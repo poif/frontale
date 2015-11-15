@@ -1,4 +1,4 @@
-1.) installer qt : sudo apt-get install qt4-dev-tools\n
+1.) installer qt : sudo apt-get install qt4-dev-tools
 2.) installer cryptopp : sudo apt-get install libcrypto++
 si le package n'est pas trouvé lancer : 
 sudo apt-cache pkgnames | grep -i crypto++
