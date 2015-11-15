@@ -1,4 +1,4 @@
-#include <asio.hpp>
+#include <boost/asio.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/map.hpp>
@@ -21,8 +21,8 @@
 
 #include "network_interface.h"
 #include "engine_event.h"
-#include "network_machine.h"
 #include "utils.h"
+#include "traitement.h"
 
 using namespace std;
 using namespace CryptoPP;
@@ -31,17 +31,12 @@ using namespace CryptoPP;
  *  very very bad way to avoid error during compilation
  *  created from boost/static_assert.hpp line 36
  */
-template <> struct boost::STATIC_ASSERTION_FAILURE<false> { enum { value = 0 }; };
+//template <> struct boost::STATIC_ASSERTION_FAILURE<false> { enum { value = 0 }; };
 
 /**
  * constructor
  */
 network_interface::network_interface(){
-	engine_name = "network engine";
-	tcp_acceptor = NULL;
-	ni.reset();
-	next_machine_id = 1;
-	state = STATE_NOTHING;
 	running = true;
 
 	///////////////////////////////////////
@@ -77,16 +72,15 @@ network_interface::network_interface(){
 		cerr << "unknown exception handled" << endl;
 	}
 
-	clean_interface();
 }
 
 
 network_interface::~network_interface(){		
-	boost::mutex::scoped_lock l(state_mutex);
-		state = STATE_QUITTING;
-	l.unlock();
+	//boost::mutex::scoped_lock l(state_mutex);
+	//	state = STATE_QUITTING;
+	//l.unlock();
 
-	io.stop();
+	//io.stop();
 }
 
 
@@ -159,7 +153,7 @@ void network_interface::generateAESkey(){
 	prng.GenerateBlock( iv, sizeof(iv) );
 }
 */
-string network_interface::encrypto_aes(SecByteBlock key, bytes* iv, string& plain){
+string network_interface::encrypto_aes(SecByteBlock key, byte* iv, string& plain){
 
 	string cipher;
 
@@ -233,6 +227,8 @@ string* network_interface::aesKeyToS(SecByteBlock key, byte* iv){
 	            new StringSink( aesString[1] )
 	        ) // StreamTransformationFilter      
 	); // StringSource
+
+	return aesString;
 }
 
 byte* network_interface::sToB(string plain){
@@ -256,17 +252,17 @@ void network_interface::get_config_data(){
 	
 	// starts the network and set up all the async_callbacks
 	// TODO : regarder configuration broadcast
-	asio::ip::udp::endpoint udp_listening_ep(asio::ip::udp::v4(), port_udp_reception);
-	s_udp_in = new asio::ip::udp::socket(io, udp_listening_ep);
+	boost::asio::ip::udp::endpoint udp_listening_ep(boost::asio::ip::udp::v4(), port_udp_reception);
+	s_udp_in = new boost::asio::ip::udp::socket(io, udp_listening_ep);
 
 	try{
 
-	s_udp_in->async_receive_from(	asio::buffer(network_buffer, BUFFER_SIZE), 
+	s_udp_in->async_receive_from(	boost::asio::buffer(network_buffer, BUFFER_SIZE), 
 									udp_remote_endpoint, 
 									boost::bind(&network_interface::UDP_async_read, 
 												this, 
-												asio::placeholders::error,
-												asio::placeholders::bytes_transferred)
+												boost::asio::placeholders::error,
+												boost::asio::placeholders::bytes_transferred)
 								);
 	}catch(exception&e){
 		cerr << e.what() << endl;
@@ -276,7 +272,7 @@ void network_interface::get_config_data(){
 
 	cout << "UDP listening " << s_udp_in->local_endpoint().address() << ":" << s_udp_in->local_endpoint().port()  << endl;
 
-	asio::thread(boost::bind(&asio::io_service::run, &io));
+	boost::asio::detail::thread(boost::bind(&boost::asio::io_service::run, &io));
 }
 
 void network_interface::frame(){
@@ -292,7 +288,7 @@ void network_interface::frame(){
  *  we only accept messages from registered machines
  *  asynchronous function
  */
-void network_interface::UDP_async_read(const asio::error_code& e, size_t){
+void network_interface::UDP_async_read(const boost::system::error_code& e, size_t){
 	// check if the messages comes from a registered machine	
 	/*if (!is_address_registered(udp_remote_endpoint.address().to_string()))
 		return;*/
@@ -317,14 +313,14 @@ void network_interface::UDP_async_read(const asio::error_code& e, size_t){
  *  similar to send_eventTCP
  */
  
-void network_interface::send_eventUDP(engine_event &ne, asio::ip::udp::socket *s){
+void network_interface::send_eventUDP(engine_event &ne, boost::asio::ip::udp::socket *s){
 	ostringstream archive_stream;
 	boost::archive::text_oarchive archive(archive_stream);
     archive << ne;
 	const string &outbound_data = archive_stream.str();
 
 	try{
-		s->send(asio::buffer(outbound_data));
+		s->send(boost::asio::buffer(outbound_data));
 	}catch(exception& e){
 		cerr << "sending on " 
 										   << s->remote_endpoint().address() << ":" 
@@ -336,6 +332,11 @@ void network_interface::send_eventUDP(engine_event &ne, asio::ip::udp::socket *s
 										   << s->remote_endpoint().port() << " : unknown eception caught !" 
 										   << endl;
 	}
+}
+
+void network_interface::push_received_event(engine_event& e){
+	boost::mutex::scoped_lock l(l_receive_queue);
+		received_events.push(e);
 }
 
 void network_interface::process_received_events_queue(){
@@ -360,6 +361,8 @@ void network_interface::process_received_events_queue(){
 
 void network_interface::process_received_events(engine_event& e){
 	// we just have received e from the network
+
+	ostringstream archive_stream;
 	switch(e.type){
 		case engine_event::LOOK:{
 			engine_event r;
@@ -369,13 +372,14 @@ void network_interface::process_received_events(engine_event& e){
 			/*Traitement de la requete */
 			string hashNomList = traitement(affectationReq);
 
-			if (hashNomList)
+			if (!hashNomList.empty() || hashNomList != "")
 			{
+				r.type = engine_event::SHOW;
 				r.s_data["HNOM"] = hashNomList;
 
 				boost::archive::text_oarchive archive(archive_stream);
 			    	archive << r;
-				string &outbound_data = archive_stream.str();
+				string outbound_data = archive_stream.str();
 
 				string pubRemote;
 				StringSource ss(pubStringRemote, true,
@@ -383,14 +387,14 @@ void network_interface::process_received_events(engine_event& e){
 						new StringSink(pubRemote)
 					) // Base64Decoder
 				); // StringSource
-				StringSource ss(pubRemote, true /*pumpAll*/);
+				StringSource ss2(pubRemote, true /*pumpAll*/);
 
 				RSA::PublicKey publicRemoteKey;
-				publicRemoteKey.Load(ss);
-				string data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+				publicRemoteKey.Load(ss2);
+				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
 
 				
-				sendTor(outbound_data);
+				//sendTor(outbound_data);
 			}
 			
 			break;
@@ -400,10 +404,10 @@ void network_interface::process_received_events(engine_event& e){
 			string pubStringRemote = e.s_data["PUB"];
 			string statutReq = e.s_data["STATUT"];
 			/*Traitement de la requete */
-			if (outbound_data)
+			/*if (outbound_data)
 			{
-				sendTor(outbound_data);
-			}
+				//sendTor(outbound_data);
+			}*/
 			
 			break;
 		}
@@ -413,10 +417,10 @@ void network_interface::process_received_events(engine_event& e){
 			string dataType = e.s_data["TYPE"];
 			string statutReq = e.s_data["STATUT"];
 			/*Traitement de la requete */
-			if (outbound_data)
+			/*if (outbound_data)
 			{
-				sendTor(outbound_data);
-			}
+				//sendTor(outbound_data);
+			}*/
 			
 			break;
 		}
@@ -427,10 +431,10 @@ void network_interface::process_received_events(engine_event& e){
 			string reference = e.s_data["REFERENCE"];
 			string groupeClient = e.s_data["GRCLIENT"];
 			/*Traitement de la requete */
-			if (outbound_data)
+			/*if (outbound_data)
 			{
-				sendTor(outbound_data);
-			}
+				//sendTor(outbound_data);
+			}*/
 			
 			break;
 		}
@@ -453,12 +457,31 @@ string network_interface::Pub_toB64string(){
 	    ) // Base64Encoder
 	); // StringSource
 
+	return encoded;
+
+}
+
+string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
+
+	string spki, encoded;
+
+	StringSink ss(spki);
+	publicRemoteKey.Save(ss);
+
+	StringSource ss1(spki, true,
+	    new Base64Encoder(
+	        new StringSink(encoded)
+	    ) // Base64Encoder
+	); // StringSource
+
+	return encoded;
+
 }
 
 string* network_interface::send_look(string& affectation){
 	engine_event e;
 	engine_event r;
-	asio::buffer network_buffer;
+	//boost::asio::buffer network_buffer;
 	ostringstream archive_stream;
 	string pubEncoded;
 	int challN = 0;
@@ -481,22 +504,22 @@ string* network_interface::send_look(string& affectation){
     	archive << e;
 	const string &outbound_data = archive_stream.str();
 
-	sendTor(outbound_data);
-	receiveTor(network_buffer);
+	//sendTor(outbound_data);
+	//receiveTor(network_buffer);
 
 	string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_rsa(str_data);
-	istringstream archive_stream(data_clear);
-	boost::archive::text_iarchive archive(archive_stream);
+	istringstream archive_streamIn(data_clear);
+	boost::archive::text_iarchive archiveIn(archive_streamIn);
 
-	archive >> r;
+	archiveIn >> r;
 
 	if (r.type == engine_event::SHOW)
 	{
 		challN = r.i_data["CHALL"];
 		if (challN%n == 0){
-			if(r.s_data["NOM"] && r.s_data["NOM"] != ""){
-				if(r.s_data["HSTATUT"] && r.s_data["HSTATUT"] != ""){
+			if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
+				if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
 					showRep[0] = r.s_data["NOM"];
 					showRep[1] = r.s_data["HSATUT"];
 					return showRep;
@@ -511,8 +534,9 @@ string* network_interface::send_look(string& affectation){
 string network_interface::send_exist(string& statut){
 	engine_event e;
 	engine_event r;
-	asio::buffer network_buffer;
+	//boost::asio::buffer network_buffer;
 	e.type = engine_event::EXIST;
+	ostringstream archive_stream;
 	string pubEncoded;
 	int challN = 0;
 
@@ -531,39 +555,38 @@ string network_interface::send_exist(string& statut){
     	archive << e;
 	const string &outbound_data = archive_stream.str();
 
-	sendTor(outbound_data);
-	receiveTor(network_buffer);
+	//sendTor(outbound_data);
+	//receiveTor(network_buffer);
 
 	string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_rsa(str_data);
-	istringstream archive_stream(data_clear);
-	boost::archive::text_iarchive archive(archive_stream);
+	istringstream archive_streamIn(data_clear);
+	boost::archive::text_iarchive archiveIn(archive_streamIn);
+
+	archiveIn >> r;
 
 	if (r.type == engine_event::ANSWER){
 		challN = r.i_data["CHALL"];
 		if (challN%n == 0){
-			if(r.s_data["HNOM"] && r.s_data["HNOM"] != ""){
+			if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
 				return r.s_data["HNOM"];
 			}
 		}
 	}
+
+	return NULL;
 }
 
 void* network_interface::send_lookrec(string& dataType, string& statut){
 	engine_event e;
 	engine_event r;
-	asio::buffer network_buffer;
+	//boost::asio::buffer network_buffer;
 	e.type = engine_event::LOOKREC;
+	ostringstream archive_stream;
 	string pubEncoded;
 	string pubRemote;
 
-	void *showRep[4];
-	showRep[0] = new string();
-	showRep[1] = new string();
-	showRep[2] = new int();
-	showRep[3] = new int();
-	showRep[4] = new RSA::PublicKey();
-
+	string * showRep= new string[5];
 
 	int challN = 0, nRemote = 0;
 
@@ -584,52 +607,54 @@ void* network_interface::send_lookrec(string& dataType, string& statut){
     	archive << e;
 	const string &outbound_data = archive_stream.str();
 
-	sendTor(outbound_data);
-	receiveTor(network_buffer);
+	//sendTor(outbound_data);
+	//receiveTor(network_buffer);
 
 	string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_rsa(str_data);
-	istringstream archive_stream(data_clear);
-	boost::archive::text_iarchive archive(archive_stream);
+	istringstream archive_streamIn(data_clear);
+	boost::archive::text_iarchive archiveIn(archive_streamIn);
 
-	archive >> r;	
+	archiveIn >> r;	
 
 	if (r.type == engine_event::SHOWREC){
 		challN = r.i_data["CHALL"];
 		if (challN%n == 0){
 			nRemote = r.i_data["CHALL2"];
-			if(r.s_data["REFERENCE"] && r.s_data["REFERENCE"] != "" ){
-				if(r.s_data["HNOM"] && r.s_data["HNOM"] != ""){
-					if(r.s_data["PUBKEY"] && r.s_data["PUBKEY"] != "" ){
+			if(!r.s_data["REFERENCE"].empty() && r.s_data["REFERENCE"] != "" ){
+				if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
+					if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
 						string encKey = r.s_data["PUBKEY"];
 						StringSource ss(encKey, true,
 						    new Base64Decoder(
 						        new StringSink(pubRemote)
 						    ) // Base64Decoder
 						); // StringSource
-						StringSource ss(pubRemote, true /*pumpAll*/);
+						StringSource ss2(pubRemote, true /*pumpAll*/);
 
-						RSA::PublicKey publicKey;
-						publicKey.Load(ss);
+						RSA::PublicKey publicKeyRemote;
+						publicKey.Load(ss2);
 
 						showRep[0] = r.s_data["REFERENCE"];
 						showRep[1] = r.s_data["HNOM"];
-						showRep[2] = nRemote;
-						showRep[3] = n;
-						showRep[4] = publicKey;
+						showRep[2] = to_string(nRemote);
+						showRep[3] = to_string(n);
+						showRep[4] = Pub_toB64string(publicKeyRemote);
 						return showRep;
 					}
 				}
 			}
 		}
 	}
+	return NULL;
 }
 
 string network_interface::send_pull(string& reference, string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote){
 	engine_event e;
 	engine_event r;
-	asio::buffer network_buffer;
+	//boost::asio::buffer network_buffer;
 	e.type = engine_event::LOOKREC;
+	ostringstream archive_stream;
 	string pubEncoded;
 	string document;
 	string encDocument;
@@ -658,25 +683,25 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
-	string &outbound_data = archive_stream.str();
+	string outbound_data = archive_stream.str();
 
-	string data_encoded = encrypto_rsa(outbound_data, pubRemote);
+	const string &data_encoded = encrypto_rsa(outbound_data, pubRemote);
 
-	sendTor(outbound_data);
-	receiveTor(network_buffer);
+	//sendTor(outbound_data);
+	//receiveTor(network_buffer);
 
 
 	string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_aes(key, iv, str_data);
-	istringstream archive_stream(data_clear);
-	boost::archive::text_iarchive archive(archive_stream);
+	istringstream archive_streamIn(data_clear);
+	boost::archive::text_iarchive archiveIn(archive_streamIn);
 
-	archive >> r;	
+	archiveIn >> r;	
 
 	if (r.type == engine_event::PUSH){
 		challN = r.i_data["CHALL"];
 		if (challN%n == 0){
-			if(r.s_data["DOCUMENT"] && r.s_data["DOCUMENT"] != "" ){
+			if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != "" ){
 				encDocument = r.s_data["DOCUMENT"];
 				StringSource ss(encDocument, true,
 				    new Base64Decoder(
@@ -687,4 +712,5 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 			}
 		}
 	}
+	return NULL;
 }

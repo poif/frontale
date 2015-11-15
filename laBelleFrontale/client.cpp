@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QTextStream>
 
+using namespace std;
 
 client::client()
 {
@@ -14,9 +15,9 @@ void client::socBind(){
 
 }
 
-void client::emission(const char *message){
+void client::emission(QString message){
 
-    QByteArray datagram = message;
+    QByteArray datagram = message.toAscii().data();;
     soc->writeDatagram(datagram.data(),datagram.size(),QHostAddress::Broadcast, 45454 );
 
 }

@@ -24,17 +24,17 @@ using namespace std;
 		//recherche nom
 			//reception_frontale)->affectation,statut
 			//string affectation=message reçu affectation;
-
-        Message msg(QString(affectation), 'S', '*');
+        string nouveau = affectation;
+        Message msg(QString(nouveau.data()), 'S', '*');
         msg.entete();
-        msg.chiffrement();
+        //msg.chiffrement();
         client cli;
 
         cli.socBind();
         cli.emission(msg.getMsg());
 
         reception ser;
-        ser.creatSocket();
+        ser.ecoute();
         //attendre connexion
 
 

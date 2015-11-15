@@ -1,18 +1,19 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 #include <QCoreApplication>
-#include <QTcpSocket>
+#include <QUdpSocket>
 
+#include <QString>
 
 class client: public QObject
 {
 public:
     client();
     void socBind();
-    void emission(Qstring message);
+    void emission(QString message);
 
 private:
-        QTcpSocket soc;
+        QUdpSocket *soc;
 };
 
 #endif // CLIENT_H

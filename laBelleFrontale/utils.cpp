@@ -13,7 +13,7 @@ int check_prime(int a)
       return 1;
 }
 
-Huge bigger_prime(Huge n){
+int bigger_prime(int n){
 
   int ret =  0;
   ret = check_prime(n);

@@ -47,14 +47,15 @@ void reception::procReception(){
         string * showRep = new string[2];
         char * triq = new char(showRep[0].size()+showRep[1].size()+1);
 
-        msg.dechiffrement();
+        //msg.dechiffrement();
         req.decoupage(msg.getMsg().toStdString().c_str());
         req.construction();
         network_interface netinf;
-        showRep = netinf.send_look(req.getRequete());
+        string temp = req.getRequete();
+        showRep = netinf.send_look(temp);
 
 
-        triq = const_cast <char *>(showRep[0] + showRep[1]);
+        triq = const_cast <char *>((showRep[0] + showRep[1]).data());
         req.tri(triq);
 
 
@@ -64,10 +65,10 @@ void reception::procReception(){
 
         Message msg2(retour,'R', '*');
         msg2.entete();
-        msg2.chiffrement();
+        //msg2.chiffrement();
         client cli;
         cli.socBind();
-        cli.emission(msg2.chiffre);
+        cli.emission(msg2.getChiffre());
 
 
 

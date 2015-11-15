@@ -5,7 +5,7 @@
 
 class Message
 {
-private :
+private:
     QString msg;
     char type;
     char separateur;
