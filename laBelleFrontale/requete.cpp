@@ -1,6 +1,7 @@
 #include "requete.h"
 #include <stdio.h>
 #include <string.h>
+#include <openssl/sha.h>
 
 using namespace std;
 
@@ -48,14 +49,20 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 	int cpt_name=0;
 	char sep = '*';
 	char hash_recu[512];
-	char hash_test[512] = "yolo";
 	char name[512];
 	char reference[512];
+
+	SHA_CTX ctx;
+        char hash[SHA_DIGEST_LENGTH];
+	SHA1_Init(&ctx);
 
 	if(strcmp(m_action,"search") == 0)
 	{
 		if(strcmp(m_option,"name") == 0)
 		{
+			SHA1_Update(&ctx,m_statut,strlen(m_statut));
+			SHA1_Final((unsigned char*)hash,&ctx);
+
 			do //on parcours toute la requete recu
 			{
 				while(resultat[cpt_resultat] != sep) //on récupère le nom
@@ -78,7 +85,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 				cpt_element=0;
 				cpt_resultat++;
 
-				if(strcmp(hash_test,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
+				if(strcmp(hash,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
 					while(name[cpt_element] != '\0')
 					{
@@ -96,6 +103,9 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 
 		else if (strcmp(m_option,"exist") ==0)
 		{
+			SHA1_Update(&ctx,m_parametre,strlen(m_parametre));
+                        SHA1_Final((unsigned char*)hash,&ctx);
+
 			do
 			{
 				while(resultat[cpt_resultat] != sep)
@@ -108,7 +118,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 				cpt_element=0;
 				cpt_resultat++;
 
-				if(strcmp(hash_recu,hash_test) == 0)
+				if(strcmp(hash_recu,hash) == 0)
 				{
 					m_resultat[0] = 'y';
 					m_resultat[1] = 'e';
@@ -125,6 +135,9 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 
 		else if (strcmp(m_option,"photo") ==0)
 		{
+			SHA1_Update(&ctx,m_parametre,strlen(m_parametre));
+                        SHA1_Final((unsigned char*)hash,&ctx);
+
 			do
 			{
 				while(resultat[cpt_resultat] != sep)
@@ -147,7 +160,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 				cpt_element=0;
 				cpt_resultat++;
 
-				if(strcmp(hash_test,hash_recu) == 0)
+				if(strcmp(hash,hash_recu) == 0)
 				{
 					while(reference[cpt_element] != '\0')
 					{
