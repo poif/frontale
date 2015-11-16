@@ -23,6 +23,7 @@
 #include "engine_event.h"
 #include "utils.h"
 #include "traitement.h"
+#include "sendUdpBlocking.h"
 
 using namespace std;
 using namespace CryptoPP;
@@ -38,6 +39,8 @@ using namespace CryptoPP;
  */
 network_interface::network_interface(){
 	running = true;
+	host_rem = "127.0.0.1";
+    	port_rem = "31337";
 
 	///////////////////////////////////////
 	// Generate Parameters
@@ -60,7 +63,7 @@ network_interface::network_interface(){
 	publicKey.DEREncode(pubkeysink);
 	pubkeysink.MessageEnd();
 	
-	try{
+	/*try{
 		get_config_data();
 	}catch(exception&e){
 		cerr << e.what() << endl;
@@ -70,7 +73,7 @@ network_interface::network_interface(){
 		running = false;
 	}catch(...){
 		cerr << "unknown exception handled" << endl;
-	}
+	}*/
 
 }
 
@@ -366,16 +369,22 @@ void network_interface::process_received_events(engine_event& e){
 	switch(e.type){
 		case engine_event::LOOK:{
 			engine_event r;
+			string *finalList = new string[2];
 			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
-			string hashNomList = traitement(affectationReq);
+			finalList = traitement(affectationReq);
+			string hashStatList = finalList[0];
+			string nomList = finalList[1];
 
-			if (!hashNomList.empty() || hashNomList != "")
+
+			if (!hashStatList.empty() || hashStatList != "")
 			{
 				r.type = engine_event::SHOW;
-				r.s_data["HNOM"] = hashNomList;
+				r.i_data["CHALL"] = nRemote;
+				r.s_data["NOM"] = nomList;
+				r.s_data["HSTATUT"] = hashStatList;
 
 				boost::archive::text_oarchive archive(archive_stream);
 			    	archive << r;
@@ -507,7 +516,9 @@ string* network_interface::send_look(string& affectation){
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
 
-	string str_data(&network_buffer[0], network_buffer.size());
+	string str_data = sendUDP(outbound_data, host_rem, port_rem);
+
+	//string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_rsa(str_data);
 	istringstream archive_streamIn(data_clear);
 	boost::archive::text_iarchive archiveIn(archive_streamIn);
@@ -521,7 +532,7 @@ string* network_interface::send_look(string& affectation){
 			if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
 				if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
 					showRep[0] = r.s_data["NOM"];
-					showRep[1] = r.s_data["HSATUT"];
+					showRep[1] = r.s_data["HSTATUT"];
 					return showRep;
 				}
 			}

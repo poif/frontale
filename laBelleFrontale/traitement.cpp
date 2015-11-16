@@ -12,7 +12,7 @@
 
 using namespace std;
 
-	string traitement(string& affectation) {
+	string* traitement(string& affectation) {
 //pas nécessairement dans la classe message (messageatraiter, faut voir...)
 
 /*THEORIQUEMENT LAFFECTATION EST RECUPEREE DANS LE MESSAGE ET PAS PASSEE EN PARAMETRE*/
@@ -24,7 +24,8 @@ using namespace std;
 		//recherche nom
 			//reception_frontale)->affectation,statut
 			//string affectation=message reçu affectation;
-        string nouveau = affectation;
+        //A decommenter apres le test
+        /*string nouveau = affectation;
         Message msg(QString(nouveau.data()), 'S', '*');
         msg.entete();
         //msg.chiffrement();
@@ -34,16 +35,18 @@ using namespace std;
         cli.emission(msg.getMsg());
 
         reception ser;
-        ser.ecoute();
+        ser.ecoute();*/
         //attendre connexion
 
 
 			//reception_client(nom) si client.affectation==affectation
 			char * nom = (char*)malloc(200*sizeof(char));
+                 char * statut = (char*)malloc(200*sizeof(char));
 			unsigned char hash[SHA_DIGEST_LENGTH];
 			char hashString[SHA_DIGEST_LENGTH*2+1];
 			char * token=(char*)malloc(200*sizeof(char));
 			char * hashlist=(char*)malloc(200*sizeof(char));
+                 char * listnom =(char*)malloc(200*sizeof(char));
 			string fichier = "test.txt";
 			/**remplacement pour test**/
 			/*************************************/
@@ -57,8 +60,8 @@ using namespace std;
         			string tokStr;
         			while (getline(file,sline)){
         				line = &sline[0];			
-						nom= strtok(line, " ");
-						strtok(NULL," ");
+						nom = strtok(line, " ");
+						statut = strtok(NULL," ");
 						//next token
 						token =strtok(NULL," ");
 						tokStr = token;
@@ -67,8 +70,8 @@ using namespace std;
 
 			/**Recuperation du nom des clients et hashage***/
 							SHA_CTX ctx;
-    						SHA1_Init(&ctx);
-    						SHA1_Update(&ctx, nom, strlen(nom));
+    						      SHA1_Init(&ctx);
+    						      SHA1_Update(&ctx, statut, strlen(statut));
    						 	SHA1_Final(hash, &ctx);
 
    						 	
@@ -78,6 +81,8 @@ using namespace std;
  							//strcat(hashlist," ");
  							strcat(hashlist,(const char*)hash);
  							strcat(hashlist,"\n");
+                                          strcat(listnom,(const char*)nom);
+                                          strcat(listnom,"\n");
  						} 
  					}
  					file.close();		
@@ -87,8 +92,12 @@ using namespace std;
  slin mais que je ne peux pas parce que c'est un string? à voir.*/
 
                     //envoi_frontale(nom)
- 	           		string tamere = hashlist;
- 	           		return tamere;
+ 	           		string listStr = hashlist;
+                       string nomStr = listnom; 
+                       string *finalList = new string[2];
+                       finalList[0] = listStr;
+                       finalList[1] = nomStr;
+ 	           		return finalList;
 
     	    	}
         		else {

@@ -3,6 +3,6 @@
 
 #include <string>
 
-std::string traitement(std::string& affectation);
+std::string* traitement(std::string& affectation);
 
 #endif

@@ -84,6 +84,8 @@ private:
 	int type;
 	int save_n;
 	bool running;
+	std::string &host_rem;
+    	std::string &port_rem;
 };
 
 #endif
