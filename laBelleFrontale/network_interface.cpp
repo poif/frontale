@@ -29,13 +29,7 @@ using namespace std;
 using namespace CryptoPP;
 
 /**
- *  very very bad way to avoid error during compilation
- *  created from boost/static_assert.hpp line 36
- */
-//template <> struct boost::STATIC_ASSERTION_FAILURE<false> { enum { value = 0 }; };
-
-/**
- * constructor
+ * constructeur
  */
 network_interface::network_interface(){
 	running = true;
@@ -63,6 +57,7 @@ network_interface::network_interface(){
 	publicKey.DEREncode(pubkeysink);
 	pubkeysink.MessageEnd();
 	
+	// en commentaire en attendant le module reseau
 	/*try{
 		get_config_data();
 	}catch(exception&e){
@@ -78,7 +73,8 @@ network_interface::network_interface(){
 }
 
 
-network_interface::~network_interface(){		
+network_interface::~network_interface(){	
+	// en commentaire en attendant le module reseau	
 	//boost::mutex::scoped_lock l(state_mutex);
 	//	state = STATE_QUITTING;
 	//l.unlock();
@@ -250,7 +246,7 @@ SecByteBlock network_interface::sToSbb(string plain){
 }
 
 void network_interface::get_config_data(){	
-
+	// non utilisé en attendant le module reseau
 	port_udp_reception = 4447;
 	
 	// starts the network and set up all the async_callbacks
@@ -292,6 +288,9 @@ void network_interface::frame(){
  *  asynchronous function
  */
 void network_interface::UDP_async_read(const boost::system::error_code& e, size_t){
+
+	// non utilisé en attendant le module reseau
+
 	// check if the messages comes from a registered machine	
 	/*if (!is_address_registered(udp_remote_endpoint.address().to_string()))
 		return;*/
@@ -317,6 +316,7 @@ void network_interface::UDP_async_read(const boost::system::error_code& e, size_
  */
  
 void network_interface::send_eventUDP(engine_event &ne, boost::asio::ip::udp::socket *s){
+	// non utilisé  en attendant le module reseau
 	ostringstream archive_stream;
 	boost::archive::text_oarchive archive(archive_stream);
     archive << ne;
@@ -374,7 +374,7 @@ void network_interface::process_received_events(engine_event& e){
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
-			finalList = traitement(affectationReq);
+			finalList = traitement_look(affectationReq);
 			string hashStatList = finalList[0];
 			string nomList = finalList[1];
 
@@ -409,41 +409,129 @@ void network_interface::process_received_events(engine_event& e){
 			break;
 		}
 		case engine_event::EXIST:{
+			engine_event r;
 			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
 			string statutReq = e.s_data["STATUT"];
 			/*Traitement de la requete */
-			/*if (outbound_data)
+			string hashNomList = traitement_exist(statutReq);
+
+			if (!hashNomList.empty() || hashNomList != "")
 			{
+				r.type = engine_event::ANSWER;
+				r.i_data["CHALL"] = nRemote;
+				r.s_data["HNOM"] = hashNomList;
+
+				boost::archive::text_oarchive archive(archive_stream);
+			    	archive << r;
+				string outbound_data = archive_stream.str();
+
+				string pubRemote;
+				StringSource ss(pubStringRemote, true,
+					new Base64Decoder(
+						new StringSink(pubRemote)
+					) // Base64Decoder
+				); // StringSource
+				StringSource ss2(pubRemote, true /*pumpAll*/);
+
+				RSA::PublicKey publicRemoteKey;
+				publicRemoteKey.Load(ss2);
+				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+
+				
 				//sendTor(outbound_data);
-			}*/
+			}
 			
 			break;
 		}
 		case engine_event::LOOKREC:{
+			engine_event r;
 			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
 			string statutReq = e.s_data["STATUT"];
 			/*Traitement de la requete */
-			/*if (outbound_data)
+			finalList = traitement_lookrec(dataType, statutReq);
+			string reference = finalList[0];
+			string hashNomList = finalList[1];
+
+
+			if (!hashStatList.empty() || hashStatList != "")
 			{
+				r.type = engine_event::SHOWREC;
+				r.i_data["CHALL"] = nRemote;
+				save_nRemote = nRemote;
+
+				/* choisir nombre entier grand */
+				/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
+				int n = bigger_prime(25000);
+				r.i_data["CHALL2"] = n;
+				save_n = n;
+
+				r.s_data["REFERENCE"] = reference;
+				r.s_data["HNOM"] = hashNomList;
+
+				boost::archive::text_oarchive archive(archive_stream);
+			    	archive << r;
+				string outbound_data = archive_stream.str();
+
+				string pubRemote;
+				StringSource ss(pubStringRemote, true,
+					new Base64Decoder(
+						new StringSink(pubRemote)
+					) // Base64Decoder
+				); // StringSource
+				StringSource ss2(pubRemote, true /*pumpAll*/);
+
+				RSA::PublicKey publicRemoteKey;
+				publicRemoteKey.Load(ss2);
+				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+
+				
 				//sendTor(outbound_data);
-			}*/
+			}
 			
 			break;
 		}
 		case engine_event::PULL:{
+			engine_event r;
 			int challenge = e.i_data["CHALL2"];
-			string aesKey = e.s_data["KEY"];
-			string aesIv = e.s_data["IV"];
-			string reference = e.s_data["REFERENCE"];
-			string groupeClient = e.s_data["GRCLIENT"];
-			/*Traitement de la requete */
-			/*if (outbound_data)
-			{
-				//sendTor(outbound_data);
-			}*/
+
+			if (challenge%sav_n == 0){
+
+				string aesKey = e.s_data["KEY"];
+				string aesIv = e.s_data["IV"];
+				string reference = e.s_data["REFERENCE"];
+				string groupeClient = e.s_data["GRCLIENT"];
+				/*Traitement de la requete */
+				string document = traitement_pull(reference, groupeClient);
+
+				if (!hashStatList.empty() || hashStatList != "")
+				{
+					r.type = engine_event::PUSH;
+					r.i_data["CHALL"] = save_nRemote;
+					r.s_data["DOCUMENT"] = document;
+
+					boost::archive::text_oarchive archive(archive_stream);
+				    	archive << r;
+					string outbound_data = archive_stream.str();
+
+					string pubRemote;
+					StringSource ss(pubStringRemote, true,
+						new Base64Decoder(
+							new StringSink(pubRemote)
+						) // Base64Decoder
+					); // StringSource
+					StringSource ss2(pubRemote, true /*pumpAll*/);
+
+					RSA::PublicKey publicRemoteKey;
+					publicRemoteKey.Load(ss2);
+					const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+
+					
+					//sendTor(outbound_data);
+				}
+			}
 			
 			break;
 		}

@@ -83,6 +83,7 @@ private:
 	RSA::PublicKey publicKey;
 	int type;
 	int save_n;
+	int save_nRemote;
 	bool running;
 	std::string &host_rem;
     	std::string &port_rem;
