@@ -5,10 +5,8 @@
 #include <string>
 #include <map>
 
-
-
 /**
-* generic class to manage events between engines
+* generic class 
 */
 class engine_event{
 public:
@@ -19,8 +17,7 @@ public:
 	bool operator==(const engine_event& e){
 		return (type == e.type) && 
 			   (s_data == e.s_data) && 
-			   (i_data == e.i_data);// && 
-			   //(v_data == e.v_data);
+			   (i_data == e.i_data);
 	}
 
 	template<class Archive>
@@ -28,7 +25,6 @@ public:
 		ar & type;
 		ar & s_data;
 		ar & i_data;
-		//ar & v_data;
 	}
 
 	enum{

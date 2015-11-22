@@ -36,7 +36,7 @@ void reception::procReception(){
         datagram.resize(soc->pendingDatagramSize());
         soc->readDatagram(datagram.data(),datagram.size());
 	
-	const unsigned char key[]={0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF}; 
+        const unsigned char key[]={0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF}; 
 
         QString message;
 
@@ -47,20 +47,21 @@ void reception::procReception(){
         Requete req;
 
         string * showRep = new string[2];
-        char * triq = new char(showRep[0].size()+showRep[1].size()+1);
+        
 
         msg.dechiffrement(key);
         req.decoupage(msg.getMsg().toStdString().c_str());
         req.construction();
-        network_interface netinf;
         string temp = req.getRequete();
+
+        /* Il faudrait plutôt utiliser une réference vers l'objet de type network_interface qui doit rester unique */
+        network_interface netinf;
         showRep = netinf.send_look(temp);
+        string sep = "*";
 
-
-        triq = const_cast <char *>((showRep[0] + showRep[1]).data());
+        char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size()+1);
+        triq = const_cast <char *>((showRep[0] + sep.data() + showRep[1]).data());
         req.tri(triq);
-
-
 
         QString retour;
         retour = QString("%1").arg(req.getResultat());

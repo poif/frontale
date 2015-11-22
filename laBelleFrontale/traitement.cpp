@@ -25,21 +25,22 @@ using namespace std;
 			//reception_frontale)->affectation,statut
 			//string affectation=message reçu affectation;
         //A decommenter apres le test
-        /*string nouveau = affectation;
+        string nouveau = affectation;
         Message msg(QString(nouveau.data()), 'S', '*');
         msg.entete();
-        //msg.chiffrement();
+        const unsigned char key[]={0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF}; 
+        msg.chiffrement();
         client cli;
 
         cli.socBind();
         cli.emission(msg.getMsg());
 
         reception ser;
-        ser.ecoute();*/
+        ser.ecoute();
         //attendre connexion
 
 
-			//reception_client(nom) si client.affectation==affectation
+			reception_client(nom) si client.affectation==affectation
 			char * nom = (char*)malloc(200*sizeof(char));
                  char * statut = (char*)malloc(200*sizeof(char));
 			unsigned char hash[SHA_DIGEST_LENGTH];
