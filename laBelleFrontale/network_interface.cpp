@@ -141,27 +141,6 @@ string network_interface::decrypto_rsa(string& cipher){
 	
 
 }
-
-string network_interface::decrypto_rsa(string& cipher, RSA::PublicKey pubRemote){
-
-	AutoSeededRandomPool rng;
-	string recovered;
-
-	////////////////////////////////////////////////
-	// Decryption
-	RSAES_OAEP_SHA_Decryptor d(privateKey);
-
-	StringSource ss2(cipher, true,
-	    new PK_DecryptorFilter(rng, d,
-	        new StringSink(recovered)
-	   ) // PK_DecryptorFilter
-	); // StringSource
-
-	return recovered;
-
-	
-
-}
 /*
 void network_interface::generateAESkey(){
 	AutoSeededRandomPool prng;

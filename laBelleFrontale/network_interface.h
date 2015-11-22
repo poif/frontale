@@ -81,7 +81,6 @@ private:
 
 	RSA::PrivateKey privateKey;
 	RSA::PublicKey publicKey;
-	RSA::PublicKey save_publicRemoteKey;
 	
 	int type;
 	int save_n;
