@@ -141,6 +141,27 @@ string network_interface::decrypto_rsa(string& cipher){
 	
 
 }
+
+string network_interface::decrypto_rsa(string& cipher, RSA::PublicKey pubRemote){
+
+	AutoSeededRandomPool rng;
+	string recovered;
+
+	////////////////////////////////////////////////
+	// Decryption
+	RSAES_OAEP_SHA_Decryptor d(privateKey);
+
+	StringSource ss2(cipher, true,
+	    new PK_DecryptorFilter(rng, d,
+	        new StringSink(recovered)
+	   ) // PK_DecryptorFilter
+	); // StringSource
+
+	return recovered;
+
+	
+
+}
 /*
 void network_interface::generateAESkey(){
 	AutoSeededRandomPool prng;
@@ -296,9 +317,26 @@ void network_interface::UDP_async_read(const boost::system::error_code& e, size_
 		return;*/
 	
 	// let's deserialize the message
+
+
 	string str_data(&network_buffer[0], network_buffer.size());
-	istringstream archive_stream(str_data);
-	boost::archive::text_iarchive archive(archive_stream);
+
+	char buffer[26];
+	string str ("Test string...");
+	size_t length = str_data.copy(buffer,25,0);
+	buffer[length]='\0';
+	string testHeader = string(buffer.data(), buffer.size());
+
+	if (testHeader.compare(23,2,"22 serialization::archive") == 0){
+		istringstream archive_stream(str_data);
+		boost::archive::text_iarchive archive(archive_stream);
+	}
+	else{
+		string data_clear = decrypto_rsa(str_data);
+		istringstream archive_stream(data_clear);
+		boost::archive::text_iarchive archive(archive_stream);
+		/* TODO : gestion quand pas à nous */
+	}
 
 	engine_event ne;
 	archive >> ne;
@@ -471,6 +509,9 @@ void network_interface::process_received_events(engine_event& e){
 				r.s_data["REFERENCE"] = reference;
 				r.s_data["HNOM"] = hashNomList;
 
+				string pubEncoded = Pub_toB64string();
+				r.s_data["PUBKEY"] = pubEncoded;
+
 				boost::archive::text_oarchive archive(archive_stream);
 			    	archive << r;
 				string outbound_data = archive_stream.str();
@@ -485,6 +526,9 @@ void network_interface::process_received_events(engine_event& e){
 
 				RSA::PublicKey publicRemoteKey;
 				publicRemoteKey.Load(ss2);
+
+				save_publicRemoteKey.Load(ss2);
+
 				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
 
 				
@@ -495,6 +539,8 @@ void network_interface::process_received_events(engine_event& e){
 		}
 		case engine_event::PULL:{
 			engine_event r;
+
+
 			int challenge = e.i_data["CHALL2"];
 
 			if (challenge%sav_n == 0){
@@ -516,17 +562,10 @@ void network_interface::process_received_events(engine_event& e){
 				    	archive << r;
 					string outbound_data = archive_stream.str();
 
-					string pubRemote;
-					StringSource ss(pubStringRemote, true,
-						new Base64Decoder(
-							new StringSink(pubRemote)
-						) // Base64Decoder
-					); // StringSource
-					StringSource ss2(pubRemote, true /*pumpAll*/);
+					byte * iv = sToB(aesIv);
+					SecByteBlock key = sToSbb(aesKey);
 
-					RSA::PublicKey publicRemoteKey;
-					publicRemoteKey.Load(ss2);
-					const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+					const string &data_encoded = encrypto_aes(key, iv, outbound_data);
 
 					
 					//sendTor(outbound_data);
