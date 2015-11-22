@@ -25,6 +25,7 @@ using namespace std;
 			//reception_frontale)->affectation,statut
 			//string affectation=message reçu affectation;
         //A decommenter apres le test
+        // TODO : il faudrait insérer un en-tête avant d'ajouter l'affectation demandée
         string nouveau = affectation;
         Message msg(QString(nouveau.data()), 'S', '*');
         msg.entete();
@@ -35,12 +36,14 @@ using namespace std;
         cli.socBind();
         cli.emission(msg.getMsg());
 
+        /*
+        Creer une fonction pour la reception du message client adaptée à la requete de demande de ressource
         reception ser;
         ser.ecoute();
         //attendre connexion
 
-
-			reception_client(nom) si client.affectation==affectation
+        */
+			//reception_client(nom) si client.affectation==affectation
 			char * nom = (char*)malloc(200*sizeof(char));
                  char * statut = (char*)malloc(200*sizeof(char));
 			unsigned char hash[SHA_DIGEST_LENGTH];
@@ -51,6 +54,9 @@ using namespace std;
 			string fichier = "test.txt";
 			/**remplacement pour test**/
 			/*************************************/
+
+/* TODO : Gestion BDD à insérer */
+
 
 /*lecture dans le fichier (IE le message reçu)*/
 			ifstream file(fichier.c_str(), ios::in); 
