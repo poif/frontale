@@ -12,7 +12,7 @@
 
 using namespace std;
 
-	string* traitement(string& affectation) {
+	string* traitement_look(string& affectation) {
 //pas nécessairement dans la classe message (messageatraiter, faut voir...)
 
 /*THEORIQUEMENT LAFFECTATION EST RECUPEREE DANS LE MESSAGE ET PAS PASSEE EN PARAMETRE*/
@@ -30,7 +30,7 @@ using namespace std;
         Message msg(QString(nouveau.data()), 'S', '*');
         msg.entete();
         const unsigned char key[]={0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF}; 
-        msg.chiffrement();
+        msg.chiffrement(key);
         client cli;
 
         cli.socBind();
@@ -99,8 +99,8 @@ using namespace std;
  slin mais que je ne peux pas parce que c'est un string? à voir.*/
 
                     //envoi_frontale(nom)
- 	           		string listStr = hashlist;
-                       string nomStr = listnom; 
+ 	           		string listStr = string(hashlist, sizeof(hashlist));
+                       string nomStr = string(listnom, sizeof(hashlist)); 
                        string *finalList = new string[2];
                        finalList[0] = listStr;
                        finalList[1] = nomStr;
@@ -116,3 +116,153 @@ using namespace std;
 			
 
 	}
+
+
+  string traitement_exist(string& status) {
+//retourne juste le nom hashÃ©
+      string readStatus;
+      string hashlist;
+      string hashS;
+    char*nom=(char*)malloc(sizeof(char)*30);
+      string fichier = "test.txt";
+        char *hash=(char*)malloc(sizeof(char)*SHA_DIGEST_LENGTH);
+      /**remplacement pour test**/
+      /*************************************/
+         ifstream file(fichier.c_str(), ios::in);
+         if(file){
+                 char* line= (char*)malloc(BUF_SIZE * sizeof(char));
+                 string sline=line;
+                 while (getline(file,sline)){
+                       line=(char*)sline.c_str();
+                         nom = strtok(line, " ");
+                         readStatus = string(strtok(NULL," "));
+                         if (status == readStatus){    //line : nom statut affectation
+                         /**Recuperation du nom des clients et hashage***/
+                                SHA_CTX ctx;
+                                SHA1_Init(&ctx);
+                                SHA1_Update(&ctx, nom, strlen(nom));
+                                SHA1_Final((unsigned char*)hash, &ctx);
+                                string hashS= hash;
+                                hashlist += hashS;
+                                hashlist += "\n";
+                          }
+                  }
+                  file.close();
+             //     free(hash);
+            //      free(nom);
+            //      free(line);
+                  //envoi_frontale(nom) 
+                  return hashlist;
+          }
+          else {
+                  printf("error : ouverture impossible!\n");
+                  exit(EXIT_FAILURE);
+       }
+}
+
+string* traitement_lookrec(string& datatype, string& status) {
+//rÃ©cupÃ©ration des rÃ©fÃ©rences et du hash des noms
+    string *finalList = new string[2];
+      string readStatus;
+      char*nom=(char*)malloc(sizeof(char)*30);
+      char* hash=(char*)malloc(sizeof(char)*SHA_DIGEST_LENGTH);
+      string fichier = "test2.txt";
+      string readDataType;
+      string listRef;
+      string reference;
+    string hashlist;
+    string hashS;
+         /**remplacement pour test**/
+         /*************************************/
+         ifstream file(fichier.c_str(), ios::in);
+         if(file){
+                 char* line= (char*)malloc(BUF_SIZE * sizeof(char));
+                 string sline=line;
+                 while (getline(file,sline)){
+    //on reÃ§oit nom statut reference
+                     line=(char*)sline.c_str();
+                         nom = strtok(line, " ");
+                         readStatus = string(strtok(NULL," "));
+                         readDataType=string(strtok(NULL," "));
+             reference=string(strtok(NULL," "));
+                         if (status == readStatus && datatype==readDataType){    //line : nom status datatype rÃ©fÃ©rence
+                         /**Recuperation du nom des clients et hashage***/
+                                SHA_CTX ctx;
+                                SHA1_Init(&ctx);
+                                SHA1_Update(&ctx, nom, strlen(nom));
+                                SHA1_Final((unsigned char*)hash, &ctx);
+                                hashS=hash;
+                listRef += reference;
+                listRef += "\n";
+                                hashlist+= hashS;
+                                hashlist+= "\n";
+                          }
+                  }
+                  file.close();
+                  //free(line);
+            //free(nom);
+             free(hash);
+                  //envoi_frontale(nom) 
+                  finalList[0] = listRef;
+            finalList[1] = hashlist;
+                  return finalList;
+          }
+          else {
+                  printf("error : ouverture impossible!\n");
+                  exit(EXIT_FAILURE);
+       }
+}
+
+string traitement_pull(string& reference, vector<string>& groupes_client ) {
+//rÃ©cupÃ©ration du document
+   string readReference;
+//readGroups : token du fichier contenant la liste des groupes séparés par /
+//readGroup : token de readGroups
+   char* readGroups=(char*)malloc(sizeof(char)*100);
+   string readGroup;
+     string document;
+     string fichier = "test3.txt";
+   int found=0;
+   int i=0;
+   int k=0;
+         /**remplacement pour test**/
+         /*************************************/
+     ifstream file(fichier.c_str(), ios::in);
+        if(file){
+                char* line= (char*)malloc(BUF_SIZE * sizeof(char));
+                string sline=line;
+                while (getline(file,sline)){  //line ref document groupes
+                     line=(char*)sline.c_str();
+                         readReference = string(strtok(line, " "));
+                         document = string(strtok(NULL," "));
+                         readGroups = strtok(NULL," ");
+                         //init groupe
+                         readGroup = string(strtok(readGroups,"/"));
+                         if (reference==readReference){
+               while (!readGroup.empty()) {
+                for (int j=0;j<groupes_client.size();j++){
+                  //cout <<"comparaison de : "<<readGroup << " avec " <<groupes_client[j]<<" pour la référence " << reference << " vs " << readReference<<endl;
+                  if (readGroup==groupes_client[j]){  
+                          file.close();
+                    //        free(line);
+                    //        free(readGroups);
+                    return document;
+                  }
+                            }
+                            readGroup = string(strtok(NULL,"/"));
+                          }
+                        }
+                        //inc groupe
+                 }
+                 file.close();
+                 return NULL;
+    //           free(line);
+   //            free(readGroups);
+                  //envoi_frontale(nom) 
+          }
+
+          else {
+                  printf("error : ouverture impossible!\n");
+                  exit(EXIT_FAILURE);
+          }
+}
