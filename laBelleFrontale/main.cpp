@@ -22,11 +22,6 @@ int main(int argc, char *argv[])
 
     network_interface net;
 
-    while(1){
-        net.frame();
-        sleep(2);
-    }
-
 
 
     return a.exec();
