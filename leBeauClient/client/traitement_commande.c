@@ -34,7 +34,7 @@ int traiter_commande(char *a_traiter)
 
 	printf("%s\n", cible);
 
-	char *a_envoyer = malloc (sizeof (char*) * 1024);
+	unsigned char a_envoyer[sizeof (char*) * 1024];
 
 	if (memcmp(action, "help", 4) == 0)
 	{
@@ -48,8 +48,9 @@ int traiter_commande(char *a_traiter)
 	{
 		sprintf(a_envoyer, "none*none*%s*%s*%s*none*none", action, option, cible);
 		printf("%s\n", a_envoyer);
+		printf("SIZE -> %d\n", strlen(a_envoyer));
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
-		crypt(a_envoyer, a_envoyer_crypt);
+		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 		printf("%s\n", a_envoyer_crypt);
 		puts("AFTER");
 		envoi_requete(a_envoyer_crypt);

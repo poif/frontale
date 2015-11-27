@@ -1,5 +1,6 @@
 #include "envoi.h"
 
+
 /*======================================================================
 **  Nom          : envoi_requete
 **  Description  : Permet l'envoi d'une requête vers la frontale
@@ -42,7 +43,7 @@ int envoi_requete(char *requete)
 
   printf("requete -> %s\n", requete);
                                            
-  if(send(sockfd,requete,2048,0) == -1)
+  if(send(sockfd,requete,strlen(requete),0) == -1)
   {
     perror("Erreur lors de l'appel a send -> ");
     exit(1);

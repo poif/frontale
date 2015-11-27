@@ -15,7 +15,7 @@ client: client.o traitement_commande.o traitement_recu.o ecoute.o crypt.o recup_
 	$(CC) $(CFLAGS) -o $@ client.o traitement_commande.o traitement_recu.o crypt.o ecoute.o envoi.o recup_config.o $(LIBS)
 
 client.o: client.c
-		$(CC) $(CFLAGS) -c client.c client.h
+		$(CC) $(CFLAGS) -c client.c crypt.h client.h
 
 traitement_commande.o: traitement_commande.c
 		$(CC) $(CFLAGS) -c traitement_commande.c traitement_commande.h

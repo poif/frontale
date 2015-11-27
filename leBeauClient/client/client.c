@@ -1,9 +1,12 @@
 #include "client.h"
+#include "crypt.h"
 
 int main (void)
 {
 	char * command = malloc (sizeof (char*) *1024);
-	
+	//unsigned char entre[] = "bonjourj'aimelecheval";
+	//unsigned char sortie[sizeof(entre)];// = malloc (sizeof(entre));
+	//unsigned char lafin[sizeof(entre)];// = malloc (sizeof(entre));
 	system("clear");
 
 	if(memcmp(recup_valeur("accueil_visible"), "true", 4) == 0)
@@ -14,6 +17,11 @@ int main (void)
 		puts("Erreur lors de la creation du thread");
 		return -1;
 	}
+
+	//crypt(entre, sortie, sizeof(entre));
+	//decrypt(sortie, lafin, sizeof(entre));
+
+	//printf("La fin -> %s\n", lafin);
 
 	puts("Entrez une commande ou help !");
 
