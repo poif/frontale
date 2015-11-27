@@ -42,7 +42,7 @@ void Message::chiffrement(const unsigned char *key){
     const char *message = msg.toStdString().c_str();
     AES_KEY enc_key;
     AES_set_encrypt_key(key,128,&enc_key);
-    AES_encrypt((const unsigned char *)message,trame, &enc_key);
+    AES_cbc_encrypt((const unsigned char *)message,trame, &enc_key);
 
     this->chiffre = QString((const char *)trame);
 
@@ -53,7 +53,7 @@ void Message::dechiffrement(const unsigned char *key){
     const char *chif = this->chiffre.toStdString().c_str();
     AES_KEY dec_key;
     AES_set_decrypt_key(key,128,&dec_key);
-    AES_decrypt((const unsigned char *)chif,trame,&dec_key);
+    AES_cbc_decrypt((const unsigned char *)chif,trame,&dec_key);
 
     this->msg = QString((const char *)trame);
 }
