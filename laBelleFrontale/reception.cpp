@@ -21,7 +21,7 @@ reception::reception()
 
 void reception::ecoute(){
     soc = new QUdpSocket(this);
-    soc->bind(45454,QUdpSocket::ShareAddress);
+    soc->bind(12345,QUdpSocket::ShareAddress);
     QTextStream(stdout) << "fin bind" << endl;
 
     connect(soc,SIGNAL(readyRead()),this, SLOT(procReception()));
@@ -47,10 +47,14 @@ void reception::procReception(){
         Requete req;
 
         string * showRep = new string[2];
-        
+
+	QTextStream(stdout) << datagram.data() << endl;	        
 
         msg.dechiffrement(key);
-        req.decoupage(msg.getMsg().toStdString().c_str());
+
+	QTextStream(stdout) << msg.getMsg() << endl;
+
+        if(req.decoupage(msg.getMsg().toStdString().c_str())){
         req.construction();
         string temp = req.getRequete();
 
@@ -71,6 +75,6 @@ void reception::procReception(){
         msg2.chiffrement(key);
         client cli;
         cli.socBind();
-        cli.emission(msg2.getChiffre());
+        cli.emission(msg2.getChiffre());}
 
 }

@@ -246,14 +246,30 @@ void Requete::affichage()
 	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_groupe,m_cle);
 }
 
-void Requete::decoupage(const char * chaine)
+int Requete::test_char(char caractere)
 {
+	if((caractere < 123 && caractere > 96) || (caractere == '*'))
+		return 1;
+	else
+		return 0;
+}
+
+int Requete::decoupage(const char * chaine)
+{
+	int test;
 	int cpt_chaine = 0;
 	int cpt_element = 0;
 	char sep = '*'; //on considère ici que '*' est le séparateur
 
 	while(chaine[cpt_chaine] != sep)
 	{
+		test = test_char(chaine[cpt_chaine]);
+		if(test == 0)
+		{
+			printf("Requete malforme\n");
+			return 0;
+		}
+
 		m_affectation[cpt_element]=chaine[cpt_chaine]; //on met les caracteres 1 à 1 de la chaine dans l'élément jusqu'au séparateur
 		cpt_chaine ++;
 		cpt_element ++;
@@ -264,7 +280,14 @@ void Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != sep)
         {
-                m_statut[cpt_element]=chaine[cpt_chaine];
+                test = test_char(chaine[cpt_chaine]);
+                if(test == 0)
+                {
+                        printf("Requete malforme\n");
+                        return 0;
+                }
+
+		m_statut[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
         }
@@ -274,7 +297,14 @@ void Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != sep)
         {
-                m_action[cpt_element]=chaine[cpt_chaine];
+                test = test_char(chaine[cpt_chaine]);
+                if(test == 0)
+                {
+                        printf("Requete malforme\n");
+                        return 0;
+                }
+
+		m_action[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
         }
@@ -284,6 +314,13 @@ void Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != sep)
         {
+		test = test_char(chaine[cpt_chaine]);
+                if(test == 0)
+                {
+                        printf("Requete malforme\n");
+                        return 0;
+                }
+
                 m_option[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
@@ -294,6 +331,13 @@ void Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != sep)
         {
+		test = test_char(chaine[cpt_chaine]);
+                if(test == 0)
+                {
+                        printf("Requete malforme\n");
+                        return 0;
+                }
+
                 m_parametre[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
@@ -304,6 +348,13 @@ void Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != sep)
         {
+		test = test_char(chaine[cpt_chaine]);
+                if(test == 0)
+                {
+                        printf("Requete malforme\n");
+                        return 0;
+                }
+
                 m_groupe[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
@@ -314,11 +365,19 @@ void Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != '\0') //ici fin de la chaine (donc pas de séparateur)
         {
+		test = test_char(chaine[cpt_chaine]);
+                if(test == 0)
+                {
+                        printf("Requete malforme\n");
+                        return 0;
+                }
+
                 m_cle[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
         }
 	m_cle[cpt_element] = '\0';
+	return 1;
 }
 
 

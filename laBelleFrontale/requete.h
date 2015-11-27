@@ -16,7 +16,8 @@ class Requete
 	char* getCle();
 	char* getRequete();
 	char* getResultat();
-	void decoupage(const char * chaine);
+	int test_char(char caractere);
+	int decoupage(const char * chaine);
 	void affichage();
 	void construction();
 	int tri(const char * resultat);
