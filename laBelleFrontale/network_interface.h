@@ -86,8 +86,8 @@ private:
 	int save_n;
 	int save_nRemote;
 	bool running;
-	std::string &host_rem;
-    	std::string &port_rem;
+	std::string host_rem;
+    	std::string port_rem;
 };
 
 #endif

@@ -304,21 +304,25 @@ void network_interface::UDP_async_read(const boost::system::error_code& e, size_
 	string str ("Test string...");
 	size_t length = str_data.copy(buffer,25,0);
 	buffer[length]='\0';
-	string testHeader = string(buffer.data(), buffer.size());
+	string testHeader = string(buffer, length);
+	engine_event ne;
 
 	if (testHeader.compare(23,2,"22 serialization::archive") == 0){
 		istringstream archive_stream(str_data);
 		boost::archive::text_iarchive archive(archive_stream);
+		
+		archive >> ne;
 	}
 	else{
 		string data_clear = decrypto_rsa(str_data);
 		istringstream archive_stream(data_clear);
 		boost::archive::text_iarchive archive(archive_stream);
 		/* TODO : gestion quand pas à nous */
+		
+		archive >> ne;
 	}
 
-	engine_event ne;
-	archive >> ne;
+
 
 	// we add the id of the expeditor
 	//ne.i_data["FROM"] = get_machine_from_address(udp_remote_endpoint.address().to_string())->get_id();
@@ -468,12 +472,13 @@ void network_interface::process_received_events(engine_event& e){
 			string dataType = e.s_data["TYPE"];
 			string statutReq = e.s_data["STATUT"];
 			/*Traitement de la requete */
+			string *finalList = new string[2];
 			finalList = traitement_lookrec(dataType, statutReq);
 			string reference = finalList[0];
 			string hashNomList = finalList[1];
 
 
-			if (!hashStatList.empty() || hashStatList != "")
+			if (!hashNomList.empty() || hashNomList != "")
 			{
 				r.type = engine_event::SHOWREC;
 				r.i_data["CHALL"] = nRemote;
@@ -506,7 +511,7 @@ void network_interface::process_received_events(engine_event& e){
 				RSA::PublicKey publicRemoteKey;
 				publicRemoteKey.Load(ss2);
 
-				save_publicRemoteKey.Load(ss2);
+				//save_publicRemoteKey.Load(ss2);
 
 				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
 
@@ -522,16 +527,18 @@ void network_interface::process_received_events(engine_event& e){
 
 			int challenge = e.i_data["CHALL2"];
 
-			if (challenge%sav_n == 0){
+			if (challenge%save_n == 0){
 
 				string aesKey = e.s_data["KEY"];
 				string aesIv = e.s_data["IV"];
 				string reference = e.s_data["REFERENCE"];
-				string groupeClient = e.s_data["GRCLIENT"];
+				string groClient = e.s_data["GRCLIENT"];
+				vector<string> groupeClient;
+				groupeClient.push_back(groClient);
 				/*Traitement de la requete */
 				string document = traitement_pull(reference, groupeClient);
 
-				if (!hashStatList.empty() || hashStatList != "")
+				if (!document.empty() || document != "")
 				{
 					r.type = engine_event::PUSH;
 					r.i_data["CHALL"] = save_nRemote;

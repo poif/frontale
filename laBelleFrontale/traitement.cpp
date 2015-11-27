@@ -10,6 +10,8 @@
 #include <client.h>
 #include <reception.h>
 
+#define BUF_SIZE 100
+
 using namespace std;
 
 	string* traitement_look(string& affectation) {

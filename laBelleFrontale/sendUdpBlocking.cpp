@@ -8,7 +8,7 @@ using boost::asio::ip::udp;
 
 enum { max_length = 1024 };
 
-string sendUDP(const std::string& message, std::string& host, std::string& port){
+std::string sendUDP(const std::string& message, std::string& host, std::string& port){
     try
   {
 
@@ -36,7 +36,7 @@ string sendUDP(const std::string& message, std::string& host, std::string& port)
     std::cout << "Reply is: ";
     std::cout.write(reply, reply_length);
     std::cout << "\n";
-    string replyStr = reply;
+    std::string replyStr = reply;
     return replyStr;
   }
   catch (std::exception& e)
