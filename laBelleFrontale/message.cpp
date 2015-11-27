@@ -38,22 +38,30 @@ void Message::challenge(int N){
 }
 
 void Message::chiffrement(const unsigned char *key){
-    unsigned char trame[100];
+    unsigned char trame[1024];
     const char *message = msg.toStdString().c_str();
+
+    unsigned char iv[AES_BLOCK_SIZE];
+    memset(iv, 0x00, AES_BLOCK_SIZE);
+
     AES_KEY enc_key;
     AES_set_encrypt_key(key,128,&enc_key);
-    AES_cbc_encrypt((const unsigned char *)message,trame, &enc_key);
+    AES_cbc_encrypt((const unsigned char *)message,trame,sizeof(message), &enc_key,iv,AES_ENCRYPT );
 
     this->chiffre = QString((const char *)trame);
 
 }
 
 void Message::dechiffrement(const unsigned char *key){
-    unsigned char trame [100];
+    unsigned char trame [1024];
     const char *chif = this->chiffre.toStdString().c_str();
+
+    unsigned char iv[AES_BLOCK_SIZE];
+    memset(iv, 0x00, AES_BLOCK_SIZE);
+
     AES_KEY dec_key;
     AES_set_decrypt_key(key,128,&dec_key);
-    AES_cbc_decrypt((const unsigned char *)chif,trame,&dec_key);
+    AES_cbc_encrypt((const unsigned char *)chif,trame,sizeof(chif),&dec_key, iv,AES_DECRYPT);
 
     this->msg = QString((const char *)trame);
 }
