@@ -9,7 +9,7 @@
 using namespace std;
 
 
-string* traitement_req1(string& affectation) {
+string* traitement_look(string& affectation) {
 	//reception_frontale)->affectation,statut
 	//string affectation=message reÃ§u affectation;
         //A decommenter apres le test
@@ -73,7 +73,7 @@ string* traitement_req1(string& affectation) {
 
 /***********************************************************/
 
-string* traitement_req2(string& status) {
+string* traitement_exist(string& status) {
 //retourne juste le nom hashÃ©
     	string readStatus;
     	string hashlist;
@@ -118,7 +118,7 @@ string* traitement_req2(string& status) {
 
 /***********************************************************/
 
-string* traitement_req3(string& datatype, string& status) {
+string* traitement_lookrec(string& datatype, string& status) {
 //rÃ©cupÃ©ration des rÃ©fÃ©rences et du hash des noms
 	  string *finalList = new string[2];
       string readStatus;
@@ -172,7 +172,7 @@ string* traitement_req3(string& datatype, string& status) {
 
 /***********************************************************/
 
-string* traitement_req4(string& reference, vector<string>& groupes_client ) {
+string* traitement_pull(string& reference, vector<string>& groupes_client ) {
 //rÃ©cupÃ©ration du document
 	 string readReference;
 //readGroups : token du fichier contenant la liste des groupes séparés par /
