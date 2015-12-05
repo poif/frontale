@@ -8,7 +8,7 @@ LIBS = -lpthread -lcrypto
 all: $(CIBLES)
 
 clean: 
-	rm *.o *.gch $(CIBLES)
+	rm *.o *.gch
 
 
 client: client.o traitement_commande.o traitement_recu.o ecoute.o crypt.o recup_config.o envoi.o

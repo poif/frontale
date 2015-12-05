@@ -14,6 +14,7 @@ int traiter_commande(char *a_traiter)
 	char *action = malloc (sizeof (char*) * 256);
 	char *option = malloc (sizeof (char*) * 256);
 	char *cible = malloc (sizeof (char*) * 256);
+	char *statut = malloc (sizeof (char*) * 256);
 	char *affectation = malloc (sizeof (char*) * 256);
 
 	if (memcmp(a_traiter, "exit", 4) == 0)
@@ -23,6 +24,7 @@ int traiter_commande(char *a_traiter)
 	action = strtok_r(a_traiter, " ", &save_ptr);
 	option = strtok_r(NULL, " ", &save_ptr);
 	cible = strtok_r(NULL, " ", &save_ptr);
+	statut = strtok_r(NULL, " ", &save_ptr);
 	
 	int j = 0;
 
@@ -48,7 +50,7 @@ int traiter_commande(char *a_traiter)
 
 	else if (memcmp(action, "search", 6) == 0)
 	{
-		sprintf(a_envoyer, "%s*none*%s*%s*%s*none*none", affectation, action, option, cible);
+		sprintf(a_envoyer, "%s*%s*%s*%s*%s*none*none", affectation, statut, action, option, cible);
 		printf("%s\n", a_envoyer);
 		printf("SIZE -> %d\n", strlen(a_envoyer));
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];

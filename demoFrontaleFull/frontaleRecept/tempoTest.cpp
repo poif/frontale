@@ -72,10 +72,11 @@ void server(boost::asio::io_service& io_service, unsigned short port)
       std::string pubStringRemote = e.s_data["PUB"];
       std::string affectationReq = e.s_data["AFFECTATION"];
       /*Traitement de la requete */
-      finalList = traitement(affectationReq);
+      finalList = traitement_look(affectationReq);
       std::string hashStatList = finalList[0];
+      std::cout << hashStatList << std::endl;
       std::string nomList = finalList[1];
-
+      std::cout << nomList << std::endl;
 
       if (!hashStatList.empty() || hashStatList != "")
       {

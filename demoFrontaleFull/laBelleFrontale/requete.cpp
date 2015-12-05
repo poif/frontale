@@ -44,6 +44,7 @@ char* Requete::getResultat()
 
 int Requete::tri(const char *resultat) //tri les resultats recu et garde les éléments nécessaire suivant le type de requête
 {
+
 	int cpt_resultat=0;
 	int cpt_element=0;
 	int cpt_name=0;
@@ -52,9 +53,12 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 	char name[512];
 	char reference[512];
 
+
 	SHA_CTX ctx;
         char hash[SHA_DIGEST_LENGTH];
 	SHA1_Init(&ctx);
+
+
 
 	if(strcmp(m_action,"search") == 0)
 	{
@@ -62,6 +66,9 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 		{
 			SHA1_Update(&ctx,m_statut,strlen(m_statut));
 			SHA1_Final((unsigned char*)hash,&ctx);
+
+			printf("\n\nhash : %s\n%d\n", hash, SHA_DIGEST_LENGTH);
+			
 
 			do //on parcours toute la requete recu
 			{
@@ -75,28 +82,36 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				cpt_resultat++;
 				cpt_element=0;
 
-				while(resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
+				while(resultat[cpt_resultat] && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
 				{
 					hash_recu[cpt_element]=resultat[cpt_resultat];
 					cpt_resultat++;
 					cpt_element++;
 				}
-				hash_recu[cpt_element]='\0';
+				//hash_recu[cpt_element]='\0';
+				hash_recu[SHA_DIGEST_LENGTH] = '\0';
+				printf("hash recu : %s\n", hash_recu);
 				cpt_element=0;
 				cpt_resultat++;
 
+				printf("cpt %d\n", cpt_resultat);
 				if(strcmp(hash,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
+					printf("hello\n");
+
 					while(name[cpt_element] != '\0')
 					{
 						m_resultat[cpt_name]=name[cpt_element];
 						cpt_name++;
 						cpt_element++;
+
 					}
-					m_resultat[cpt_name]=sep;
+
+					m_resultat[cpt_name]='\0';
 					cpt_name++;
 					cpt_element=0;
 				}
+				printf("cpt %d\n", cpt_resultat);
 			}while(resultat[cpt_resultat] != '\0');
 			m_resultat[cpt_name]='\0';
 		}

@@ -618,7 +618,7 @@ string* network_interface::send_look(string& affectation){
 	e.i_data["CHALLENGE"] = n;
 
 	pubEncoded = Pub_toB64string();
-
+	
 	e.s_data["PUB"]=pubEncoded;
 	e.s_data["AFFECTATION"]=affectation;
 
@@ -629,9 +629,9 @@ string* network_interface::send_look(string& affectation){
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
 
-	//string str_data = sendUDP(outbound_data, host_rem, port_rem);
+	string str_data = sendUDP(outbound_data, host_rem, port_rem);
 
-	string str_data(&network_buffer[0], network_buffer.size());
+	//string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_rsa(str_data);
 	istringstream archive_streamIn(data_clear);
 	boost::archive::text_iarchive archiveIn(archive_streamIn);

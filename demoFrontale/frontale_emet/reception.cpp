@@ -45,8 +45,8 @@ void reception::procReception(){
         Requete req;
 
         string * showRep = new string[2];
-        char * triq = new char(showRep[0].size()+showRep[1].size()+1);
-
+        char * triq = new char(showRep[0].size()+showRep[1].size());
+        cout << "1";
         //msg.dechiffrement();
         req.decoupage(msg.getMsg().toStdString().c_str());
         req.construction();
