@@ -3,6 +3,7 @@
 #include <openssl/aes.h>
 #include <cstdlib>
 #include <ctime>
+#include <string>
 Message::Message(QString msg, char type, char separateur)
 {
     this->msg = msg;
@@ -61,7 +62,7 @@ void Message::dechiffrement(const unsigned char *key){
 
     AES_KEY dec_key;
     AES_set_decrypt_key(key,128,&dec_key);
-    AES_cbc_encrypt((const unsigned char *)chif,trame,sizeof(chif),&dec_key, iv,AES_DECRYPT);
+    AES_cbc_encrypt((const unsigned char *)chif,trame,strlen(chif),&dec_key, iv,AES_DECRYPT);
 
     this->msg = QString((const char *)trame);
 }
