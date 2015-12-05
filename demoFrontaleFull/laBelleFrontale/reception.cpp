@@ -60,7 +60,9 @@ void reception::procReception(){
 
         /* Il faudrait plutôt utiliser une réference vers l'objet de type network_interface qui doit rester unique */
         network_interface netinf;
+        cout << temp << endl;
         showRep = netinf.send_look(temp);
+
         string sep = "*";
 
         char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size()+1);

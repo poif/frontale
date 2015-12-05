@@ -258,7 +258,7 @@ void Requete::affichage()
 
 int Requete::test_char(char caractere)
 {
-	if(caractere < 123 && caractere > 96)
+	if(caractere < 127 && caractere > 31)
 		return 1;
 	else
 		return 0;
@@ -344,6 +344,7 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
+
                         printf("Requete malformée\n");
                         return 0;
                 }
@@ -361,6 +362,7 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
+
                         printf("Requete malformée\n");
                         return 0;
                 }
@@ -378,6 +380,7 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
+
                         printf("Requete malformée\n");
                         return 0;
                 }
