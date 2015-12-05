@@ -42,7 +42,7 @@ char* Requete::getResultat()
 
 //Methods
 
-int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
+int Requete::tri(const char *resultat) //tri les resultats recu et garde les éléments nécessaire suivant le type de requête
 {
 	int cpt_resultat=0;
 	int cpt_element=0;
@@ -58,7 +58,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 
 	if(strcmp(m_action,"search") == 0)
 	{
-		if(strcmp(m_option,"name") == 0)
+		if(strcmp(m_option,"-n") == 0) //Si on recherche le nom de qqn
 		{
 			SHA1_Update(&ctx,m_statut,strlen(m_statut));
 			SHA1_Final((unsigned char*)hash,&ctx);
@@ -101,7 +101,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 			m_resultat[cpt_name]='\0';
 		}
 
-		else if (strcmp(m_option,"exist") ==0)
+		else if (strcmp(m_option,"-e") ==0)
 		{
 			SHA1_Update(&ctx,m_parametre,strlen(m_parametre));
                         SHA1_Final((unsigned char*)hash,&ctx);
@@ -133,7 +133,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 			m_resultat[2] = '\0';
 		}
 
-		else if (strcmp(m_option,"photo") ==0)
+		else if (strcmp(m_option,"-p") ==0)
 		{
 			SHA1_Update(&ctx,m_parametre,strlen(m_parametre));
                         SHA1_Final((unsigned char*)hash,&ctx);
@@ -183,6 +183,16 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 				}
 			}while(resultat[cpt_resultat] != '\0');
 		}
+		else
+		{
+			printf("Tri : Option inconnu\n");
+			return 0;
+		}
+	}
+	else
+	{
+		printf("Tri : Action inconnu\n");
+		return 0;
 	}
 	return 1;
 }
@@ -195,7 +205,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 	if(strcmp(m_action,"search") == 0)
 	{
-		if(strcmp(m_option,"name") == 0)
+		if(strcmp(m_option,"-n") == 0)
 		{
 		while(m_affectation[i] != '\0')
 			{
@@ -205,7 +215,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 			m_requete[i]='\0';
 		}
 
-		else if(strcmp(m_option,"exist") == 0)
+		else if(strcmp(m_option,"-e") == 0)
 		{
 			while(m_statut[i] != '\0')
 			{
@@ -215,7 +225,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 			m_requete[i]='\0';
 		}
 
-		else if(strcmp(m_option,"photo") == 0)
+		else if(strcmp(m_option,"-p") == 0)
 		{
 			while(m_option[i] != '\0')
 			{
@@ -248,7 +258,7 @@ void Requete::affichage()
 
 int Requete::test_char(char caractere)
 {
-	if((caractere < 123 && caractere > 96) || (caractere == '*'))
+	if(caractere < 123 && caractere > 96)
 		return 1;
 	else
 		return 0;
@@ -266,7 +276,7 @@ int Requete::decoupage(const char * chaine)
 		test = test_char(chaine[cpt_chaine]);
 		if(test == 0)
 		{
-			printf("Requete malforme\n");
+			printf("Requete malformée\n");
 			return 0;
 		}
 
@@ -283,7 +293,7 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-                        printf("Requete malforme\n");
+                        printf("Requete malformée\n");
                         return 0;
                 }
 
@@ -300,7 +310,7 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-                        printf("Requete malforme\n");
+                        printf("Requete malformée\n");
                         return 0;
                 }
 
@@ -317,7 +327,7 @@ int Requete::decoupage(const char * chaine)
 		test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-                        printf("Requete malforme\n");
+                        printf("Requete malformée\n");
                         return 0;
                 }
 
@@ -331,14 +341,14 @@ int Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != sep)
         {
-		test = test_char(chaine[cpt_chaine]);
+                test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-                        printf("Requete malforme\n");
+                        printf("Requete malformée\n");
                         return 0;
                 }
 
-                m_parametre[cpt_element]=chaine[cpt_chaine];
+		m_parametre[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
         }
@@ -348,14 +358,14 @@ int Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != sep)
         {
-		test = test_char(chaine[cpt_chaine]);
+                test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-                        printf("Requete malforme\n");
+                        printf("Requete malformée\n");
                         return 0;
                 }
 
-                m_groupe[cpt_element]=chaine[cpt_chaine];
+		m_groupe[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
         }
@@ -365,14 +375,14 @@ int Requete::decoupage(const char * chaine)
 
 	while(chaine[cpt_chaine] != '\0') //ici fin de la chaine (donc pas de séparateur)
         {
-		test = test_char(chaine[cpt_chaine]);
+                test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-                        printf("Requete malforme\n");
+                        printf("Requete malformée\n");
                         return 0;
                 }
 
-                m_cle[cpt_element]=chaine[cpt_chaine];
+		m_cle[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
         }
