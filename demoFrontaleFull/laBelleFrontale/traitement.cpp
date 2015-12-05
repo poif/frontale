@@ -6,8 +6,9 @@
 #include <fstream>
 #include <iostream>
 #include "traitement.h"
-using namespace std;
 
+#define BUF_SIZE 100
+using namespace std;
 
 string* traitement_look(string& affectation) {
 	//reception_frontale)->affectation,statut
@@ -181,17 +182,16 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
 	 char* readGroups;
 	 string readGroup;
      string document;
-	 string * finalList = new string[1];
      string fichier = "test3.txt";
-	 int found=0;
+	 /*int found=0;
 	 int i=0;
-	 int k=0;
+	 int k=0;*/
          /**remplacement pour test**/
          /*************************************/
      ifstream file(fichier.c_str(), ios::in);
         if(file){
                 char* line;
-                string sline=line;
+                string sline;
                 while (getline(file,sline)){	//line ref document groupes
                  		 int stop=0;
                  		 line=(char*)sline.c_str();
@@ -202,11 +202,10 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
                          readGroup = string(strtok(readGroups,"/"));
                          if (reference==readReference){
 					 		 while (!readGroup.empty() && stop==0) {
-					 	 		for (int j=0;j<groupes_client.size();j++){
+					 	 		for (unsigned int j=0;j<groupes_client.size();j++){
 			 						if (readGroup==groupes_client[j]){  
-					 					finalList[0]=document;
-					           			file.close();
-					 					return finalList;
+					           			     file.close();
+					 					return document;
 					 				}
                        			}
                        			try{
@@ -227,4 +226,6 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
                   printf("error : ouverture impossible!\n");
                   exit(EXIT_FAILURE);
       	  }
+
+          return NULL;
 }
