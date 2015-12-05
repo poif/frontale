@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     //thread
 
-    network_interface net;
+//    network_interface net;
 
 
 
