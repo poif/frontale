@@ -54,9 +54,9 @@ string* traitement_look(string& affectation) {
 	   			SHA1_Final((unsigned char*)hash, &ctx);
 	   			hashS=string(hash,strlen(hash));
  				hashlist += hashS; 
- 				//hashlist += "\n";
+ 				hashlist += "*";
 				listnom  += nom; 
-				//listnom  += "\n";
+				listnom  += "*";
 			}
  		} 
 	 	file.close();

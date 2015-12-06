@@ -46,7 +46,8 @@ void reception::procReception(){
         Message msg(message,'*');
         Requete req;
 
-        string * showRep = new string[2];
+        //string * showRep = new string[2];
+        string showRep;
 
 	QTextStream(stdout) << datagram.data() << endl;	        
 
@@ -63,12 +64,17 @@ void reception::procReception(){
             
             showRep = netinf.send_look(temp);
 
+            cout << showRep << endl;
+            //cout << showRep[1] << endl;
+
             string sep = "*";
 
-            char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size());
-            int triqlength = showRep[0].size()+showRep[1].size()+sep.size();
-
-            triq = const_cast <char *>((showRep[0] + sep + showRep[1]).data());
+            //char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size());
+            char * triq = new char(showRep.size());
+            //int triqlength = showRep[0].size()+showRep[1].size()+sep.size();
+            int triqlength = showRep.size();
+            //triq = const_cast <char *>((showRep[0] + sep + showRep[1]).data());
+            triq = const_cast <char *>(showRep.data());
             triq[triqlength] = '\0';
             /*cout << triqlength << endl;
             cout << strlen(triq) << endl;
@@ -83,8 +89,8 @@ void reception::procReception(){
             msg2.entete();
             msg2.chiffrement(key);
 
-            //string toto = retour.toStdString();
-            //cout << toto << endl;
+            string toto = msg2.getMsg().toStdString();
+            cout << toto << endl;
 
             client cli;
             cli.socBind();

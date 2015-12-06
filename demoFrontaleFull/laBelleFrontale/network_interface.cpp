@@ -600,7 +600,7 @@ string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
 
 }
 
-string* network_interface::send_look(string& affectation){
+string network_interface::send_look(string& affectation){
 	engine_event e;
 	engine_event r;
 	//boost::asio::buffer network_buffer;
@@ -608,7 +608,8 @@ string* network_interface::send_look(string& affectation){
 	string pubEncoded;
 	int challN = 0;
 
-	string * showRep = new string[2];
+	//string * showRep = new string[2];
+	string showRep = "";
 
 	e.type = engine_event::LOOK;
 	/* choisir nombre entier grand */
@@ -644,8 +645,17 @@ string* network_interface::send_look(string& affectation){
 		if (challN%n == 0){
 			if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
 				if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
-					showRep[0] = r.s_data["NOM"];
-					showRep[1] = r.s_data["HSTATUT"];
+					istringstream issNom(r.s_data["NOM"]);
+					istringstream issHstatut(r.s_data["HSTATUT"]);
+					string nom;
+					string hstatut; 
+					while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
+					{ 
+					    showRep += nom + "*" + hstatut + "*";
+					}
+					showRep.erase(showRep.size() - 1, 1);
+					//showRep[0] = r.s_data["NOM"];
+					//showRep[1] = r.s_data["HSTATUT"];
 					return showRep;
 				}
 			}

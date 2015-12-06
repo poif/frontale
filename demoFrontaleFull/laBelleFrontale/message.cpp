@@ -47,7 +47,7 @@ void Message::chiffrement(const unsigned char *key){
 
     AES_KEY enc_key;
     AES_set_encrypt_key(key,128,&enc_key);
-    AES_cbc_encrypt((const unsigned char *)message,trame,sizeof(message), &enc_key,iv,AES_ENCRYPT );
+    AES_cbc_encrypt((const unsigned char *)message,trame,strlen(message), &enc_key,iv,AES_ENCRYPT );
 
     this->chiffre = QString((const char *)trame);
 

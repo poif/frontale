@@ -2,3 +2,7 @@ Castelain directeur INSACVL
 Megy tyran INSACVL
 Bob directeur ENSIMAG
 Servietsky directeur INSACVL
+Bailly etudiant INSACVL
+Cannesse etudiant INSACVL
+Letailleur etudiant INSACVL
+Poiron etudiant INSACVL
