@@ -85,8 +85,8 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 					cpt_resultat++;
 					cpt_element++;
 				}
-				//hash_recu[cpt_element]='\0';
-				hash_recu[SHA_DIGEST_LENGTH] = '\0';
+				hash_recu[cpt_element]='\0';
+				//hash_recu[SHA_DIGEST_LENGTH] = '\0';
 
 				cpt_element=0;
 				cpt_resultat++;
@@ -101,8 +101,8 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 						cpt_element++;
 
 					}
-
-					m_resultat[cpt_name]='\0';
+					m_resultat[cpt_name]=sep;
+					//m_resultat[cpt_name]='\0';
 					cpt_name++;
 					cpt_element=0;
 				}
