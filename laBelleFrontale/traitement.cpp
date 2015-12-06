@@ -35,7 +35,7 @@ string * traitement_look(string& affectation) {
               SHA1_Init(&ctx);
               SHA1_Update(&ctx, statut, strlen(statut));
               SHA1_Final((unsigned char*)hash, &ctx);
-              hashS=string(hash,strlen(hash));
+              hashS=string(hash,SHA_DIGEST_LENGTH);
               hashlist += hashS; 
               hashlist += "\n";
               listnom  += nom; 
@@ -79,7 +79,8 @@ string traitement_exist(string& status) {
                 SHA_CTX ctx;
                 SHA1_Init(&ctx);
                 SHA1_Update(&ctx, nom, strlen(nom));
-                SHA1_Final((unsigned char*)hash, &ctx);                      hashS=hash;
+                SHA1_Final((unsigned char*)hash, &ctx);                     
+                hashS=string(hash,SHA_DIGEST_LENGTH);
                 hashlist += hashS;
                 hashlist += "\n";
             }
@@ -128,7 +129,7 @@ string* traitement_lookrec(string& datatype, string& status) {
                                 SHA1_Init(&ctx);
                                 SHA1_Update(&ctx, nom, strlen(nom));
                                 SHA1_Final((unsigned char*)hash, &ctx);
-                                hashS=hash;
+                                hashS=string(hash,SHA_DIGEST_LENGTH);
                                 listRef += reference;
                                 listRef += "\n";
                                 hashlist+= hashS;
