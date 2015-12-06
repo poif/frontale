@@ -10,6 +10,8 @@ using namespace std;
 
 string * traitement_look(string& affectation) {
   string nom;
+  string to_send = "1*none*" + affectation + "*none*none*none*none*EOF";
+  //envoi	  
   char* statut;
   char* hash=(char*)malloc(SHA_DIGEST_LENGTH*sizeof(char));
   string readAffectation;
@@ -43,8 +45,7 @@ string * traitement_look(string& affectation) {
             }
        } 
        file.close();
-       free(hash);
-        //envoi_frontale(nom) 
+       free(hash); 
        finalList[0] = hashlist;
        finalList[1] = listnom;
        return finalList;
@@ -221,8 +222,12 @@ string req_bdd(string& action, string& statut, string& affectation, vector<strin
   if (groupes_client[0] == "none")
     to_send += "NULL*";
   else {
-    for (int i = 0; i < groupes_client.size(); i++)
-      to_send += groupes_client[i] + ";";
+    for (int i = 0; i < groupes_client.size(); i++){
+      if (i==groupes_client.size()-1)
+      	to_send += groupes_client[i];
+      else 
+      	to_send += groupes_client[i] + ";";
+    }
     to_send += "*";
   }
 
@@ -243,7 +248,7 @@ string req_bdd(string& action, string& statut, string& affectation, vector<strin
 
   to_send += "EOF";
 
-  cout << "chaine   " << to_send<< endl;
+ // cout << "chaine   " << to_send<< endl;
   //envoi
   return to_send;
   //void?
