@@ -89,8 +89,8 @@ void reception::procReception(){
             msg2.entete();
             msg2.chiffrement(key);
 
-            string toto = msg2.getMsg().toStdString();
-            cout << toto << endl;
+            //string toto = msg2.getMsg().toStdString();
+            //cout << toto << endl;
 
             client cli;
             cli.socBind();
