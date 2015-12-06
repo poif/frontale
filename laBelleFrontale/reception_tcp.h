@@ -12,13 +12,15 @@ class reception_tcp : public QTcpServer
 public:
     reception_tcp();
     void bind();
-
-private slots:
+    QString getMsg();
+    bool getConnexion();
+    void attenteLecture();
     void lecture();
-    void affichage();
 
 private:
     QTcpSocket *soc;
+    bool connexion;
+    QString msg;
 };
 
 #endif // RECEPTION_TCP_H
