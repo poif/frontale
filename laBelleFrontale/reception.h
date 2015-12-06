@@ -13,7 +13,7 @@ private :
 
 public:
     reception();
-    void ecoute();
+    void ecoute(int timeout);
     void procReception();
     QString getMsg();
 };
