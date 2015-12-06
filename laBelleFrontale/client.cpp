@@ -17,8 +17,8 @@ void client::socBind(){
 
 void client::emission(QString message){
 
-    QByteArray datagram = message.toAscii().data();;
-    soc->writeDatagram(datagram.data(),datagram.size(),QHostAddress::Broadcast, 45454 );
+    QByteArray datagram = message.toAscii().data();
+    soc->writeDatagram(datagram.data(),datagram.size(), QHostAddress::LocalHost, 1234 );
 
 }
 

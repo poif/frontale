@@ -55,26 +55,41 @@ void reception::procReception(){
 	QTextStream(stdout) << msg.getMsg() << endl;
 
         if(req.decoupage(msg.getMsg().toStdString().c_str())){
-        req.construction();
-        string temp = req.getRequete();
+            req.construction();
+            string temp = req.getRequete();
 
-        /* Il faudrait plutôt utiliser une réference vers l'objet de type network_interface qui doit rester unique */
-        network_interface netinf;
-        showRep = netinf.send_look(temp);
-        string sep = "*";
+            /* Il faudrait plutôt utiliser une réference vers l'objet de type network_interface qui doit rester unique */
+            network_interface netinf;
+            
+            showRep = netinf.send_look(temp);
 
-        char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size()+1);
-        triq = const_cast <char *>((showRep[0] + sep.data() + showRep[1]).data());
-        req.tri(triq);
+            string sep = "*";
 
-        QString retour;
-        retour = QString("%1").arg(req.getResultat());
+            char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size());
+            int triqlength = showRep[0].size()+showRep[1].size()+sep.size();
 
-        Message msg2(retour,'R', '*');
-        msg2.entete();
-        msg2.chiffrement(key);
-        client cli;
-        cli.socBind();
-        cli.emission(msg2.getChiffre());}
+            triq = const_cast <char *>((showRep[0] + sep + showRep[1]).data());
+            triq[triqlength] = '\0';
+            /*cout << triqlength << endl;
+            cout << strlen(triq) << endl;
+            cout.write(triq, triqlength);*/
+            
+            req.tri(triq);
+            
+            QString retour;
+            retour = QString("%1").arg(req.getResultat());
+
+            Message msg2(retour,'R', '*');
+            msg2.entete();
+            msg2.chiffrement(key);
+
+            //string toto = retour.toStdString();
+            //cout << toto << endl;
+
+            client cli;
+            cli.socBind();
+            cli.emission(msg2.getChiffre());
+ 
+        }
 
 }

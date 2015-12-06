@@ -36,7 +36,7 @@ std::string sendUDP(const std::string& message, std::string& host, std::string& 
     std::cout << "Reply is: ";
     std::cout.write(reply, reply_length);
     std::cout << "\n";
-    std::string replyStr = reply;
+    std::string replyStr = std::string(reply, reply_length);
     return replyStr;
   }
   catch (std::exception& e)
