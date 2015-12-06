@@ -58,8 +58,6 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
         char hash[SHA_DIGEST_LENGTH];
 	SHA1_Init(&ctx);
 
-
-
 	if(strcmp(m_action,"search") == 0)
 	{
 		if(strcmp(m_option,"-n") == 0) //Si on recherche le nom de qqn
@@ -79,7 +77,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				cpt_resultat++;
 				cpt_element=0;
 
-				while(resultat[cpt_resultat] && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
+				while(cpt_element < 20 && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
 				{
 					hash_recu[cpt_element]=resultat[cpt_resultat];
 					cpt_resultat++;
@@ -91,6 +89,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				cpt_element=0;
 				cpt_resultat++;
 
+				
 				if(strcmp(hash,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
 
@@ -99,16 +98,17 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 						m_resultat[cpt_name]=name[cpt_element];
 						cpt_name++;
 						cpt_element++;
-
 					}
+
 					m_resultat[cpt_name]=sep;
-					//m_resultat[cpt_name]='\0';
 					cpt_name++;
 					cpt_element=0;
 				}
 
 			}while(resultat[cpt_resultat] != '\0');
+
 			m_resultat[cpt_name]='\0';
+			m_resultat[strlen(m_resultat)-1]='\0';
 		}
 
 		else if (strcmp(m_option,"-e") ==0)

@@ -40,7 +40,7 @@ void decrypt(unsigned char* dec_in, unsigned char* dec_out , int size_aes_input)
     AES_set_decrypt_key(aes_key, sizeof(aes_key)*8, &dec_key);
     AES_cbc_encrypt(dec_in, dec_out, size_aes_input, &dec_key, iv, AES_DECRYPT);
     // print_data("\n Decrypted",dec_out, sizeof(dec_out));
-    printf("%s\n", dec_out);
+    printf("Reponse : %s\n", dec_out);
  }
 
  void print_data(const char *tittle, const void* data, int len)
