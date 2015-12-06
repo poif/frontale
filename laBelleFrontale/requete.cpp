@@ -42,9 +42,12 @@ char* Requete::getResultat()
 
 //Methods
 
-int Requete::tri(const char *resultat) //tri les resultats recu et garde les éléments nécessaire suivant le type de requête
-{
+/* =======================================================================================================================
+	FONCTION TRI : TRI ET CONSTRUIT LE RESULTAT A ENVOYER AU CLIENT
+=========================================================================================================================*/
 
+int Requete::tri(const char *resultat) //tri les resultats recu et garde les éléments nécessaire suivant le type de requête => construit la requete à envoyer sur le réseau
+{
 	int cpt_resultat=0;
 	int cpt_element=0;
 	int cpt_name=0;
@@ -52,7 +55,6 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 	char hash_recu[512];
 	char name[512];
 	char reference[512];
-
 
 	SHA_CTX ctx;
         char hash[SHA_DIGEST_LENGTH];
@@ -64,7 +66,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 		{
 			SHA1_Update(&ctx,m_statut,strlen(m_statut));
 			SHA1_Final((unsigned char*)hash,&ctx);
-			
+
 			do //on parcours toute la requete recu
 			{
 				while(resultat[cpt_resultat] != sep) //on récupère le nom
@@ -77,38 +79,30 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				cpt_resultat++;
 				cpt_element=0;
 
-				while(cpt_element < 20 && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
+				while(resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
 				{
 					hash_recu[cpt_element]=resultat[cpt_resultat];
 					cpt_resultat++;
 					cpt_element++;
 				}
 				hash_recu[cpt_element]='\0';
-				//hash_recu[SHA_DIGEST_LENGTH] = '\0';
-
 				cpt_element=0;
 				cpt_resultat++;
 
-				
 				if(strcmp(hash,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
-
 					while(name[cpt_element] != '\0')
 					{
 						m_resultat[cpt_name]=name[cpt_element];
 						cpt_name++;
 						cpt_element++;
 					}
-
 					m_resultat[cpt_name]=sep;
 					cpt_name++;
 					cpt_element=0;
 				}
-
 			}while(resultat[cpt_resultat] != '\0');
-
 			m_resultat[cpt_name]='\0';
-			m_resultat[strlen(m_resultat)-1]='\0';
 		}
 
 		else if (strcmp(m_option,"-e") ==0)
@@ -199,6 +193,17 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 			return 0;
 		}
 	}
+
+	else if(strcmp(m_action, "insert")==0 || strcmp(m_action, "seek")==0 || strcmp(m_action, "delete")==0 || strcmp(m_action, "select")==0) // Si c'était une interaction bdd, il faut juste retransmettre le message au client
+	{
+		while(resultat[cpt_resultat] != '\0')
+		{
+			m_resultat[cpt_resultat] = resultat[cpt_resultat]; // Copie du resultat
+			cpt_resultat ++;
+		}
+		m_resultat[cpt_resultat] = '\0';
+	}
+
 	else
 	{
 		printf("Tri : Action inconnu\n");
@@ -207,39 +212,43 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 	return 1;
 }
 
+/*=========================================================================================
+	FONCTION DE CONSTRUCTION : CONSTRUIT LA REQUETE A ENVOYER (AU RESEAU OU A LA BDD)
+=========================================================================================*/
+
 void Requete::construction() //construit la requete suivant action, option et parametre
 {
 	int i=0;
 	int j=0;
 	char sep = '*';
 
-	if(strcmp(m_action,"search") == 0)
+	if(strcmp(m_action,"search") == 0) // Fonction recherche
 	{
-		if(strcmp(m_option,"-n") == 0)
+		if(strcmp(m_option,"-n") == 0) // Si on cherche un nom
 		{
 		while(m_affectation[i] != '\0')
 			{
-				m_requete[i]=m_affectation[i];
+				m_requete[i]=m_affectation[i];  //La requete à envoyer est composé uniquement de l'affectation
 				i++;
 			}
 			m_requete[i]='\0';
 		}
 
-		else if(strcmp(m_option,"-e") == 0)
+		else if(strcmp(m_option,"-e") == 0) // Si on cherche l'existance
 		{
 			while(m_statut[i] != '\0')
 			{
-				m_requete[i]=m_statut[i];
+				m_requete[i]=m_statut[i]; // La requete à envoyer est composé uniquement du statut
 				i++;
 			}
 			m_requete[i]='\0';
 		}
 
-		else if(strcmp(m_option,"-p") == 0)
+		else if(strcmp(m_option,"-p") == 0) // Si on cherche une photo(donnée)
 		{
 			while(m_option[i] != '\0')
 			{
-				m_requete[i]=m_option[i];
+				m_requete[i]=m_option[i]; // Premiere partie de la requete : l'option de la requete
 				i++;
 			}
 			m_requete[i]=sep;
@@ -247,7 +256,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 			while(m_statut[j] != '\0')
 			{
-				m_requete[i]=m_statut[j];
+				m_requete[i]=m_statut[j]; // Deuxieme partie : le statut
 				j++;
 				i++;
 			}
@@ -257,22 +266,96 @@ void Requete::construction() //construit la requete suivant action, option et pa
 		else
 			printf("option inconnue\n");
 	}
+	else if(strcmp(m_action,"insert") == 0 || strcmp(m_action,"delete") == 0) // Insertion d'une donnée dans la bdd
+	{
+		m_requete[0] = '3';  // Premiere partie : l'action (ici 302)
+		m_requete[1] = '0';
+		m_requete[2] = '2';
+		m_requete[3] = '*';
+		i=4;
+
+		while(m_statut[j] != '\0')
+		{
+			m_requete[i] = m_statut[j]; // Deuxieme partie : statut
+			i++;
+			j++;
+		}
+		m_requete[i] = sep; // On met un séparateur
+		i++;
+		j=0;
+
+		while(m_affectation[j] != '\0')
+		{
+			m_requete[i] = m_affectation[j]; // 3e partie : l'affectation
+			i++;
+			j++;
+		}
+		m_requete[i] = sep; // On met un séparateur
+		i++;
+		j=0;
+
+		while(m_groupe[j] != '\0')
+		{
+			m_requete[i] = m_groupe[j]; // 4e partie : le groupe
+			i++;
+			j++;
+		}
+		m_requete[i] = sep; // On met un séparateur
+		i++;
+		j=0;
+
+		while(m_option[j] != '\0')
+		{
+			m_requete[i] = m_option[j]; // 5e partie : l'option (le type de la donnée)
+			i++;
+			j++;
+		}
+		m_requete[i] = sep; // On met un séparateur
+		i++;
+		j=0;
+
+		while(m_parametre[j] != '\0')
+		{
+			m_requete[i] = m_parametre[j]; // 6e partie : la donnée en question
+			i++;
+			j++;
+		}
+		m_requete[i] = sep; // On met un séparateur
+		m_requete[i+1] = 'E';
+		m_requete[i+2] = 'O';	// 7e partie : EOF
+		m_requete[i+3] = 'F';
+		m_requete[i+4] = '\0'; // Fin de la requete
+		j=0;
+	}
+
 	else
 		printf("action inconnue\n");
 }
 
-void Requete::affichage()
+/*============================================================================================
+	FONCTION AFFICHAGE : INUTILE DANS LE PROJET (utilisée pour des tests)
+============================================================================================*/
+
+void Requete::affichage() //Fonction inutile dans la frontale (je l'utilise pour mes tests)
 {
 	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_groupe,m_cle);
 }
 
-int Requete::test_char(char caractere)
+/*===========================================================================================
+	FONCTION DE TEST DES CARACTERES
+===========================================================================================*/
+
+int Requete::test_char(char caractere) //test si le caractère est bien une lettre minuscule
 {
 	if(caractere < 127 && caractere > 31)
 		return 1;
 	else
 		return 0;
 }
+
+/*===========================================================================================
+	FONCTION DE DECOUPAGE : DECOUPE LA REQUETE RECU DU CLIENT (1ere fonction appelée)
+===========================================================================================*/
 
 int Requete::decoupage(const char * chaine)
 {
