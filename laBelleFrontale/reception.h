@@ -1,5 +1,5 @@
-#ifndef SERVER_TCP_H
-#define SERVER_TCP_H
+#ifndef RECEPTION_H
+#define RECEPTION_H
 #include <QCoreApplication>
 #include <QtNetwork>
 
@@ -9,13 +9,13 @@ class reception : public QObject
     Q_OBJECT
 private :
     QUdpSocket *soc;
+    QString msg;
 
 public:
     reception();
     void ecoute();
-
-private slots:
     void procReception();
+    QString getMsg();
 };
 
-#endif // SERVER_TCP_H
+#endif // RECEPTION_H
