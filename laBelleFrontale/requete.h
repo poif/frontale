@@ -15,6 +15,8 @@ class Requete
 
 	char m_requete[256];
 	char m_resultat[256];
+        bool pourBdd;
+
 
 	public:
 
@@ -28,6 +30,7 @@ class Requete
 	char* getCle();
 	char* getRequete();
 	char* getResultat();
+	bool getPourBdd();
 	int test_char(char caractere);
 	int decoupage(const char * chaine);
 	void affichage();

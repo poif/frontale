@@ -39,6 +39,8 @@ char* Requete::getRequete()
 {	return m_requete;}
 char* Requete::getResultat()
 {	return m_resultat;}
+bool Requete::getPourBdd()
+{	return pourBdd;}
 
 //Methods
 
@@ -225,6 +227,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 	if(strcmp(m_action,"search") == 0) // Fonction recherche
 	{
+		pourBdd = false;
 		if(strcmp(m_option,"-n") == 0) // Si on cherche un nom
 		{
 		while(m_affectation[i] != '\0')
@@ -269,6 +272,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	}
 	else if(strcmp(m_action,"insert") == 0 || strcmp(m_action,"delete") == 0) // Insertion d'une donnée dans la bdd
 	{
+		pourBdd = true;
 		m_requete[0] = '3';  // Premiere partie : l'action (ici 302)
 		m_requete[1] = '0';
 		m_requete[2] = '2';

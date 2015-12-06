@@ -11,8 +11,8 @@
 #include <string>
 #include "client.h"
 #include <QtNetwork>
-
-
+#include "emission_tcp.h"
+#include "reception_tcp.h"
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -23,10 +23,16 @@ int main(int argc, char *argv[])
 	//thread
 	reception ser;
 
+	emission_tcp emi;
 
+    	emi.connection_tcp("127.0.0.1",32154);
 	const unsigned char key[]={0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF}; 
+	
+	reception_tcp recep; 
+
 
 	QString message;
+	QString versBdd;
 	while(1){
 		ser.ecoute(-1); // timeout= -1 == pas de timeout
 
@@ -47,31 +53,46 @@ int main(int argc, char *argv[])
 
 		if(req.decoupage(msg.getMsg().toStdString().c_str())){
 			req.construction();
-			string temp = req.getRequete();
+			recep.bind();		
+			if(req.getPourBdd()){
+				versBdd = QString("%1").arg(req.getRequete());
+				emi.emission(versBdd);
+				
+    				if(!recep.getConnexion()){
+        				//envoyer message d'erreur timeout   					
+    				}else{
+           				recep.attenteLecture();
 
-			/* Il faudrait plutôt utiliser une réference vers l'objet de type network_interface qui doit rester unique */
-			network_interface netinf;
+         				// fonction pour interpreter le retour de la bdd(succes ou fail)  recep.getMsg() << endl;
+    				}							
+			}
+			else
+			{
+				string temp = req.getRequete();
 
-			showRep = netinf.send_look(temp);
+				/* Il faudrait plutôt utiliser une réference vers l'objet de type network_interface qui doit rester unique */
+				network_interface netinf;
 
-			cout << showRep << endl;
-			//cout << showRep[1] << endl;
+				showRep = netinf.send_look(temp);
 
-			string sep = "*";
+				cout << showRep << endl;
+				//cout << showRep[1] << endl;
 
-			//char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size());
-			char * triq = new char(showRep.size());
-			//int triqlength = showRep[0].size()+showRep[1].size()+sep.size();
-			int triqlength = showRep.size();
-			//triq = const_cast <char *>((showRep[0] + sep + showRep[1]).data());
-			triq = const_cast <char *>(showRep.data());
-			triq[triqlength] = '\0';
-			/*cout << triqlength << endl;
-			  cout << strlen(triq) << endl;
-			  cout.write(triq, triqlength);*/
+				string sep = "*";
 
-			req.tri(triq);
+				//char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size());
+				char * triq = new char(showRep.size());
+				//int triqlength = showRep[0].size()+showRep[1].size()+sep.size();
+				int triqlength = showRep.size();
+				//triq = const_cast <char *>((showRep[0] + sep + showRep[1]).data());
+				triq = const_cast <char *>(showRep.data());
+				triq[triqlength] = '\0';
+				/*cout << triqlength << endl;
+				  cout << strlen(triq) << endl;
+				  cout.write(triq, triqlength);*/
 
+				req.tri(triq);
+			}
 			QString retour;
 			retour = QString("%1").arg(req.getResultat());
 
