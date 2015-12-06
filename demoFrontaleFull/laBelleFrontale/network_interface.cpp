@@ -40,7 +40,7 @@ network_interface::network_interface(){
 	// Generate Parameters
 	AutoSeededRandomPool rng;
 	InvertibleRSAFunction params;
-	params.GenerateRandomWithKeySize(rng, 3072);
+	params.GenerateRandomWithKeySize(rng, 1024);
 
 	///////////////////////////////////////
 	// Create Keys
@@ -232,15 +232,31 @@ string* network_interface::aesKeyToS(SecByteBlock key, byte* iv){
 
 byte* network_interface::sToB(string plain){
 
-	byte * conv = new byte(plain.size()+1);
-	conv = reinterpret_cast<unsigned char*>(const_cast<char*>(plain.data()));
+	string clear;
+
+	StringSource ss5( plain , true, 
+	        new HexDecoder(
+	            new StringSink( clear )
+	        ) // StreamTransformationFilter      
+	); // StringSource
+
+	byte * conv = new byte(clear.size()+1);
+	conv = reinterpret_cast<unsigned char*>(const_cast<char*>(clear.data()));
 
 	return conv;
 }
 
 SecByteBlock network_interface::sToSbb(string plain){
 
-	SecByteBlock conv(reinterpret_cast<const unsigned char*>(plain.data()), plain.size());
+	string clear;
+
+	StringSource ss5( plain , true, 
+	        new HexDecoder(
+	            new StringSink( clear )
+	        ) // StreamTransformationFilter      
+	); // StringSource
+
+	SecByteBlock conv(reinterpret_cast<const unsigned char*>(clear.data()), clear.size());
 
 	return conv;
 }
@@ -603,6 +619,7 @@ string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
 string network_interface::send_look(string& affectation){
 	engine_event e;
 	engine_event r;
+	engine_event p;
 	//boost::asio::buffer network_buffer;
 	ostringstream archive_stream;
 	string pubEncoded;
@@ -633,33 +650,57 @@ string network_interface::send_look(string& affectation){
 	string str_data = sendUDP(outbound_data, host_rem, port_rem);
 
 	//string str_data(&network_buffer[0], network_buffer.size());
-	string data_clear = decrypto_rsa(str_data);
-	istringstream archive_streamIn(data_clear);
+	//string data_clear = decrypto_rsa(str_data);
+	istringstream archive_streamIn(str_data);
 	boost::archive::text_iarchive archiveIn(archive_streamIn);
 
-	archiveIn >> r;
+	archiveIn >> p;
 
-	if (r.type == engine_event::SHOW)
-	{
-		challN = r.i_data["CHALL"];
-		if (challN%n == 0){
-			if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
-				if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
-					istringstream issNom(r.s_data["NOM"]);
-					istringstream issHstatut(r.s_data["HSTATUT"]);
-					string nom;
-					string hstatut; 
-					while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
-					{ 
-					    showRep += nom + "*" + hstatut + "*";
+	if(p.type == engine_event::SECRET){
+
+
+		string aesKey = decrypto_rsa(p.s_data["KEY"]);
+		string aesIv = decrypto_rsa(p.s_data["IV"]);
+
+		byte * iv = sToB(aesIv);
+		SecByteBlock key = sToSbb(aesKey);
+
+		string data_clear = decrypto_aes(key, iv, p.s_data["CIPHER"]);
+
+		
+		data_clear.erase(0, 16);
+		data_clear = "22 serialization" + data_clear;
+		cout << data_clear << endl;
+
+		istringstream archive_streamPckt(data_clear);
+
+		boost::archive::text_iarchive archivePckt(archive_streamPckt);
+
+		archivePckt >> r;
+
+		if (r.type == engine_event::SHOW)
+		{
+			challN = r.i_data["CHALL"];
+			if (challN%n == 0){
+				if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
+					if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
+						istringstream issNom(r.s_data["NOM"]);
+						istringstream issHstatut(r.s_data["HSTATUT"]);
+						string nom;
+						string hstatut; 
+						while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
+						{ 
+						    showRep += nom + "*" + hstatut + "*";
+						}
+						showRep.erase(showRep.size() - 1, 1);
+						//showRep[0] = r.s_data["NOM"];
+						//showRep[1] = r.s_data["HSTATUT"];
+						return showRep;
 					}
-					showRep.erase(showRep.size() - 1, 1);
-					//showRep[0] = r.s_data["NOM"];
-					//showRep[1] = r.s_data["HSTATUT"];
-					return showRep;
 				}
 			}
-		}
+		}	
+
 	}
 
 	return NULL;

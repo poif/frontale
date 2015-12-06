@@ -25,13 +25,46 @@
 
 using boost::asio::ip::udp;
 using namespace CryptoPP; 
+using namespace std;
 
-enum { max_length = 1024 };
+enum { max_length = 2048 };
 
-std::string encrypto_rsa(std::string& plain, RSA::PublicKey pubRemote){
+string encrypto_aes(SecByteBlock key, byte* iv, string& plain){
+
+  string cipher;
+
+  /*********************************\
+  \*********************************/
+
+  try
+  {
+
+      CBC_Mode< AES >::Encryption e;
+      e.SetKeyWithIV( key, key.size(), iv );
+
+      // The StreamTransformationFilter adds padding
+      //  as required. ECB and CBC Mode must be padded
+      //  to the block size of the cipher.
+      StringSource ss( plain, true, 
+          new StreamTransformationFilter( e,
+              new StringSink( cipher )
+          ) // StreamTransformationFilter      
+      ); // StringSource
+  }
+  catch( const CryptoPP::Exception& e )
+  {
+      cerr << e.what() << endl;
+      exit(1);
+  }
+
+  return cipher;
+
+}
+
+string encrypto_rsa(string& plain, RSA::PublicKey pubRemote){
 
   AutoSeededRandomPool rng;
-  std::string cipher;
+  string cipher;
 
   ////////////////////////////////////////////////
   // Encryption
@@ -47,6 +80,24 @@ std::string encrypto_rsa(std::string& plain, RSA::PublicKey pubRemote){
 
 }
 
+string* aesKeyToS(SecByteBlock key, byte* iv){
+  string* aesString = new string[2];
+
+  StringSource ss5( key.data(), key.size() , true, 
+          new HexEncoder(
+              new StringSink( aesString[0] )
+          ) // StreamTransformationFilter      
+  ); // StringSource
+
+  StringSource ss6( iv, sizeof(iv) , true, 
+          new HexEncoder(
+              new StringSink( aesString[1] )
+          ) // StreamTransformationFilter      
+  ); // StringSource
+
+  return aesString;
+}
+
 void server(boost::asio::io_service& io_service, unsigned short port)
 {
   udp::socket sock(io_service, udp::endpoint(udp::v4(), port));
@@ -57,26 +108,28 @@ void server(boost::asio::io_service& io_service, unsigned short port)
     size_t length = sock.receive_from(
     boost::asio::buffer(data, max_length), sender_endpoint);
 
-    std::string str_data(data, length);
-    std::istringstream archive_streamIn(str_data);
+    string str_data(data, length);
+    istringstream archive_streamIn(str_data);
     boost::archive::text_iarchive archive(archive_streamIn);
 
     engine_event e;
     archive >> e;
-    std::ostringstream archive_stream;
+    ostringstream archive_stream;
+    ostringstream archive_streamOut;
     switch(e.type){
       case engine_event::LOOK:{
         engine_event r;
-      std::string *finalList = new std::string[2];
+        engine_event p;
+      string *finalList = new string[2];
       int nRemote = e.i_data["CHALLENGE"];
-      std::string pubStringRemote = e.s_data["PUB"];
-      std::string affectationReq = e.s_data["AFFECTATION"];
+      string pubStringRemote = e.s_data["PUB"];
+      string affectationReq = e.s_data["AFFECTATION"];
       /*Traitement de la requete */
       finalList = traitement_look(affectationReq);
-      std::string hashStatList = finalList[0];
-      std::cout << hashStatList << std::endl;
-      std::string nomList = finalList[1];
-      std::cout << nomList << std::endl;
+      string hashStatList = finalList[0];
+      cout << hashStatList << endl;
+      string nomList = finalList[1];
+      cout << nomList << endl;
 
       if (!hashStatList.empty() || hashStatList != "")
       {
@@ -86,10 +139,10 @@ void server(boost::asio::io_service& io_service, unsigned short port)
         r.s_data["HSTATUT"] = hashStatList;
 
           boost::archive::text_oarchive archive(archive_stream);
-              archive << r;
-          std::string outbound_data = archive_stream.str();
+          archive << r;
+          string outbound_data = archive_stream.str();
 
-          std::string pubRemote;
+          string pubRemote;
           StringSource ss(pubStringRemote, true,
             new Base64Decoder(
               new StringSink(pubRemote)
@@ -99,9 +152,36 @@ void server(boost::asio::io_service& io_service, unsigned short port)
 
           RSA::PublicKey publicRemoteKey;
           publicRemoteKey.Load(ss2);
-          std::cout << "Message reponse avant chiffrement avec la cle publique de frontale1 :\n\n" << outbound_data << "\n\n";
-          const std::string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
-          std::cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
+          cout << "Message reponse avant chiffrement avec la cle publique de frontale1 :\n\n" << outbound_data << "\n\n";
+
+          AutoSeededRandomPool prng;
+
+          SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+          prng.GenerateBlock( key, key.size() );
+
+          byte iv[ AES::BLOCKSIZE ];
+          prng.GenerateBlock( iv, sizeof(iv) );
+
+          string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+          p.type = engine_event::SECRET;
+          p.s_data["CIPHER"] = cipher_data;
+
+          string * aesKey = new string[2];
+          aesKey = aesKeyToS(key, iv);
+
+          string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+          string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+
+          p.s_data["KEY"] = aesKey_encoded;
+          p.s_data["IV"] = aesIv_encoded;
+
+          boost::archive::text_oarchive archiveOut(archive_streamOut);
+          archiveOut << p;
+          const string &data_encoded = archive_streamOut.str();
+
+          //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+          cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
           sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
           //sendTor(outbound_data);
         }
@@ -121,7 +201,7 @@ int main(int argc, char* argv[])
   {
     if (argc != 2)
     {
-      std::cerr << "Usage: blocking_udp_echo_server <port>\n";
+      cerr << "Usage: blocking_udp_echo_server <port>\n";
       return 1;
     }
 
@@ -130,9 +210,9 @@ int main(int argc, char* argv[])
     using namespace std; // For atoi.
     server(io_service, atoi(argv[1]));
   }
-  catch (std::exception& e)
+  catch (exception& e)
   {
-    std::cerr << "Exception: " << e.what() << "\n";
+    cerr << "Exception: " << e.what() << "\n";
   }
 
   return 0;

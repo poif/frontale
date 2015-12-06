@@ -40,6 +40,7 @@ public:
 		ANSWER,
 		PUSH,
 		PULL,
+		SECRET,
 
 	};
 
