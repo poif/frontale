@@ -79,7 +79,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				cpt_resultat++;
 				cpt_element=0;
 
-				while(resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
+				while(cpt_element < 20 && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
 				{
 					hash_recu[cpt_element]=resultat[cpt_resultat];
 					cpt_resultat++;
@@ -103,6 +103,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				}
 			}while(resultat[cpt_resultat] != '\0');
 			m_resultat[cpt_name]='\0';
+			m_resultat[strlen(m_resultat)-1]='\0';
 		}
 
 		else if (strcmp(m_option,"-e") ==0)
