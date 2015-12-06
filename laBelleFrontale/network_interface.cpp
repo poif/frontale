@@ -600,7 +600,7 @@ string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
 
 }
 
-string* network_interface::send_look(string& affectation){
+string network_interface::send_look(string& affectation){
 	engine_event e;
 	engine_event r;
 	//boost::asio::buffer network_buffer;
@@ -608,7 +608,8 @@ string* network_interface::send_look(string& affectation){
 	string pubEncoded;
 	int challN = 0;
 
-	string * showRep = new string[2];
+	//string * showRep = new string[2];
+	string showRep = "";
 
 	e.type = engine_event::LOOK;
 	/* choisir nombre entier grand */
@@ -618,7 +619,7 @@ string* network_interface::send_look(string& affectation){
 	e.i_data["CHALLENGE"] = n;
 
 	pubEncoded = Pub_toB64string();
-
+	
 	e.s_data["PUB"]=pubEncoded;
 	e.s_data["AFFECTATION"]=affectation;
 
@@ -629,9 +630,9 @@ string* network_interface::send_look(string& affectation){
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
 
-	//string str_data = sendUDP(outbound_data, host_rem, port_rem);
+	string str_data = sendUDP(outbound_data, host_rem, port_rem);
 
-	string str_data(&network_buffer[0], network_buffer.size());
+	//string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_rsa(str_data);
 	istringstream archive_streamIn(data_clear);
 	boost::archive::text_iarchive archiveIn(archive_streamIn);
@@ -644,8 +645,17 @@ string* network_interface::send_look(string& affectation){
 		if (challN%n == 0){
 			if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
 				if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
-					showRep[0] = r.s_data["NOM"];
-					showRep[1] = r.s_data["HSTATUT"];
+					istringstream issNom(r.s_data["NOM"]);
+					istringstream issHstatut(r.s_data["HSTATUT"]);
+					string nom;
+					string hstatut; 
+					while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
+					{ 
+					    showRep += nom + "*" + hstatut + "*";
+					}
+					showRep.erase(showRep.size() - 1, 1);
+					//showRep[0] = r.s_data["NOM"];
+					//showRep[1] = r.s_data["HSTATUT"];
 					return showRep;
 				}
 			}
