@@ -70,9 +70,9 @@ void reception::procReception(){
 
             triq = const_cast <char *>((showRep[0] + sep + showRep[1]).data());
             triq[triqlength] = '\0';
-            cout << triqlength << endl;
+            /*cout << triqlength << endl;
             cout << strlen(triq) << endl;
-            cout.write(triq, triqlength);
+            cout.write(triq, triqlength);*/
             
             req.tri(triq);
             
@@ -83,14 +83,13 @@ void reception::procReception(){
             msg2.entete();
             msg2.chiffrement(key);
 
-            string toto = retour.toStdString();
-            cout << toto << endl;
+            //string toto = retour.toStdString();
+            //cout << toto << endl;
 
             client cli;
             cli.socBind();
             cli.emission(msg2.getChiffre());
  
-            cout << "tata" << endl;
         }
 
 }

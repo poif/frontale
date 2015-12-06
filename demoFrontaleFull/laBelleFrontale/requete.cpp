@@ -66,10 +66,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 		{
 			SHA1_Update(&ctx,m_statut,strlen(m_statut));
 			SHA1_Final((unsigned char*)hash,&ctx);
-
-			printf("\n\nhash : %s\n%d\n", hash, SHA_DIGEST_LENGTH);
 			
-
 			do //on parcours toute la requete recu
 			{
 				while(resultat[cpt_resultat] != sep) //on récupère le nom
@@ -90,14 +87,12 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				}
 				//hash_recu[cpt_element]='\0';
 				hash_recu[SHA_DIGEST_LENGTH] = '\0';
-				printf("hash recu : %s\n", hash_recu);
+
 				cpt_element=0;
 				cpt_resultat++;
 
-				printf("cpt %d\n", cpt_resultat);
 				if(strcmp(hash,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
-					printf("hello\n");
 
 					while(name[cpt_element] != '\0')
 					{
@@ -111,7 +106,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 					cpt_name++;
 					cpt_element=0;
 				}
-				printf("cpt %d\n", cpt_resultat);
+
 			}while(resultat[cpt_resultat] != '\0');
 			m_resultat[cpt_name]='\0';
 		}
@@ -359,7 +354,6 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-
                         printf("Requete malformée\n");
                         return 0;
                 }
@@ -377,7 +371,6 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-
                         printf("Requete malformée\n");
                         return 0;
                 }
@@ -395,7 +388,6 @@ int Requete::decoupage(const char * chaine)
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
-
                         printf("Requete malformée\n");
                         return 0;
                 }
