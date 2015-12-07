@@ -8,18 +8,37 @@
 #include "traitement.h"
 using namespace std;
 
-string * traitement_look(string& affectation) {
+string hashString(char * to_hash){
+	string sHash;
+	char* hash=(char*)malloc(SHA_DIGEST_LENGTH*sizeof(char));
+	SHA_CTX ctx;
+    SHA1_Init(&ctx);
+    SHA1_Update(&ctx, to_hash, strlen(to_hash));
+    SHA1_Final((unsigned char*)hash, &ctx);
+    sHash = hash;
+    free(hash);
+    return sHash;
+}
+
+//////////////////////////
+/******///client///******/
+//////////////////////////
+
+/////////////////////////
+/*******REQUETES********/
+/////////////////////////
+
+string *traitement_look(string& affectation) {
+  //envoi affectation, récupération hash statut + nom
   string nom;
-  string to_send = "1*none*" + affectation + "*none*none*none*none*EOF";
-  //envoi	  
   char* statut;
-  char* hash=(char*)malloc(SHA_DIGEST_LENGTH*sizeof(char));
   string readAffectation;
   string hashlist;
   string hashS;
   string *finalList = new string[2];
   string listnom;
   string fichier = "test.txt";
+  //envoyer to_send
   /**remplacement pour test**/
   /*************************************/
   ifstream file(fichier.c_str(), ios::in); 
@@ -33,19 +52,14 @@ string * traitement_look(string& affectation) {
             readAffectation =string(strtok(NULL," "));
             if (affectation == readAffectation){  //line : nom statut affectation
       /**Recuperation des statuts des clients et hashage***/
-              SHA_CTX ctx;
-              SHA1_Init(&ctx);
-              SHA1_Update(&ctx, statut, strlen(statut));
-              SHA1_Final((unsigned char*)hash, &ctx);
-              hashS=string(hash,SHA_DIGEST_LENGTH);
+              hashS=hashString(statut);
               hashlist += hashS; 
-              hashlist += "*";
+              hashlist += "\n";
               listnom  += nom; 
-              listnom  += "*";
+              listnom  += "\n";
             }
        } 
        file.close();
-       free(hash); 
        finalList[0] = hashlist;
        finalList[1] = listnom;
        return finalList;
@@ -55,16 +69,16 @@ string * traitement_look(string& affectation) {
        exit(EXIT_FAILURE);  
     }               
 }
+
 /***********************************************************/
 
 string traitement_exist(string& status) {
-//retourne juste le nom hashÃ©
+//envoi statut, retourne juste le nom hashe
       string readStatus;
       string hashlist;
       string hashS;
       char *nom;
       string fichier = "test.txt";
-      char *hash=(char*)malloc(sizeof(char)*SHA_DIGEST_LENGTH);
       /**remplacement pour test**/
       /*************************************/
       ifstream file(fichier.c_str(), ios::in);
@@ -77,17 +91,12 @@ string traitement_exist(string& status) {
              readStatus = string(strtok(NULL," "));
              if (status == readStatus){    //line : nom statut affectation
         /**Recuperation du nom des clients et hashage***/
-                SHA_CTX ctx;
-                SHA1_Init(&ctx);
-                SHA1_Update(&ctx, nom, strlen(nom));
-                SHA1_Final((unsigned char*)hash, &ctx);                     
-                hashS=string(hash,SHA_DIGEST_LENGTH);
+                hashS=hashString(nom);
                 hashlist += hashS;
                 hashlist += "\n";
             }
          }
          file.close();
-         free(hash);
          return hashlist;
      }
      else {
@@ -104,7 +113,6 @@ string* traitement_lookrec(string& datatype, string& status) {
       string *finalList = new string[2];
       string readStatus;
       char*nom;
-      char* hash=(char*)malloc(sizeof(char)*SHA_DIGEST_LENGTH);
       string fichier = "test2.txt";
       string readDataType;
       string listRef;
@@ -124,13 +132,8 @@ string* traitement_lookrec(string& datatype, string& status) {
                          readStatus = string(strtok(NULL," "));
                          readDataType=string(strtok(NULL," "));
                          reference=string(strtok(NULL," "));
-                         if (status == readStatus && datatype==readDataType){    //line : nom status datatype rÃ©fÃ©rence
-                         /**Recuperation du nom des clients et hashage***/
-                                SHA_CTX ctx;
-                                SHA1_Init(&ctx);
-                                SHA1_Update(&ctx, nom, strlen(nom));
-                                SHA1_Final((unsigned char*)hash, &ctx);
-                                hashS=string(hash,SHA_DIGEST_LENGTH);
+                         if (status == readStatus && datatype==readDataType){    
+                                hashS=hashString(nom);
                                 listRef += reference;
                                 listRef += "\n";
                                 hashlist+= hashS;
@@ -138,8 +141,6 @@ string* traitement_lookrec(string& datatype, string& status) {
                           }
                   }
                   file.close();
-                  free(hash);
-                  //envoi_frontale(nom) 
                   finalList[0] = listRef;
                   finalList[1] = hashlist;
                   return finalList;
@@ -198,7 +199,6 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
                         //inc groupe
                 }
                 file.close();
-                  //envoi_frontale(nom) 
           }
 
           else {
@@ -207,7 +207,10 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
           }
 }
 
-string req_bdd(string& action, string& statut, string& affectation, vector<string>& groupes_client, string& typeData, string& ref, string& user){
+//fonction de formatage de requete
+string traitement_req_client(string& action, string& statut, string& affectation, vector<string>& groupes_client, string& typeData, string& ref, string& user){
+//pas besoin de traiter par requete a première vue c'est mieux comme ca	
+//fonction de test ou le client/bdd le fait?	
   string to_send = action + "*";
   if (statut == "none")
     to_send +="NULL*";
@@ -227,8 +230,119 @@ string req_bdd(string& action, string& statut, string& affectation, vector<strin
       	to_send += groupes_client[i];
       else 
       	to_send += groupes_client[i] + ";";
-    }
     to_send += "*";
+	}
+  }
+
+  if (typeData == "none")
+    to_send += "NULL*";
+  else 
+    to_send += typeData + "*";
+
+  if (ref == "none")
+    to_send += "NULL*";
+  else 
+    to_send += ref + "*";
+
+  if (user== "none")
+    to_send += "NULL*";
+  else
+    to_send += user + "*";
+
+  to_send += "EOF";
+  return to_send;
+}
+
+/////////////////////////
+/*******REPONSES********/
+/////////////////////////
+
+//retransmission client->frontale1
+string traitement_rep_client(string a_traiter){
+	//on garde la convention ...*EOF
+	char *ca_traiter = (char*)a_traiter.c_str();
+	string action = string(strtok(ca_traiter,"*"));
+	string to_send;
+	int testerror=0;
+	int compteur_error=0;  //juste pour vérifier que la requete document est valide
+	char * token;
+	// // // // // // 
+	if (action == "1"){
+	//RECHERCHE REFERENCE +HASH
+		while ((token = strtok(NULL,"*"))!=NULL && string(token)!="EOF") {
+			//token contient un couple reference;hash
+			if (testerror==0){
+				testerror=1;
+				if (token=="ERROR"){
+					to_send = "ERROR*EOF";
+					//envoi
+					return to_send;
+					exit(EXIT_FAILURE);
+				}
+			}
+			to_send += string(token) + "*";
+		}
+	}
+	// // // // // //
+	else if (action == "2"){
+	//RECUPERATION DOCUMENT
+		while ((token = strtok(NULL,"*"))!="EOF"){
+		//si pas d'erreur, on récupère juste le document en un token
+			if (testerror==0){
+				testerror=1;
+				if (token=="ERROR"){
+					to_send = "ERROR*EOF";
+					//envoi
+					return to_send;
+					exit(EXIT_FAILURE);
+				}
+			}
+			if (compteur_error>0){ //ie on a déja bouclé
+				to_send = "ERROR*EOF";
+				//envoi
+				return to_send;
+				exit(EXIT_FAILURE);
+			}
+			compteur_error++;
+			to_send += string(token);
+		}
+	}
+	else 
+		to_send ="ERROR*";
+	to_send += "EOF";
+	return to_send;
+}
+
+
+
+/***************************************************/
+/////////////////////////
+/*         BDD         */
+/////////////////////////
+
+//formatage requete bdd
+string traitement_req_bdd(string& action, string& statut, string& affectation, vector<string>& groupes_client, string& typeData, string& ref, string& user){
+  string to_send = action + "*";
+  if (statut == "none")
+    to_send +="NULL*";
+  else 
+    to_send += statut + "*";
+
+  if (affectation == "none")
+    to_send += "NULL*";
+  else 
+    to_send += affectation + "*"; 
+
+  if (groupes_client[0] == "none")
+    to_send += "NULL*";
+  else {
+    for (int i = 0; i < groupes_client.size(); i++){
+      if (i==groupes_client.size()-1)
+      	to_send += groupes_client[i];
+      else 
+      	to_send += groupes_client[i] + ";";
+    to_send += "*";
+	}
   }
 
   if (typeData == "none")
@@ -248,10 +362,66 @@ string req_bdd(string& action, string& statut, string& affectation, vector<strin
 
   to_send += "EOF";
 
- // cout << "chaine   " << to_send<< endl;
-  //envoi
   return to_send;
-  //void?
+
 }
 
+
+
+/***********************************/
+//retransmission bdd -> frontale 1
+string traitement_rep_bdd(string a_traiter){
+	//on garde la convention ...*EOF
+	char *ca_traiter = (char*)a_traiter.c_str();
+	string action = string(strtok(ca_traiter,"*"));
+	string to_send;
+	int testerror=0;
+	int compteur_error=0;  //juste pour vérifier que la requete document est valide
+	char * token;
+	// // // // // // 
+	if (action == "300"){
+	//RECHERCHE REFERENCE +HASH
+		while ((token = strtok(NULL,"*"))!=NULL && string(token)!="EOF") {
+			//token contient un couple reference;hash
+			if (testerror==0){
+				testerror=1;
+				if (token=="ERROR"){
+					to_send = "ERROR*EOF";
+					//envoi
+					return to_send;
+					exit(EXIT_FAILURE);
+				}
+			}
+			to_send += string(token) + "*";
+		}
+	}
+	// // // // // //
+	else if (action == "301"){
+	//RECUPERATION DOCUMENT
+		while ((token = strtok(NULL,"*"))!="EOF"){
+		//si pas d'erreur, on récupère juste le document en un token
+			if (testerror==0){
+				testerror=1;
+				if (token=="ERROR"){
+					to_send = "ERROR*EOF";
+					//envoi
+					return to_send;
+					exit(EXIT_FAILURE);
+				}
+			}
+			if (compteur_error>0){ //ie on a déja bouclé
+				to_send = "ERROR*EOF";
+				//envoi
+				return to_send;
+				exit(EXIT_FAILURE);
+			}
+			compteur_error++;
+			to_send += string(token);
+		}
+	}
+	else
+		to_send = "ERROR*";
+	to_send += "EOF";
+	return to_send;
+}
 
