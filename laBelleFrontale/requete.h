@@ -10,13 +10,12 @@ class Requete
 	char m_action[64];
 	char m_option[64];
 	char m_parametre[64];
+	char m_nom[64];
 	char m_groupe[64];
 	char m_cle[256];
 
 	char m_requete[256];
 	char m_resultat[256];
-        bool pourBdd;
-
 
 	public:
 
@@ -30,7 +29,6 @@ class Requete
 	char* getCle();
 	char* getRequete();
 	char* getResultat();
-	bool getPourBdd();
 	int test_char(char caractere);
 	int decoupage(const char * chaine);
 	void affichage();

@@ -12,6 +12,7 @@ Requete::Requete()
 	m_action[0] = '\0';
 	m_option[0] = '\0';
 	m_parametre[0] = '\0';
+	m_nom[0] = '\0';
 	m_groupe[0] = '\0';
 	m_cle[0] = '\0';
 
@@ -39,8 +40,6 @@ char* Requete::getRequete()
 {	return m_requete;}
 char* Requete::getResultat()
 {	return m_resultat;}
-bool Requete::getPourBdd()
-{	return pourBdd;}
 
 //Methods
 
@@ -81,7 +80,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				cpt_resultat++;
 				cpt_element=0;
 
-				while(cpt_element < 20 && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
+				while(resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom recu depuis la requete
 				{
 					hash_recu[cpt_element]=resultat[cpt_resultat];
 					cpt_resultat++;
@@ -105,7 +104,6 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				}
 			}while(resultat[cpt_resultat] != '\0');
 			m_resultat[cpt_name]='\0';
-			m_resultat[strlen(m_resultat)-1]='\0';
 		}
 
 		else if (strcmp(m_option,"-e") ==0)
@@ -224,10 +222,12 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	int i=0;
 	int j=0;
 	char sep = '*';
+	SHA_CTX ctx;
+        char hash[SHA_DIGEST_LENGTH];
+        SHA1_Init(&ctx); 		//Initialisation pour calculer le hash
 
 	if(strcmp(m_action,"search") == 0) // Fonction recherche
 	{
-		pourBdd = false;
 		if(strcmp(m_option,"-n") == 0) // Si on cherche un nom
 		{
 		while(m_affectation[i] != '\0')
@@ -270,10 +270,12 @@ void Requete::construction() //construit la requete suivant action, option et pa
 		else
 			printf("option inconnue\n");
 	}
-	else if(strcmp(m_action,"insert") == 0 || strcmp(m_action,"delete") == 0) // Insertion d'une donnée dans la bdd
+	else if(strcmp(m_action,"insert") == 0) // Cas d'ajout d'une donneé dans la bdd
 	{
-		pourBdd = true;
-		m_requete[0] = '3';  // Premiere partie : l'action (ici 302)
+		SHA1_Update(&ctx,m_nom,strlen(m_nom));
+	        SHA1_Final((unsigned char*)hash,&ctx); //calcul du hash et stockage dans hash
+
+		m_requete[0] = '3';  // Premiere partie : l'action (insert : 302)
 		m_requete[1] = '0';
 		m_requete[2] = '2';
 		m_requete[3] = '*';
@@ -326,11 +328,60 @@ void Requete::construction() //construit la requete suivant action, option et pa
 			j++;
 		}
 		m_requete[i] = sep; // On met un séparateur
-		m_requete[i+1] = 'E';
-		m_requete[i+2] = 'O';	// 7e partie : EOF
-		m_requete[i+3] = 'F';
-		m_requete[i+4] = '\0'; // Fin de la requete
+		i++;
 		j=0;
+
+		while(hash[j] != '\0')
+		{
+			m_requete[i] = hash[j]; // 7e partie : le hash du nom
+			i++;
+			j++;
+		}
+		m_requete[i] = sep;
+		i++;
+		j=0;
+
+		m_requete[i] = 'E';
+		m_requete[i+1] = 'O';	// 8e et dernière partie : EOF
+		m_requete[i+2] = 'F';
+		m_requete[i+3] = '\0'; // Fin de la requete
+	}
+
+	else if(strcmp(m_action,"delete")==0)
+	{
+                m_requete[0] = '3';  // Premiere partie : l'action (delete : 303)
+                m_requete[1] = '0';
+                m_requete[2] = '3';
+                m_requete[3] = '*';
+		i=4;
+
+		while(m_parametre[j] != '\0')
+		{
+			m_requete[i] = m_parametre[j];	//2e partie : la référence (stocker dans m_parametre)
+			i++;
+			j++;
+		}
+		m_requete[i] = sep;
+		i++;
+		j=0;
+
+		SHA1_Update(&ctx, m_nom, strlen(m_nom));
+		SHA1_Final((unsigned char*)hash, &ctx);	//hash reçoit le hash du nom
+
+		while(hash[j] != '\0')
+		{
+			m_requete[i] = hash[j]; // 3e partie : le hash du nom.
+			i++;
+			j++;
+		}
+		m_requete[i] = sep;
+		i++;
+		j=0;
+
+		m_requete[i] = 'E';
+		m_requete[i+1] = 'O';
+		m_requete[i+2] = 'F';
+		m_requete[i+3] = '\0'; //3e partie : EOF
 	}
 
 	else
@@ -343,7 +394,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 void Requete::affichage() //Fonction inutile dans la frontale (je l'utilise pour mes tests)
 {
-	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_groupe,m_cle);
+	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n nom : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_nom,m_groupe,m_cle);
 }
 
 /*===========================================================================================
@@ -453,6 +504,26 @@ int Requete::decoupage(const char * chaine)
         m_parametre[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
+
+	if(strcmp(m_action,"insert") == 0 || strcmp(m_action,"delete") == 0) // Si c'est une requête pour la bdd on a un champ en plus : le nom de la personne
+	{
+		while(chaine[cpt_chaine] != sep)
+		{
+			test = test_char(chaine[cpt_chaine]);
+			if(test == 0)
+			{
+				printf("Requete malformée\n");
+				return 0;
+			}
+
+			m_nom[cpt_element] = chaine[cpt_chaine];
+			cpt_chaine ++;
+			cpt_element ++;
+		}
+		m_nom[cpt_element] = '\0';
+		cpt_element = 0;
+		cpt_chaine++;
+	}
 
 	while(chaine[cpt_chaine] != sep)
         {
