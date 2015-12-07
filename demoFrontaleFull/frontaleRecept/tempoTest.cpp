@@ -117,77 +117,226 @@ void server(boost::asio::io_service& io_service, unsigned short port)
     ostringstream archive_stream;
     ostringstream archive_streamOut;
     switch(e.type){
-      case engine_event::LOOK:{
-        engine_event r;
-        engine_event p;
-      string *finalList = new string[2];
+          case engine_event::LOOK:{
+            engine_event r;
+            engine_event p;
+          string *finalList = new string[2];
+          int nRemote = e.i_data["CHALLENGE"];
+          string pubStringRemote = e.s_data["PUB"];
+          string affectationReq = e.s_data["AFFECTATION"];
+          /*Traitement de la requete */
+          finalList = traitement_look(affectationReq);
+          string hashStatList = finalList[0];
+          cout << hashStatList << endl;
+          string nomList = finalList[1];
+          cout << nomList << endl;
+
+          if (!hashStatList.empty() || hashStatList != "")
+          {
+            r.type = engine_event::SHOW;
+            r.i_data["CHALL"] = nRemote;
+            r.s_data["NOM"] = nomList;
+            r.s_data["HSTATUT"] = hashStatList;
+
+              boost::archive::text_oarchive archive(archive_stream);
+              archive << r;
+              string outbound_data = archive_stream.str();
+
+              string pubRemote;
+              StringSource ss(pubStringRemote, true,
+                new Base64Decoder(
+                  new StringSink(pubRemote)
+                ) // Base64Decoder
+              ); // StringSource
+              StringSource ss2(pubRemote, true /*pumpAll*/);
+
+              RSA::PublicKey publicRemoteKey;
+              publicRemoteKey.Load(ss2);
+              cout << "Message reponse avant chiffrement avec la cle publique de frontale1 :\n\n" << outbound_data << "\n\n";
+
+              AutoSeededRandomPool prng;
+
+              SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+              prng.GenerateBlock( key, key.size() );
+
+              byte iv[ AES::BLOCKSIZE ];
+              prng.GenerateBlock( iv, sizeof(iv) );
+
+              string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+              p.type = engine_event::SECRET;
+              p.s_data["CIPHER"] = cipher_data;
+
+              string * aesKey = new string[2];
+              aesKey = aesKeyToS(key, iv);
+
+              string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+              string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+
+              p.s_data["KEY"] = aesKey_encoded;
+              p.s_data["IV"] = aesIv_encoded;
+
+              boost::archive::text_oarchive archiveOut(archive_streamOut);
+              archiveOut << p;
+              const string &data_encoded = archive_streamOut.str();
+
+              //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+              cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
+              sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
+              //sendTor(outbound_data);
+            }
+            
+            break;
+        }
+
+    case engine_event::EXIST:{
+            engine_event r;
+            engine_event p;
       int nRemote = e.i_data["CHALLENGE"];
       string pubStringRemote = e.s_data["PUB"];
-      string affectationReq = e.s_data["AFFECTATION"];
+      string statutReq = e.s_data["STATUT"];
       /*Traitement de la requete */
-      finalList = traitement_look(affectationReq);
-      string hashStatList = finalList[0];
-      cout << hashStatList << endl;
-      string nomList = finalList[1];
-      cout << nomList << endl;
+      string hashNomList = traitement_exist(statutReq);
 
-      if (!hashStatList.empty() || hashStatList != "")
+      if (!hashNomList.empty() || hashNomList != "")
       {
-        r.type = engine_event::SHOW;
+
+              r.type = engine_event::ANSWER;
+              r.i_data["CHALL"] = nRemote;
+              r.s_data["HNOM"] = hashNomList;
+
+              boost::archive::text_oarchive archive(archive_stream);
+              archive << r;
+              string outbound_data = archive_stream.str();
+
+              string pubRemote;
+              StringSource ss(pubStringRemote, true,
+                new Base64Decoder(
+                  new StringSink(pubRemote)
+                ) // Base64Decoder
+              ); // StringSource
+              StringSource ss2(pubRemote, true /*pumpAll*/);
+
+              RSA::PublicKey publicRemoteKey;
+              publicRemoteKey.Load(ss2);
+              cout << "Message reponse avant chiffrement avec la cle publique de frontale1 :\n\n" << outbound_data << "\n\n";
+
+              AutoSeededRandomPool prng;
+
+              SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+              prng.GenerateBlock( key, key.size() );
+
+              byte iv[ AES::BLOCKSIZE ];
+              prng.GenerateBlock( iv, sizeof(iv) );
+
+              string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+              p.type = engine_event::SECRET;
+              p.s_data["CIPHER"] = cipher_data;
+
+              string * aesKey = new string[2];
+              aesKey = aesKeyToS(key, iv);
+
+              string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+              string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+
+              p.s_data["KEY"] = aesKey_encoded;
+              p.s_data["IV"] = aesIv_encoded;
+
+              boost::archive::text_oarchive archiveOut(archive_streamOut);
+              archiveOut << p;
+              const string &data_encoded = archive_streamOut.str();
+
+              //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+              cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
+              sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
+              //sendTor(outbound_data);
+            }
+      
+      break;
+    }
+    case engine_event::LOOKREC:{
+      engine_event r;
+      engine_event p;
+      int nRemote = e.i_data["CHALLENGE"];
+      string pubStringRemote = e.s_data["PUB"];
+      string dataType = e.s_data["TYPE"];
+      string statutReq = e.s_data["STATUT"];
+      /*Traitement de la requete */
+      string *finalList = new string[2];
+      finalList = traitement_lookrec(dataType, statutReq);
+      string reference = finalList[0];
+      string hashNomList = finalList[1];
+
+
+      if (!hashNomList.empty() || hashNomList != "")
+      {
+        r.type = engine_event::SHOWREC;
         r.i_data["CHALL"] = nRemote;
-        r.s_data["NOM"] = nomList;
-        r.s_data["HSTATUT"] = hashStatList;
+        save_nRemote = nRemote;
 
-          boost::archive::text_oarchive archive(archive_stream);
-          archive << r;
-          string outbound_data = archive_stream.str();
+        /* choisir nombre entier grand */
+        /* TODO : prendre un random < 100.000 à passer dans bigger_prime */
+        int n = bigger_prime(25000);
+        r.i_data["CHALL2"] = n;
+        save_n = n;
 
-          string pubRemote;
-          StringSource ss(pubStringRemote, true,
-            new Base64Decoder(
-              new StringSink(pubRemote)
-            ) // Base64Decoder
-          ); // StringSource
-          StringSource ss2(pubRemote, true /*pumpAll*/);
+        r.s_data["REFERENCE"] = reference;
+        r.s_data["HNOM"] = hashNomList;
 
-          RSA::PublicKey publicRemoteKey;
-          publicRemoteKey.Load(ss2);
-          cout << "Message reponse avant chiffrement avec la cle publique de frontale1 :\n\n" << outbound_data << "\n\n";
+        string pubEncoded = Pub_toB64string();
+        r.s_data["PUBKEY"] = pubEncoded;
 
-          AutoSeededRandomPool prng;
+        boost::archive::text_oarchive archive(archive_stream);
+            archive << r;
+        string outbound_data = archive_stream.str();
 
-          SecByteBlock key(AES::DEFAULT_KEYLENGTH);
-          prng.GenerateBlock( key, key.size() );
+        string pubRemote;
+        StringSource ss(pubStringRemote, true,
+          new Base64Decoder(
+            new StringSink(pubRemote)
+          ) // Base64Decoder
+        ); // StringSource
+        StringSource ss2(pubRemote, true /*pumpAll*/);
 
-          byte iv[ AES::BLOCKSIZE ];
-          prng.GenerateBlock( iv, sizeof(iv) );
+        RSA::PublicKey publicRemoteKey;
+        publicRemoteKey.Load(ss2);
 
-          string cipher_data = encrypto_aes(key, iv, outbound_data);
 
-          p.type = engine_event::SECRET;
-          p.s_data["CIPHER"] = cipher_data;
+              AutoSeededRandomPool prng;
 
-          string * aesKey = new string[2];
-          aesKey = aesKeyToS(key, iv);
+              SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+              prng.GenerateBlock( key, key.size() );
 
-          string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
-          string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+              byte iv[ AES::BLOCKSIZE ];
+              prng.GenerateBlock( iv, sizeof(iv) );
 
-          p.s_data["KEY"] = aesKey_encoded;
-          p.s_data["IV"] = aesIv_encoded;
+              string cipher_data = encrypto_aes(key, iv, outbound_data);
 
-          boost::archive::text_oarchive archiveOut(archive_streamOut);
-          archiveOut << p;
-          const string &data_encoded = archive_streamOut.str();
+              p.type = engine_event::SECRET;
+              p.s_data["CIPHER"] = cipher_data;
 
-          //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
-          cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
-          sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
-          //sendTor(outbound_data);
-        }
-        
-        break;
-      }
+              string * aesKey = new string[2];
+              aesKey = aesKeyToS(key, iv);
+
+              string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+              string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+
+              p.s_data["KEY"] = aesKey_encoded;
+              p.s_data["IV"] = aesIv_encoded;
+
+              boost::archive::text_oarchive archiveOut(archive_streamOut);
+              archiveOut << p;
+              const string &data_encoded = archive_streamOut.str();
+
+              //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+              cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
+              sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
+              //sendTor(outbound_data);
+            }
+      
+      break;
+    }
     }
 
 

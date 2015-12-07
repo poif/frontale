@@ -114,7 +114,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 		else if (strcmp(m_option,"-e") ==0)
 		{
 			SHA1_Update(&ctx,m_parametre,strlen(m_parametre));
-                        SHA1_Final((unsigned char*)hash,&ctx);
+                       	SHA1_Final((unsigned char*)hash,&ctx);
 
 			do
 			{

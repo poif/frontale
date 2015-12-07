@@ -272,13 +272,13 @@ void network_interface::get_config_data(){
 
 	try{
 
-	s_udp_in->async_receive_from(	boost::asio::buffer(network_buffer, BUFFER_SIZE), 
+	/*s_udp_in->async_receive_from(	boost::asio::buffer(network_buffer, BUFFER_SIZE), 
 									udp_remote_endpoint, 
 									boost::bind(&network_interface::UDP_async_read, 
 												this, 
 												boost::asio::placeholders::error,
 												boost::asio::placeholders::bytes_transferred)
-								);
+								);*/
 	}catch(exception&e){
 		cerr << e.what() << endl;
 	}catch(...){
@@ -303,7 +303,7 @@ void network_interface::frame(){
  *  we only accept messages from registered machines
  *  asynchronous function
  */
-void network_interface::UDP_async_read(const boost::system::error_code& e, size_t){
+void network_interface::tor_recieve(const boost::system::error_code& e, size_t taille, string str_data){
 
 	// non utilisé en attendant le module reseau
 
@@ -314,7 +314,7 @@ void network_interface::UDP_async_read(const boost::system::error_code& e, size_
 	// let's deserialize the message
 
 
-	string str_data(&network_buffer[0], network_buffer.size());
+	//string str_data(&network_buffer[0], network_buffer.size());
 
 	char buffer[26];
 	string str ("Test string...");
@@ -403,46 +403,75 @@ void network_interface::process_received_events(engine_event& e){
 	// we just have received e from the network
 
 	ostringstream archive_stream;
+	ostringstream archive_streamOut;
+	ostringstream archive_streamPckt;
 	switch(e.type){
 		case engine_event::LOOK:{
-			engine_event r;
-			string *finalList = new string[2];
-			int nRemote = e.i_data["CHALLENGE"];
-			string pubStringRemote = e.s_data["PUB"];
-			string affectationReq = e.s_data["AFFECTATION"];
-			/*Traitement de la requete */
-			finalList = traitement_look(affectationReq);
-			string hashStatList = finalList[0];
-			string nomList = finalList[1];
 
+		      engine_event r;
+		      engine_event p;
+		      string *finalList = new string[2];
+		      int nRemote = e.i_data["CHALLENGE"];
+		      string pubStringRemote = e.s_data["PUB"];
+		      string affectationReq = e.s_data["AFFECTATION"];
 
-			if (!hashStatList.empty() || hashStatList != "")
-			{
-				r.type = engine_event::SHOW;
-				r.i_data["CHALL"] = nRemote;
-				r.s_data["NOM"] = nomList;
-				r.s_data["HSTATUT"] = hashStatList;
+		      /*Traitement de la requete */
+		      finalList = traitement_look(affectationReq);
+		      string hashStatList = finalList[0];
+		      string nomList = finalList[1];
 
-				boost::archive::text_oarchive archive(archive_stream);
-			    	archive << r;
-				string outbound_data = archive_stream.str();
+		      if (!hashStatList.empty() || hashStatList != "")
+		      {
+			        r.type = engine_event::SHOW;
+			        r.i_data["CHALL"] = nRemote;
+			        r.s_data["NOM"] = nomList;
+			        r.s_data["HSTATUT"] = hashStatList;
 
-				string pubRemote;
-				StringSource ss(pubStringRemote, true,
-					new Base64Decoder(
-						new StringSink(pubRemote)
-					) // Base64Decoder
-				); // StringSource
-				StringSource ss2(pubRemote, true /*pumpAll*/);
+			        boost::archive::text_oarchive archive(archive_stream);
+			        archive << r;
+			        string outbound_data = archive_stream.str();
 
-				RSA::PublicKey publicRemoteKey;
-				publicRemoteKey.Load(ss2);
-				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+			        string pubRemote;
+			        StringSource ss(pubStringRemote, true,
+			           new Base64Decoder(
+			             new StringSink(pubRemote)
+			           ) // Base64Decoder
+			        ); // StringSource
+			        StringSource ss2(pubRemote, true /*pumpAll*/);
 
-				
-				//sendTor(outbound_data);
-			}
-			
+			        RSA::PublicKey publicRemoteKey;
+			        publicRemoteKey.Load(ss2);
+			        AutoSeededRandomPool prng;
+
+			        SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+			        prng.GenerateBlock( key, key.size() );
+
+			        byte iv[ AES::BLOCKSIZE ];
+			        prng.GenerateBlock( iv, sizeof(iv) );
+
+			        string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+			        p.type = engine_event::SECRET;
+			        p.s_data["CIPHER"] = cipher_data;
+
+			        string * aesKey = new string[2];
+			        aesKey = aesKeyToS(key, iv);
+
+			        string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+			        string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+
+			        p.s_data["KEY"] = aesKey_encoded;
+			        p.s_data["IV"] = aesIv_encoded;
+
+			        boost::archive::text_oarchive archiveOut(archive_streamOut);
+			        archiveOut << p;
+			        const string &data_encoded = archive_streamOut.str();
+
+			        //cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
+			        //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
+			        //sendTor(outbound_data);
+		        	}
+		        
 			break;
 		}
 		case engine_event::EXIST:{
@@ -483,6 +512,7 @@ void network_interface::process_received_events(engine_event& e){
 		}
 		case engine_event::LOOKREC:{
 			engine_event r;
+			engine_event p;
 			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
@@ -527,12 +557,36 @@ void network_interface::process_received_events(engine_event& e){
 				RSA::PublicKey publicRemoteKey;
 				publicRemoteKey.Load(ss2);
 
-				//save_publicRemoteKey.Load(ss2);
+			           AutoSeededRandomPool prng;
 
-				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+			           SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+			           prng.GenerateBlock( key, key.size() );
 
-				
-				//sendTor(outbound_data);
+			           byte iv[ AES::BLOCKSIZE ];
+			           prng.GenerateBlock( iv, sizeof(iv) );
+
+			           string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+			           p.type = engine_event::SECRET;
+			           p.s_data["CIPHER"] = cipher_data;
+
+			           string * aesKey = new string[2];
+			           aesKey = aesKeyToS(key, iv);
+
+			           string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+			           string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+
+			           p.s_data["KEY"] = aesKey_encoded;
+			           p.s_data["IV"] = aesIv_encoded;
+
+			           boost::archive::text_oarchive archiveOut(archive_streamOut);
+			           archiveOut << p;
+			           const string &data_encoded = archive_streamOut.str();
+
+			           //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+			           cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
+			           //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
+			           //sendTor(outbound_data);
 			}
 			
 			break;
@@ -709,6 +763,7 @@ string network_interface::send_look(string& affectation){
 string network_interface::send_exist(string& statut){
 	engine_event e;
 	engine_event r;
+	engine_event p;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::EXIST;
 	ostringstream archive_stream;
@@ -733,18 +788,47 @@ string network_interface::send_exist(string& statut){
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
 
-	string str_data(&network_buffer[0], network_buffer.size());
-	string data_clear = decrypto_rsa(str_data);
-	istringstream archive_streamIn(data_clear);
+	string str_data = sendUDP(outbound_data, host_rem, port_rem);
+
+	//string str_data(&network_buffer[0], network_buffer.size());
+	//string data_clear = decrypto_rsa(str_data);
+	istringstream archive_streamIn(str_data);
 	boost::archive::text_iarchive archiveIn(archive_streamIn);
 
-	archiveIn >> r;
+	archiveIn >> p;
 
-	if (r.type == engine_event::ANSWER){
-		challN = r.i_data["CHALL"];
-		if (challN%n == 0){
-			if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
-				return r.s_data["HNOM"];
+	if(p.type == engine_event::SECRET){
+
+
+		string aesKey = decrypto_rsa(p.s_data["KEY"]);
+		string aesIv = decrypto_rsa(p.s_data["IV"]);
+
+		byte * iv = sToB(aesIv);
+		SecByteBlock key = sToSbb(aesKey);
+
+		string data_clear = decrypto_aes(key, iv, p.s_data["CIPHER"]);
+
+		
+		data_clear.erase(0, 16);
+		data_clear = "22 serialization" + data_clear;
+		cout << data_clear << endl;
+
+		istringstream archive_streamPckt(data_clear);
+
+		boost::archive::text_iarchive archivePckt(archive_streamPckt);
+
+		archivePckt >> r;
+
+		if (r.type == engine_event::ANSWER){
+			challN = r.i_data["CHALL"];
+			if (challN%n == 0){
+				if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
+					string hnom = r.s_data["HNOM"];
+					hnom.erase(hnom.size() - 1, 1);
+					cout << "hnom : " << hnom << endl;
+
+					return hnom;
+				}
 			}
 		}
 	}
@@ -755,6 +839,7 @@ string network_interface::send_exist(string& statut){
 void* network_interface::send_lookrec(string& dataType, string& statut){
 	engine_event e;
 	engine_event r;
+	engine_event p;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::LOOKREC;
 	ostringstream archive_stream;
@@ -784,38 +869,71 @@ void* network_interface::send_lookrec(string& dataType, string& statut){
 
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
+	string str_data = sendUDP(outbound_data, host_rem, port_rem);
 
-	string str_data(&network_buffer[0], network_buffer.size());
-	string data_clear = decrypto_rsa(str_data);
-	istringstream archive_streamIn(data_clear);
+	//string str_data(&network_buffer[0], network_buffer.size());
+	//string data_clear = decrypto_rsa(str_data);
+	istringstream archive_streamIn(str_data);
 	boost::archive::text_iarchive archiveIn(archive_streamIn);
 
-	archiveIn >> r;	
+	archiveIn >> p;
 
-	if (r.type == engine_event::SHOWREC){
-		challN = r.i_data["CHALL"];
-		if (challN%n == 0){
-			nRemote = r.i_data["CHALL2"];
-			if(!r.s_data["REFERENCE"].empty() && r.s_data["REFERENCE"] != "" ){
-				if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
-					if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
-						string encKey = r.s_data["PUBKEY"];
-						StringSource ss(encKey, true,
-						    new Base64Decoder(
-						        new StringSink(pubRemote)
-						    ) // Base64Decoder
-						); // StringSource
-						StringSource ss2(pubRemote, true /*pumpAll*/);
+	if(p.type == engine_event::SECRET){
 
-						RSA::PublicKey publicKeyRemote;
-						publicKey.Load(ss2);
 
-						showRep[0] = r.s_data["REFERENCE"];
-						showRep[1] = r.s_data["HNOM"];
-						showRep[2] = to_string(nRemote);
-						showRep[3] = to_string(n);
-						showRep[4] = Pub_toB64string(publicKeyRemote);
-						return showRep;
+		string aesKey = decrypto_rsa(p.s_data["KEY"]);
+		string aesIv = decrypto_rsa(p.s_data["IV"]);
+
+		byte * iv = sToB(aesIv);
+		SecByteBlock key = sToSbb(aesKey);
+
+		string data_clear = decrypto_aes(key, iv, p.s_data["CIPHER"]);
+
+		
+		data_clear.erase(0, 16);
+		data_clear = "22 serialization" + data_clear;
+		cout << data_clear << endl;
+
+		istringstream archive_streamPckt(data_clear);
+
+		boost::archive::text_iarchive archivePckt(archive_streamPckt);
+
+		archivePckt >> r;
+
+		if (r.type == engine_event::SHOWREC){
+			challN = r.i_data["CHALL"];
+			if (challN%n == 0){
+				nRemote = r.i_data["CHALL2"];
+				if(!r.s_data["REFERENCE"].empty() && r.s_data["REFERENCE"] != "" ){
+					if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
+						if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
+							string encKey = r.s_data["PUBKEY"];
+							StringSource ss(encKey, true,
+							    new Base64Decoder(
+							        new StringSink(pubRemote)
+							    ) // Base64Decoder
+							); // StringSource
+							StringSource ss2(pubRemote, true /*pumpAll*/);
+
+							RSA::PublicKey publicKeyRemote;
+							publicKey.Load(ss2);
+
+							istringstream issReference(r.s_data["REFERENCE"]);
+							istringstream issHnom(r.s_data["HNOM"]);
+							string reference;
+							string hnom; 
+							showRep[0] = "";
+							while ( std::getline( issReference, reference, '*' ) && std::getline( issHnom, hnom, '*' )) 
+							{ 
+							    showRep[0] += reference + "*" + hnom + "*";
+							}
+							showRep[0].erase(showRep[0].size() - 1, 1);
+
+							showRep[1] = to_string(nRemote);
+							showRep[2] = to_string(n);
+							showRep[3] = Pub_toB64string(publicKeyRemote);
+							return showRep;
+						}
 					}
 				}
 			}
@@ -827,9 +945,11 @@ void* network_interface::send_lookrec(string& dataType, string& statut){
 string network_interface::send_pull(string& reference, string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote){
 	engine_event e;
 	engine_event r;
+	engine_event p;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::LOOKREC;
 	ostringstream archive_stream;
+	ostringstream archive_streamOut;
 	string pubEncoded;
 	string document;
 	string encDocument;
@@ -846,11 +966,11 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 	byte iv[ AES::BLOCKSIZE ];
 	prng.GenerateBlock( iv, sizeof(iv) );
 
-	string * aesKey = new string[2];
-	aesKey = aesKeyToS(key, iv);
+	string * aesKey_1 = new string[2];
+	aesKey_1 = aesKeyToS(key, iv);
 
-	e.s_data["KEY"] = aesKey[0];
-	e.s_data["IV"] = aesKey[1];
+	e.s_data["KEY"] = aesKey_1[0];
+	e.s_data["IV"] = aesKey_1[1];
 
 	e.s_data["REFERENCE"]=reference;
 	e.s_data["GRCLIENT"]=groupeClient;
@@ -860,11 +980,34 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
     	archive << e;
 	string outbound_data = archive_stream.str();
 
-	const string &data_encoded = encrypto_rsa(outbound_data, pubRemote);
+           AutoSeededRandomPool prng2;
+
+           SecByteBlock key_p(AES::DEFAULT_KEYLENGTH);
+           prng2.GenerateBlock( key, key.size() );
+
+           byte iv_p[ AES::BLOCKSIZE ];
+           prng2.GenerateBlock( iv, sizeof(iv) );
+
+           string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+           p.type = engine_event::SECRET;
+           p.s_data["CIPHER"] = cipher_data;
+
+           string * aesKey = new string[2];
+           aesKey = aesKeyToS(key, iv);
+
+           string aesKey_encoded = encrypto_rsa(aesKey[0], pubRemote);
+           string aesIv_encoded = encrypto_rsa(aesKey[1], pubRemote);
+
+           p.s_data["KEY"] = aesKey_encoded;
+           p.s_data["IV"] = aesIv_encoded;
+
+           boost::archive::text_oarchive archiveOut(archive_streamOut);
+           archiveOut << p;
+           const string &data_encoded = archive_streamOut.str();
 
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
-
 
 	string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_aes(key, iv, str_data);

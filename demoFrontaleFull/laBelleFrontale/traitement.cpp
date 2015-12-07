@@ -151,9 +151,9 @@ string* traitement_lookrec(string& datatype, string& status) {
                                 SHA1_Final((unsigned char*)hash, &ctx);
                                 hashS=hash;
                 listRef += reference;
-                listRef += "\n";
+                listRef += "*";
                                 hashlist+= hashS;
-                                hashlist+= "\n";
+                                hashlist+= "*";
                           }
                   }
                   file.close();
