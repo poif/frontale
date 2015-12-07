@@ -13,6 +13,7 @@ Requete::Requete()
 	m_option[0] = '\0';
 	m_parametre[0] = '\0';
 	m_nom[0] = '\0';
+	m_partage[0] = '\0';
 	m_groupe[0] = '\0';
 	m_cle[0] = '\0';
 
@@ -394,7 +395,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 void Requete::affichage() //Fonction inutile dans la frontale (je l'utilise pour mes tests)
 {
-	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n nom : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_nom,m_groupe,m_cle);
+	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n nom : %s\n politique : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_nom,m_partage,m_groupe,m_cle);
 }
 
 /*===========================================================================================
@@ -407,6 +408,26 @@ int Requete::test_char(char caractere) //test si le caractère est bien une lett
 		return 1;
 	else
 		return 0;
+}
+
+/*==========================================================================================
+	FONCTION DE REMISE À ZERO DES VARIABLES
+===========================================================================================*/
+
+void Requete::raz()
+{
+	m_affectation[0] = '\0';
+        m_statut[0] = '\0';
+        m_action[0] = '\0';
+        m_option[0] = '\0';
+        m_parametre[0] = '\0';
+        m_nom[0] = '\0';
+        m_partage[0] = '\0';
+        m_groupe[0] = '\0';
+        m_cle[0] = '\0';
+
+        m_requete[0] = '\0';
+        m_resultat[0] = '\0';
 }
 
 /*===========================================================================================
@@ -523,6 +544,26 @@ int Requete::decoupage(const char * chaine)
 		m_nom[cpt_element] = '\0';
 		cpt_element = 0;
 		cpt_chaine++;
+
+		if(strcmp(m_action,"insert") == 0)	// Et si la requete est insert => champ supplémentaire : politique de partage
+		{
+			while(chaine[cpt_chaine] != sep)
+			{
+				test = test_char(chaine[cpt_chaine]);
+                        	if(test == 0)
+                        	{
+                                	printf("Requete malformée\n");
+                                	return 0;
+                        	}
+
+				m_partage[cpt_element] = chaine[cpt_chaine];
+				cpt_chaine++;
+				cpt_element++;
+			}
+			m_partage[cpt_element] = '\0';
+			cpt_element = 0;
+			cpt_chaine ++;
+		}
 	}
 
 	while(chaine[cpt_chaine] != sep)

@@ -11,6 +11,7 @@ class Requete
 	char m_option[64];
 	char m_parametre[64];
 	char m_nom[64];
+	char m_partage[64];
 	char m_groupe[64];
 	char m_cle[256];
 
@@ -33,6 +34,7 @@ class Requete
 	int decoupage(const char * chaine);
 	void affichage();
 	void construction();
+	void raz();
 	int tri(const char * resultat);
 };
 
