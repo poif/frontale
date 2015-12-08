@@ -54,7 +54,7 @@ public:
 	byte* sToB(std::string plain);
 	SecByteBlock sToSbb(std::string plain);
 
-	void tor_recieve(const boost::system::error_code& e, size_t taille, std::string str_data);
+	void tor_recieve(std::string str_data);
 
 	inline int get_type(){return type;}
 

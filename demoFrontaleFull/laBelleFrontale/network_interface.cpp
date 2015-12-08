@@ -24,6 +24,7 @@
 #include "utils.h"
 #include "traitement.h"
 #include "sendUdpBlocking.h"
+#include "noeudthor.h"
 
 using namespace std;
 using namespace CryptoPP;
@@ -34,7 +35,8 @@ using namespace CryptoPP;
 network_interface::network_interface(){
 	running = true;
 	host_rem = "127.0.0.1";
-    	port_rem = "31337";
+    	port_rem = "8082";
+
 
 	///////////////////////////////////////
 	// Generate Parameters
@@ -56,6 +58,31 @@ network_interface::network_interface(){
 	Base64Encoder pubkeysink(new FileSink("mypubkey_net.txt"));
 	publicKey.DEREncode(pubkeysink);
 	pubkeysink.MessageEnd();
+
+	//for (; port_rem < 8080+30 ; ++port_rem){
+
+		try
+		{
+		// Création d'un NoeudThor
+
+		boost::asio::io_service io_service;
+		NoeudThor noeudthor(io_service, atoi(port_rem.data()));
+		//io_service.run();
+		boost::asio::detail::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+		//break;
+		}
+		catch (std::exception& e)
+		{
+			if (string("bind: Address already in use") == e.what()){
+				std::cerr << e.what() << std::endl;
+			}
+			else {
+				cout << "Exit with error" << std::endl;
+				std::cerr << e.what() << std::endl;
+				exit(-1);
+			}
+		}
+	//}
 	
 	// en commentaire en attendant le module reseau
 	/*try{
@@ -303,7 +330,7 @@ void network_interface::frame(){
  *  we only accept messages from registered machines
  *  asynchronous function
  */
-void network_interface::tor_recieve(const boost::system::error_code& e, size_t taille, string str_data){
+void network_interface::tor_recieve(string str_data){
 
 	// non utilisé en attendant le module reseau
 

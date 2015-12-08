@@ -6,7 +6,7 @@
 #include "requete.h"
 #include "network_interface.h"
 #include <string>
-#include "client.h"
+#include "clientFront.h"
 using namespace std;
 
 
@@ -92,7 +92,7 @@ void reception::procReception(){
             string toto = msg2.getMsg().toStdString();
             cout << toto << endl;
 
-            client cli;
+            clientFront cli;
             cli.socBind();
             cli.emission(msg2.getChiffre());
  

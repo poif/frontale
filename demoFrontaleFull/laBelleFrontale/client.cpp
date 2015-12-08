@@ -1,4 +1,4 @@
-#include "client.h"
+#include "clientFront.h"
 #include <QtNetwork>
 #include <iostream>
 #include <QCoreApplication>
@@ -6,16 +6,16 @@
 
 using namespace std;
 
-client::client()
+clientFront::clientFront()
 {
 }
 
-void client::socBind(){
+void clientFront::socBind(){
     soc = new QUdpSocket(this);
 
 }
 
-void client::emission(QString message){
+void clientFront::emission(QString message){
 
     cout << message.toStdString() << endl;
     QByteArray datagram = message.toAscii().data();
