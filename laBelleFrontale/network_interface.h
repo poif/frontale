@@ -54,6 +54,7 @@ public:
 	byte* sToB(std::string plain);
 	SecByteBlock sToSbb(std::string plain);
 
+	void tor_recieve(std::string str_data);
 
 	inline int get_type(){return type;}
 
@@ -61,7 +62,7 @@ public:
 
 private:
 
-	void UDP_async_read(const boost::system::error_code& e, size_t);
+
 
 	// mutex to protect the 'received envents' queue
 	boost::mutex l_receive_queue;

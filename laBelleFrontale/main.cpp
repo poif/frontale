@@ -9,7 +9,7 @@
 #include <reception.h>
 #include <QTextStream>
 #include <string>
-#include "client.h"
+#include "clientFront.h"
 #include <QtNetwork>
 #include "emission_tcp.h"
 #include "reception_tcp.h"
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 			//string toto = msg2.getMsg().toStdString();
 			//cout << toto << endl;
 
-			client cli;
+			clientFront cli;
 			cli.socBind();
 			cli.emission(msg2.getChiffre());
 
