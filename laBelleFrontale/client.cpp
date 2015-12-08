@@ -6,7 +6,7 @@
 
 using namespace std;
 
-clientFront::client()
+clientFront::clientFront()
 {
 }
 
@@ -17,8 +17,9 @@ void clientFront::socBind(){
 
 void clientFront::emission(QString message){
 
+	QHostAddress addr = QHostAddress::Broadcast;
     QByteArray datagram = message.toAscii().data();
-    soc->writeDatagram(datagram.data(),datagram.size(), QHostAddress::LocalHost, 1234 );
+    soc->writeDatagram(datagram, addr, 1234 );
 
 }
 

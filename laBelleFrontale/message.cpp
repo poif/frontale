@@ -46,7 +46,7 @@ void Message::chiffrement(const unsigned char *key){
     memset(iv, 0x00, AES_BLOCK_SIZE);
 
     AES_KEY enc_key;
-    AES_set_encrypt_key(key,128,&enc_key);
+    AES_set_encrypt_key(key,256,&enc_key);
     AES_cbc_encrypt((const unsigned char *)message,trame,strlen(message), &enc_key,iv,AES_ENCRYPT );
 
     this->chiffre = QString((const char *)trame);
@@ -61,7 +61,7 @@ void Message::dechiffrement(const unsigned char *key){
     memset(iv, 0x00, AES_BLOCK_SIZE);
 
     AES_KEY dec_key;
-    AES_set_decrypt_key(key,128,&dec_key);
+    AES_set_decrypt_key(key,256,&dec_key);
     AES_cbc_encrypt((const unsigned char *)chif,trame,strlen(chif),&dec_key, iv,AES_DECRYPT);
 
     this->msg = QString((const char *)trame);

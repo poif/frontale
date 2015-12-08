@@ -41,6 +41,8 @@ char* Requete::getRequete()
 {	return m_requete;}
 char* Requete::getResultat()
 {	return m_resultat;}
+bool Requete::getPourBdd()
+{	return pourBdd;}
 
 //Methods
 
@@ -229,6 +231,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 	if(strcmp(m_action,"search") == 0) // Fonction recherche
 	{
+		pourBdd=false;
 		if(strcmp(m_option,"-n") == 0) // Si on cherche un nom
 		{
 		while(m_affectation[i] != '\0')
@@ -275,7 +278,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	{
 		SHA1_Update(&ctx,m_nom,strlen(m_nom));
 	        SHA1_Final((unsigned char*)hash,&ctx); //calcul du hash et stockage dans hash
-
+	    pourBdd=true;
 		m_requete[0] = '3';  // Premiere partie : l'action (insert : 302)
 		m_requete[1] = '0';
 		m_requete[2] = '2';
@@ -350,6 +353,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 	else if(strcmp(m_action,"delete")==0)
 	{
+				pourBdd=true;
                 m_requete[0] = '3';  // Premiere partie : l'action (delete : 303)
                 m_requete[1] = '0';
                 m_requete[2] = '3';
