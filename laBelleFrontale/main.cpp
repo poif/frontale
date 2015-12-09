@@ -63,7 +63,9 @@ int main(int argc, char *argv[])
     				}else{
            				recep.attenteLecture();
 
-         				// fonction pour interpreter le retour de la bdd(succes ou fail)  recep.getMsg() << endl;
+         				req.tri(recep.getMsg().toStdString().c_str());
+
+					
     				}							
 			}
 			else
