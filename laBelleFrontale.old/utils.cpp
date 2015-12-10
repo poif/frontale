@@ -11,7 +11,6 @@ int check_prime(int a)
    }
    if ( c == a )
       return 1;
-    else return 0;
 }
 
 int bigger_prime(int n){

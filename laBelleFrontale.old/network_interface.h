@@ -17,13 +17,10 @@
 #include <boost/thread/mutex.hpp>
 
 #include "engine_event.h"
-#include "noeudthor.h"
 
 #define BUFFER_SIZE 2048
 
 using namespace CryptoPP;
-
-class NoeudThor;
 
 class network_interface{
 public:
@@ -32,7 +29,7 @@ public:
 
 	void frame();
 
-	//void send_eventUDP(engine_event& ne, boost::asio::ip::udp::socket* s);
+	void send_eventUDP(engine_event& ne, boost::asio::ip::udp::socket* s);
 
 	//void clean_interface();
 
@@ -57,7 +54,7 @@ public:
 	byte* sToB(std::string plain);
 	SecByteBlock sToSbb(std::string plain);
 
-	void tor_receive(std::string str_data);
+	void tor_recieve(std::string str_data);
 
 	inline int get_type(){return type;}
 
@@ -74,11 +71,9 @@ private:
 	void process_received_events_queue();
 	void process_received_events(engine_event&);
 
-	//void get_config_data();
+	void get_config_data();
 
 	boost::asio::ip::udp::socket *s_udp_in;
-
-	NoeudThor *noeudthor;
 
 	boost::asio::ip::udp::endpoint udp_remote_endpoint;
 	boost::asio::io_service io;
@@ -93,7 +88,7 @@ private:
 	int save_nRemote;
 	bool running;
 	std::string host_rem;
-    	int port_rem;
+    	std::string port_rem;
 };
 
 #endif

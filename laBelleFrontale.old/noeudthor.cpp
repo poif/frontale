@@ -3,7 +3,7 @@
 #include <boost/serialization/map.hpp>
 #include <stdlib.h>
 
-NoeudThor::NoeudThor(boost::asio::io_service &io_service, int portecoute, network_interface * observeur)
+NoeudThor::NoeudThor(boost::asio::io_service &io_service, int portecoute, network_interface *observeur)
 	: portecoute(portecoute),
 	  m_acceptor(io_service, tcp::endpoint(tcp::v4(), portecoute)),
 	  io_service(io_service),
@@ -16,11 +16,6 @@ NoeudThor::NoeudThor(boost::asio::io_service &io_service, int portecoute, networ
 	askNeighborList();
 	askNombreNoeuds();
 }
-/*
-NoeudThor::NoeudThor()
-{
-
-}*/
 
 
 void NoeudThor::startConnect()
@@ -154,7 +149,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 			}
 			case 0:
 			{
-				observeur->tor_receive(t.getCommande());
+				observeur->tor_recieve(t.getCommande());
 				break;
 			}
 			default:
@@ -193,15 +188,4 @@ void NoeudThor::handle_accept(Client<NoeudThor> *noeud, const boost::system::err
 		noeud->startRead();
 		startAccept(); // (5)
 	}
-}
-
-void NoeudThor::send(std::string toSend)
-{
-    std::cout << "Envoi d'une string depuis la frontale" << std::endl;
-    Trame t;
-    t.setCommande(toSend);
-    t.setTTL(rand()%toutlemonde.size());
-    auto i = toutlemonde.begin();
-    std::advance(i, rand()%toutlemonde.size());
-    (*i)->send(t);
 }

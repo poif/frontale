@@ -15,7 +15,7 @@ string hashString(char * to_hash){
     SHA1_Init(&ctx);
     SHA1_Update(&ctx, to_hash, strlen(to_hash));
     SHA1_Final((unsigned char*)hash, &ctx);
-    sHash = string(hash,SHA_DIGEST_LENGTH);
+    sHash = hash;
     free(hash);
     return sHash;
 }
@@ -54,9 +54,9 @@ string *traitement_look(string& affectation) {
       /**Recuperation des statuts des clients et hashage***/
               hashS=hashString(statut);
               hashlist += hashS; 
-              hashlist += "*";
+              hashlist += "\n";
               listnom  += nom; 
-              listnom  += "*";
+              listnom  += "\n";
             }
        } 
        file.close();
@@ -84,7 +84,7 @@ string traitement_exist(string& status) {
       ifstream file(fichier.c_str(), ios::in);
       if(file){
          char *line;
-         string sline;
+         string sline=line;
          while (getline(file,sline)){
              line=(char*)sline.c_str();
              nom = strtok(line, " ");
@@ -93,7 +93,7 @@ string traitement_exist(string& status) {
         /**Recuperation du nom des clients et hashage***/
                 hashS=hashString(nom);
                 hashlist += hashS;
-                hashlist += "*";
+                hashlist += "\n";
             }
          }
          file.close();
@@ -124,7 +124,7 @@ string* traitement_lookrec(string& datatype, string& status) {
          ifstream file(fichier.c_str(), ios::in);
          if(file){
                  char* line;
-                 string sline;
+                 string sline=line;
                  while (getline(file,sline)){
     //on reÃ§oit nom statut reference
                          line=(char*)sline.c_str();
@@ -135,9 +135,9 @@ string* traitement_lookrec(string& datatype, string& status) {
                          if (status == readStatus && datatype==readDataType){    
                                 hashS=hashString(nom);
                                 listRef += reference;
-                                listRef += "*";
+                                listRef += "\n";
                                 hashlist+= hashS;
-                                hashlist+= "*";
+                                hashlist+= "\n";
                           }
                   }
                   file.close();
@@ -163,13 +163,15 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
    string readGroup;
    string document;
    string fichier = "test3.txt";
-
+   int found=0;
+   int i=0;
+   int k=0;
          /**remplacement pour test**/
          /*************************************/
    ifstream file(fichier.c_str(), ios::in);
         if(file){
                 char* line;
-                string sline;
+                string sline=line;
                 while (getline(file,sline)){  //line ref document groupes
                      int stop=0;
                      line=(char*)sline.c_str();
@@ -180,7 +182,7 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
                      readGroup = string(strtok(readGroups,"/"));
                      if (reference==readReference){
                         while (!readGroup.empty() && stop==0) {
-                           for (unsigned int j=0;j<groupes_client.size();j++){
+                           for (int j=0;j<groupes_client.size();j++){
                               if (readGroup==groupes_client[j]){  
                                  file.close();
                                  return document;
@@ -197,7 +199,6 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
                         //inc groupe
                 }
                 file.close();
-                return NULL;
           }
 
           else {
@@ -224,8 +225,8 @@ string traitement_req_client(string& action, string& statut, string& affectation
   if (groupes_client[0] == "none")
     to_send += "NULL*";
   else {
-    for (unsigned int i = 0; i < groupes_client.size(); i++){
-      if (i==(groupes_client.size()-1))
+    for (int i = 0; i < groupes_client.size(); i++){
+      if (i==groupes_client.size()-1)
       	to_send += groupes_client[i];
       else 
       	to_send += groupes_client[i] + ";";
@@ -268,11 +269,11 @@ string traitement_rep_client(string a_traiter){
 	// // // // // // 
 	if (action == "1"){
 	//RECHERCHE REFERENCE +HASH
-		while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0) {
+		while ((token = strtok(NULL,"*"))!=NULL && string(token)!="EOF") {
 			//token contient un couple reference;hash
 			if (testerror==0){
 				testerror=1;
-				if ((strcmp(token,"ERROR") == 0)){
+				if (token=="ERROR"){
 					to_send = "ERROR*EOF";
 					//envoi
 					return to_send;
@@ -285,11 +286,11 @@ string traitement_rep_client(string a_traiter){
 	// // // // // //
 	else if (action == "2"){
 	//RECUPERATION DOCUMENT
-		while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0){
+		while ((token = strtok(NULL,"*"))!="EOF"){
 		//si pas d'erreur, on récupère juste le document en un token
 			if (testerror==0){
 				testerror=1;
-				if ((strcmp(token,"ERROR") == 0)){
+				if (token=="ERROR"){
 					to_send = "ERROR*EOF";
 					//envoi
 					return to_send;
@@ -335,8 +336,8 @@ string traitement_req_bdd(string& action, string& statut, string& affectation, v
   if (groupes_client[0] == "none")
     to_send += "NULL*";
   else {
-    for (unsigned int i = 0; i < groupes_client.size(); i++){
-      if (i==(groupes_client.size()-1))
+    for (int i = 0; i < groupes_client.size(); i++){
+      if (i==groupes_client.size()-1)
       	to_send += groupes_client[i];
       else 
       	to_send += groupes_client[i] + ";";
@@ -384,7 +385,7 @@ string traitement_rep_bdd(string a_traiter){
 			//token contient un couple reference;hash
 			if (testerror==0){
 				testerror=1;
-				if (strcmp(token,"ERROR") == 0){
+				if (token=="ERROR"){
 					to_send = "ERROR*EOF";
 					//envoi
 					return to_send;
@@ -397,11 +398,11 @@ string traitement_rep_bdd(string a_traiter){
 	// // // // // //
 	else if (action == "301"){
 	//RECUPERATION DOCUMENT
-		while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0){
+		while ((token = strtok(NULL,"*"))!="EOF"){
 		//si pas d'erreur, on récupère juste le document en un token
 			if (testerror==0){
 				testerror=1;
-				if (strcmp(token,"ERROR") == 0){
+				if (token=="ERROR"){
 					to_send = "ERROR*EOF";
 					//envoi
 					return to_send;
