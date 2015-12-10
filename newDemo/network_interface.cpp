@@ -1,4 +1,3 @@
-#include <boost/asio.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/map.hpp>
@@ -10,20 +9,19 @@
 
 #include <string>
 
-#include <crypto++/rsa.h>
-#include <crypto++/aes.h>
-#include <crypto++/osrng.h>
-#include <crypto++/base64.h>
-#include <crypto++/files.h>
-#include <crypto++/modes.h>
-#include <crypto++/filters.h>
+#include <cryptopp/rsa.h>
+#include <cryptopp/aes.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/base64.h>
+#include <cryptopp/files.h>
+#include <cryptopp/modes.h>
+#include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
 #include "network_interface.h"
 #include "engine_event.h"
 #include "utils.h"
 #include "traitement.h"
-#include "sendUdpBlocking.h"
 #include "noeudthor.h"
 
 using namespace std;
@@ -35,7 +33,7 @@ using namespace CryptoPP;
 network_interface::network_interface(){
 	running = true;
 	host_rem = "127.0.0.1";
-    	port_rem = "8082";
+    	port_rem = 8080;
 
 
 	///////////////////////////////////////
@@ -59,14 +57,14 @@ network_interface::network_interface(){
 	publicKey.DEREncode(pubkeysink);
 	pubkeysink.MessageEnd();
 
-	for (; stoi(port_rem < 8080+30 ; ++port_rem){
+	for (; port_rem < 8080+30 ; ++port_rem){
 
 		try
 		{
 		// Création d'un NoeudThor
 
 		boost::asio::io_service io_service;
-		NoeudThor noeudthor(io_service, stoi(port_rem));
+		noeudthor = new NoeudThor(io_service, port_rem, this);
 		//io_service.run();
 		boost::asio::detail::thread(boost::bind(&boost::asio::io_service::run, &io_service));
 		//break;
@@ -82,7 +80,7 @@ network_interface::network_interface(){
 				exit(-1);
 			}
 		}
-	//}
+	}
 	
 	// en commentaire en attendant le module reseau
 	/*try{
@@ -315,7 +313,7 @@ void network_interface::get_config_data(){
 	cout << "UDP listening " << s_udp_in->local_endpoint().address() << ":" << s_udp_in->local_endpoint().port()  << endl;
 
 	boost::asio::detail::thread(boost::bind(&boost::asio::io_service::run, &io));
-}
+}*/
 
 void network_interface::frame(){
 	// events to send (maybe not needed)
@@ -323,14 +321,14 @@ void network_interface::frame(){
 
 	// events received
 	process_received_events_queue();
-}*/
+}
 
 /**
  *  main reception function. it receives data from UDP connection
  *  we only accept messages from registered machines
  *  asynchronous function
  */
-void network_interface::tor_recieve(string str_data){
+void network_interface::tor_receive(string str_data){
 
 	// non utilisé en attendant le module reseau
 
@@ -378,7 +376,7 @@ void network_interface::tor_recieve(string str_data){
  *  massively used function. used to send all the UDP messages
  *  similar to send_eventTCP
  */
- 
+ /*
 void network_interface::send_eventUDP(engine_event &ne, boost::asio::ip::udp::socket *s){
 	// non utilisé  en attendant le module reseau
 	ostringstream archive_stream;
@@ -399,7 +397,7 @@ void network_interface::send_eventUDP(engine_event &ne, boost::asio::ip::udp::so
 										   << s->remote_endpoint().port() << " : unknown eception caught !" 
 										   << endl;
 	}
-}
+}*/
 
 void network_interface::push_received_event(engine_event& e){
 	boost::mutex::scoped_lock l(l_receive_queue);
@@ -494,6 +492,8 @@ void network_interface::process_received_events(engine_event& e){
 			        archiveOut << p;
 			        const string &data_encoded = archive_streamOut.str();
 
+			        noeudthor->send(data_encoded);
+
 			        //cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
 			        //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
 			        //sendTor(outbound_data);
@@ -503,6 +503,7 @@ void network_interface::process_received_events(engine_event& e){
 		}
 		case engine_event::EXIST:{
 			engine_event r;
+			engine_event p;
 			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
 			string statutReq = e.s_data["STATUT"];
@@ -529,10 +530,37 @@ void network_interface::process_received_events(engine_event& e){
 
 				RSA::PublicKey publicRemoteKey;
 				publicRemoteKey.Load(ss2);
-				const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
+			        AutoSeededRandomPool prng;
 
-				
-				//sendTor(outbound_data);
+			        SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+			        prng.GenerateBlock( key, key.size() );
+
+			        byte iv[ AES::BLOCKSIZE ];
+			        prng.GenerateBlock( iv, sizeof(iv) );
+
+			        string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+			        p.type = engine_event::SECRET;
+			        p.s_data["CIPHER"] = cipher_data;
+
+			        string * aesKey = new string[2];
+			        aesKey = aesKeyToS(key, iv);
+
+			        string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+			        string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
+
+			        p.s_data["KEY"] = aesKey_encoded;
+			        p.s_data["IV"] = aesIv_encoded;
+
+			        boost::archive::text_oarchive archiveOut(archive_streamOut);
+			        archiveOut << p;
+			        const string &data_encoded = archive_streamOut.str();
+
+			        noeudthor->send(data_encoded);
+
+			        //cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
+			        //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
+			        //sendTor(outbound_data);
 			}
 			
 			break;
@@ -610,6 +638,8 @@ void network_interface::process_received_events(engine_event& e){
 			           archiveOut << p;
 			           const string &data_encoded = archive_streamOut.str();
 
+			           noeudthor->send(data_encoded);
+
 			           //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
 			           cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
 			           //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
@@ -650,7 +680,7 @@ void network_interface::process_received_events(engine_event& e){
 
 					const string &data_encoded = encrypto_aes(key, iv, outbound_data);
 
-					
+					noeudthor->send(data_encoded);
 					//sendTor(outbound_data);
 				}
 			}
@@ -728,7 +758,8 @@ string network_interface::send_look(string& affectation){
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
 
-	string str_data = sendUDP(outbound_data, host_rem, port_rem);
+	string str_data = "toto";
+	noeudthor->send(outbound_data);
 
 	//string str_data(&network_buffer[0], network_buffer.size());
 	//string data_clear = decrypto_rsa(str_data);
@@ -815,7 +846,8 @@ string network_interface::send_exist(string& statut){
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
 
-	string str_data = sendUDP(outbound_data, host_rem, port_rem);
+	string str_data = "toto";
+	noeudthor->send(outbound_data);
 
 	//string str_data(&network_buffer[0], network_buffer.size());
 	//string data_clear = decrypto_rsa(str_data);
@@ -896,7 +928,8 @@ void* network_interface::send_lookrec(string& dataType, string& statut){
 
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
-	string str_data = sendUDP(outbound_data, host_rem, port_rem);
+	string str_data = "toto";
+	noeudthor->send(outbound_data);
 
 	//string str_data(&network_buffer[0], network_buffer.size());
 	//string data_clear = decrypto_rsa(str_data);
@@ -1010,18 +1043,18 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
            AutoSeededRandomPool prng2;
 
            SecByteBlock key_p(AES::DEFAULT_KEYLENGTH);
-           prng2.GenerateBlock( key, key.size() );
+           prng2.GenerateBlock( key_p, key_p.size() );
 
            byte iv_p[ AES::BLOCKSIZE ];
-           prng2.GenerateBlock( iv, sizeof(iv) );
+           prng2.GenerateBlock( iv_p, sizeof(iv_p) );
 
-           string cipher_data = encrypto_aes(key, iv, outbound_data);
+           string cipher_data = encrypto_aes(key_p, iv_p, outbound_data);
 
            p.type = engine_event::SECRET;
            p.s_data["CIPHER"] = cipher_data;
 
            string * aesKey = new string[2];
-           aesKey = aesKeyToS(key, iv);
+           aesKey = aesKeyToS(key_p, iv_p);
 
            string aesKey_encoded = encrypto_rsa(aesKey[0], pubRemote);
            string aesIv_encoded = encrypto_rsa(aesKey[1], pubRemote);
@@ -1035,8 +1068,10 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
+           	string str_data = "toto";
+	noeudthor->send(data_encoded);
 
-	string str_data(&network_buffer[0], network_buffer.size());
+	//string str_data(&network_buffer[0], network_buffer.size());
 	string data_clear = decrypto_aes(key, iv, str_data);
 	istringstream archive_streamIn(data_clear);
 	boost::archive::text_iarchive archiveIn(archive_streamIn);
