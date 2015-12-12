@@ -61,7 +61,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 	char reference[512];
 
 	SHA_CTX ctx;
-        char hash[SHA_DIGEST_LENGTH];
+        	char hash[SHA_DIGEST_LENGTH+1];
 	SHA1_Init(&ctx);
 
 	if(strcmp(m_action,"search") == 0)
@@ -70,6 +70,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 		{
 			SHA1_Update(&ctx,m_statut,strlen(m_statut));
 			SHA1_Final((unsigned char*)hash,&ctx);
+			hash[SHA_DIGEST_LENGTH] = '\0';
 
 			do //on parcours toute la requete recu
 			{
@@ -83,7 +84,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				cpt_resultat++;
 				cpt_element=0;
 
-				while(resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom recu depuis la requete
+				while(cpt_element < SHA_DIGEST_LENGTH && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom recu depuis la requete
 				{
 					hash_recu[cpt_element]=resultat[cpt_resultat];
 					cpt_resultat++;

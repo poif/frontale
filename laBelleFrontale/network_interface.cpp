@@ -2,6 +2,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/bind.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <sstream>
 #include <vector>
@@ -33,8 +34,10 @@ using namespace CryptoPP;
 network_interface::network_interface(){
 	running = true;
 	host_rem = "127.0.0.1";
-    	port_rem = 8080;
+    	port_rem = 8082;
 
+    	recBool = false;
+    	responseRec = "";
 
 	///////////////////////////////////////
 	// Generate Parameters
@@ -56,31 +59,7 @@ network_interface::network_interface(){
 	Base64Encoder pubkeysink(new FileSink("mypubkey_net.txt"));
 	publicKey.DEREncode(pubkeysink);
 	pubkeysink.MessageEnd();
-
-	for (; port_rem < 8080+30 ; ++port_rem){
-
-		try
-		{
-		// Création d'un NoeudThor
-
-		boost::asio::io_service io_service;
-		noeudthor = new NoeudThor(io_service, port_rem, this);
-		//io_service.run();
-		boost::asio::detail::thread(boost::bind(&boost::asio::io_service::run, &io_service));
-		//break;
-		}
-		catch (std::exception& e)
-		{
-			if (string("bind: Address already in use") == e.what()){
-				std::cerr << e.what() << std::endl;
-			}
-			else {
-				cout << "Exit with error" << std::endl;
-				std::cerr << e.what() << std::endl;
-				exit(-1);
-			}
-		}
-	}
+	
 	
 	// en commentaire en attendant le module reseau
 	/*try{
@@ -97,6 +76,34 @@ network_interface::network_interface(){
 
 }
 
+void network_interface::spawn(){
+	for (; port_rem < 8082+30 ; ++port_rem){
+
+		try
+		{
+		// Création d'un NoeudThor
+
+		boost::asio::io_service io_service;
+		cout << "Noeud mis en place sur le port " << port_rem << endl;
+		noeudthor = new NoeudThor(io_service, port_rem, this);
+		io_service.run();
+
+		break;
+		}
+		catch (std::exception& e)
+		{
+			if (string("bind: Address already in use") == e.what() || string("bind: Adresse déjà utilisée") == e.what()){
+				cerr << e.what() << endl;
+			}
+			else {
+				cout << "Exit with error" << endl;
+				cerr << e.what() << endl;
+				exit(-1);
+			}
+		}
+	}
+}
+
 
 network_interface::~network_interface(){	
 	// en commentaire en attendant le module reseau	
@@ -107,6 +114,15 @@ network_interface::~network_interface(){
 	//io.stop();
 }
 
+bool network_interface::getRecbool(){
+
+	return recBool;
+}
+
+string network_interface::getResp(){
+
+	return responseRec;
+}
 
 string network_interface::encrypto_rsa(string& plain){
 
@@ -342,34 +358,37 @@ void network_interface::tor_receive(string str_data){
 	//string str_data(&network_buffer[0], network_buffer.size());
 
 	char buffer[26];
-	string str ("Test string...");
 	size_t length = str_data.copy(buffer,25,0);
 	buffer[length]='\0';
 	string testHeader = string(buffer, length);
 	engine_event ne;
 
-	if (testHeader.compare(23,2,"22 serialization::archive") == 0){
+
+	if (testHeader.compare("22 serialization::archive") == 0){
+		
 		istringstream archive_stream(str_data);
 		boost::archive::text_iarchive archive(archive_stream);
 		
 		archive >> ne;
 	}
 	else{
+		cout << str_data << endl;
 		string data_clear = decrypto_rsa(str_data);
 		istringstream archive_stream(data_clear);
 		boost::archive::text_iarchive archive(archive_stream);
+		
 		/* TODO : gestion quand pas à nous */
 		
 		archive >> ne;
 	}
 
-
+	process_received_events(ne);
 
 	// we add the id of the expeditor
 	//ne.i_data["FROM"] = get_machine_from_address(udp_remote_endpoint.address().to_string())->get_id();
 
 	// add the event to the received event queue
-	push_received_event(ne);
+	//push_received_event(ne);
 }
 
 /**
@@ -435,8 +454,10 @@ void network_interface::process_received_events(engine_event& e){
 
 		      engine_event r;
 		      engine_event p;
+
 		      string *finalList = new string[2];
 		      int nRemote = e.i_data["CHALLENGE"];
+
 		      string pubStringRemote = e.s_data["PUB"];
 		      string affectationReq = e.s_data["AFFECTATION"];
 
@@ -687,6 +708,55 @@ void network_interface::process_received_events(engine_event& e){
 			
 			break;
 		}
+		case engine_event::SECRET:{
+			engine_event r;
+			
+			int challN = 0;
+			string showRep = "";
+
+			string aesKey = decrypto_rsa(e.s_data["KEY"]);
+			string aesIv = decrypto_rsa(e.s_data["IV"]);
+
+			byte * iv = sToB(aesIv);
+			SecByteBlock key = sToSbb(aesKey);
+
+			string data_clear = decrypto_aes(key, iv, e.s_data["CIPHER"]);
+
+			
+			data_clear.erase(0, 16);
+			data_clear = "22 serialization" + data_clear;
+			cout << data_clear << endl;
+
+			istringstream archive_streamPckt(data_clear);
+
+			boost::archive::text_iarchive archivePckt(archive_streamPckt);
+
+			archivePckt >> r;
+
+			if (r.type == engine_event::SHOW)
+			{
+				challN = r.i_data["CHALL"];
+				if (challN%save_n == 0){
+					if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
+						if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
+							istringstream issNom(r.s_data["NOM"]);
+							istringstream issHstatut(r.s_data["HSTATUT"]);
+							string nom;
+							string hstatut; 
+							while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
+							{ 
+							    showRep += nom + "*" + hstatut + "*";
+							}
+							showRep.erase(showRep.size() - 1, 1);
+							//showRep[0] = r.s_data["NOM"];
+							//showRep[1] = r.s_data["HSTATUT"];
+							responseRec = showRep;
+							recBool = true;
+						}
+					}
+				}
+			}	
+		}
 		default : 
 			// should never happen
 			break;
@@ -727,22 +797,21 @@ string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
 
 }
 
-string network_interface::send_look(string& affectation){
+void network_interface::send_look(string& affectation){
 	engine_event e;
 	engine_event r;
 	engine_event p;
 	//boost::asio::buffer network_buffer;
 	ostringstream archive_stream;
 	string pubEncoded;
-	int challN = 0;
 
-	//string * showRep = new string[2];
-	string showRep = "";
 
 	e.type = engine_event::LOOK;
 	/* choisir nombre entier grand */
 	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int n = bigger_prime(100000);
+	int v = rand() % 20000 + 80000;
+	int n = bigger_prime(v);
+	save_n = n;
 
 	e.i_data["CHALLENGE"] = n;
 
@@ -755,67 +824,9 @@ string network_interface::send_look(string& affectation){
     	archive << e;
 	const string &outbound_data = archive_stream.str();
 
-	//sendTor(outbound_data);
-	//receiveTor(network_buffer);
-
 	string str_data = "toto";
 	noeudthor->send(outbound_data);
 
-	//string str_data(&network_buffer[0], network_buffer.size());
-	//string data_clear = decrypto_rsa(str_data);
-	istringstream archive_streamIn(str_data);
-	boost::archive::text_iarchive archiveIn(archive_streamIn);
-
-	archiveIn >> p;
-
-	if(p.type == engine_event::SECRET){
-
-
-		string aesKey = decrypto_rsa(p.s_data["KEY"]);
-		string aesIv = decrypto_rsa(p.s_data["IV"]);
-
-		byte * iv = sToB(aesIv);
-		SecByteBlock key = sToSbb(aesKey);
-
-		string data_clear = decrypto_aes(key, iv, p.s_data["CIPHER"]);
-
-		
-		data_clear.erase(0, 16);
-		data_clear = "22 serialization" + data_clear;
-		cout << data_clear << endl;
-
-		istringstream archive_streamPckt(data_clear);
-
-		boost::archive::text_iarchive archivePckt(archive_streamPckt);
-
-		archivePckt >> r;
-
-		if (r.type == engine_event::SHOW)
-		{
-			challN = r.i_data["CHALL"];
-			if (challN%n == 0){
-				if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
-					if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
-						istringstream issNom(r.s_data["NOM"]);
-						istringstream issHstatut(r.s_data["HSTATUT"]);
-						string nom;
-						string hstatut; 
-						while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
-						{ 
-						    showRep += nom + "*" + hstatut + "*";
-						}
-						showRep.erase(showRep.size() - 1, 1);
-						//showRep[0] = r.s_data["NOM"];
-						//showRep[1] = r.s_data["HSTATUT"];
-						return showRep;
-					}
-				}
-			}
-		}	
-
-	}
-
-	return NULL;
 }
 
 string network_interface::send_exist(string& statut){
