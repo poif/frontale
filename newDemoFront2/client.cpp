@@ -17,10 +17,9 @@ void clientFront::socBind(){
 
 void clientFront::emission(QString message){
 
-    QHostAddress addr = QHostAddress::LocalHost;
-    QByteArray datagram = message.toAscii().data();
-
-    soc->writeDatagram(datagram, addr, 1234);
+	QHostAddress addr = QHostAddress::Broadcast;
+    QByteArray datagram = message.toLatin1().data();
+    soc->writeDatagram(datagram, addr, 1234 );
 
 }
 

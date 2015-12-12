@@ -84,11 +84,11 @@ int main(int argc, char *argv[])
 				string temp = req.getRequete();			
 
 				netinf.send_look(temp);
-				t0 = time(NULL);
-				std::cout << "Attente " << tmax << " secondes" << std::endl;
+				//t0 = time(NULL);
+				//std::cout << "Attente " << tmax << " secondes" << std::endl;
 
-				while((respBool = netinf.getRecbool()) == false && static_cast<unsigned>(time(NULL)-t0) < tmax);
-				std::cout << tmax << "s écoulées" << std::endl;
+				//while((respBool = netinf.getRecbool()) == false && static_cast<unsigned>(time(NULL)-t0) < tmax);
+				//std::cout << tmax << "s écoulées" << std::endl;
 
 				if(respBool){
 
@@ -110,8 +110,9 @@ int main(int argc, char *argv[])
 				  cout << strlen(triq) << endl;
 				  cout.write(triq, triqlength);*/
 
+				  cout << "bahn on" << endl;
 				req.tri(triq);
-
+				cout << "bahn on 2" << endl;
 				}
 				else{
 					cout << "Temps maximum écoulé, pas de réponse" << endl;
@@ -119,7 +120,6 @@ int main(int argc, char *argv[])
 				}
 
 			}
-
 			QString retour;
 			retour = QString("%1").arg(req.getResultat());
 
@@ -127,8 +127,8 @@ int main(int argc, char *argv[])
 			msg2.entete();
 			msg2.chiffrement(key);
 
-			string toto = msg2.getMsg().toStdString();
-			cout << toto << endl;
+			//string toto = msg2.getMsg().toStdString();
+			//cout << toto << endl;
 
 			clientFront cli;
 			cli.socBind();

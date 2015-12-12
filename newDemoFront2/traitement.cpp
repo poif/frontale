@@ -37,7 +37,7 @@ string *traitement_look(string& affectation) {
   string hashS;
   string *finalList = new string[2];
   string listnom;
-  string fichier = "test2.txt";
+  string fichier = "test.txt";
   //envoyer to_send
   /**remplacement pour test**/
   /*************************************/
