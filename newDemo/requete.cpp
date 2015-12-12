@@ -44,6 +44,9 @@ char* Requete::getResultat()
 bool Requete::getPourBdd()
 {	return pourBdd;}
 
+void Requete::setResultat(const char * buffer)
+{	strncpy(m_resultat, buffer, 63);}
+
 //Methods
 
 /* =======================================================================================================================

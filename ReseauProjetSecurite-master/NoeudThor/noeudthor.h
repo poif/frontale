@@ -3,7 +3,6 @@
 
 #include <boost/serialization/list.hpp>
 #include "client.h"
-#include "network_interface.h"
 #include <string>
 
 class network_interface;

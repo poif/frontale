@@ -164,7 +164,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 		switch (t.getTTL()) {
 			case 0:
 			{
-				observeur->tor_receive(t.getCommande());
+				//observeur->tor_recieve(t.getCommande());
 				break;
 			}
 		}

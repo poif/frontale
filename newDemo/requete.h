@@ -32,6 +32,9 @@ class Requete
 	char* getRequete();
 	char* getResultat();
 	bool getPourBdd();
+
+	void setResultat(const char * buffer);
+
 	int test_char(char caractere);
 	int decoupage(const char * chaine);
 	void affichage();
