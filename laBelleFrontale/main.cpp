@@ -5,6 +5,7 @@
 #include "network_interface.h"
 #include <cstdlib>
 #include <iostream>
+#include <ctime>
 #include <unistd.h>
 #include <reception.h>
 #include <QTextStream>
@@ -13,12 +14,21 @@
 #include <QtNetwork>
 #include "emission_tcp.h"
 #include "reception_tcp.h"
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
+	
 
+	bool respBool = false;
+
+	time_t t0;
+    	unsigned tmax = 5;
+
+    	network_interface netinf;
+    	std::thread tspawn = netinf.spawnThread();
 
 	//thread
 	reception ser;
@@ -38,7 +48,7 @@ int main(int argc, char *argv[])
 
 		message = ser.getMsg();;
 
-
+		cout << "Got somethin" << endl;
 		Message msg(message,'*');
 		Requete req;
 
@@ -53,7 +63,8 @@ int main(int argc, char *argv[])
 
 		if(req.decoupage(msg.getMsg().toStdString().c_str())){
 			req.construction();
-			recep.bind();		
+			recep.bind();
+
 			if(req.getPourBdd()){
 				versBdd = QString("%1").arg(req.getRequete());
 				emi.emission(versBdd);
@@ -70,12 +81,18 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				string temp = req.getRequete();
+				string temp = req.getRequete();			
 
-				/* Il faudrait plutôt utiliser une réference vers l'objet de type network_interface qui doit rester unique */
-				network_interface netinf;
+				netinf.send_look(temp);
+				t0 = time(NULL);
+				std::cout << "Attente " << tmax << " secondes" << std::endl;
 
-				showRep = netinf.send_look(temp);
+				while((respBool = netinf.getRecbool()) == false && static_cast<unsigned>(time(NULL)-t0) < tmax);
+				std::cout << tmax << "s écoulées" << std::endl;
+
+				if(respBool){
+
+				string showRep = netinf.getResp();
 
 				cout << showRep << endl;
 				//cout << showRep[1] << endl;
@@ -94,7 +111,15 @@ int main(int argc, char *argv[])
 				  cout.write(triq, triqlength);*/
 
 				req.tri(triq);
+
+				}
+				else{
+					cout << "Temps maximum écoulé, pas de réponse" << endl;
+					req.setResultat("empty");
+				}
+
 			}
+
 			QString retour;
 			retour = QString("%1").arg(req.getResultat());
 
@@ -102,8 +127,8 @@ int main(int argc, char *argv[])
 			msg2.entete();
 			msg2.chiffrement(key);
 
-			//string toto = msg2.getMsg().toStdString();
-			//cout << toto << endl;
+			string toto = msg2.getMsg().toStdString();
+			cout << toto << endl;
 
 			clientFront cli;
 			cli.socBind();

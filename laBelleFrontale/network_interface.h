@@ -7,7 +7,7 @@
 #include <cryptopp/osrng.h>
 #include <cryptopp/base64.h>
 #include <cryptopp/files.h>
-
+#include <thread>
 
 #include <queue>
 #include <string>
@@ -30,6 +30,12 @@ public:
 	network_interface();
 	~network_interface();
 
+	void spawn();
+
+	std::thread spawnThread() {
+          		return std::thread([=] { spawn(); });
+      	}
+
 	void frame();
 
 	//void send_eventUDP(engine_event& ne, boost::asio::ip::udp::socket* s);
@@ -39,8 +45,11 @@ public:
 	inline bool is_running()	{return running;}
 	void push_received_event(engine_event& e);
 
+	bool getRecbool();
+	std::string getResp();
+
 	// observer functions
-	std::string send_look(std::string& affectation);
+	void send_look(std::string& affectation);
 	std::string send_exist(std::string& statut);
 	void* send_lookrec(std::string& dataType, std::string& statut);
 	std::string send_pull(std::string& reference, std::string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote);
@@ -65,7 +74,7 @@ public:
 
 private:
 
-
+	//pthread_t t;
 
 	// mutex to protect the 'received envents' queue
 	boost::mutex l_receive_queue;
@@ -94,6 +103,8 @@ private:
 	bool running;
 	std::string host_rem;
     	int port_rem;
+    	bool recBool;
+    	std::string responseRec;
 };
 
 #endif
