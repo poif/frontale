@@ -1,1 +1,0 @@
-g++ engine_event.h tempoTest.cpp traitement.cpp traitement.h -o frontale2 -lssl -lcrypto -lcrypto++ /usr/local/lib/libboost_system.a /usr/local/lib/libboost_regex.a /usr/local/lib/libboost_serialization.a /usr/local/lib/libboost_thread.a

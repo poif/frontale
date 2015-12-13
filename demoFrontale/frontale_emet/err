@@ -1,4 +1,0 @@
-tryme.cpp:11:5: warning: unused parameter ‘argc’ [-Wunused-parameter]
- int main(int argc, char *argv[])
-     ^
-tryme.cpp:11:5: warning: unused parameter ‘argv’ [-Wunused-parameter]
