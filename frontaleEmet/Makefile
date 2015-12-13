@@ -97,9 +97,9 @@ DIST          = /usr/share/qt4/mkspecs/common/unix.conf \
 		/usr/share/qt4/mkspecs/features/lex.prf \
 		/usr/share/qt4/mkspecs/features/include_source_dir.prf \
 		newDemo.pro
-QMAKE_TARGET  = Frontale1
+QMAKE_TARGET  = FrontaleEmet
 DESTDIR       = 
-TARGET        = Frontale1
+TARGET        = FrontaleEmet
 
 first: all
 ####### Implicit rules

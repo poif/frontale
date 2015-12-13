@@ -96,13 +96,10 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 				hash_recu[cpt_element]='\0';
 				cpt_element=0;
 				cpt_resultat++;
-				printf("hello worldi\n");
-				printf("hash %s\n", hash);
-				printf("hash recu %s\n", hash_recu);
 
 				if(strcmp(hash,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
-					printf("hello world\n");
+
 					while(name[cpt_element] != '\0')
 					{
 						m_resultat[cpt_name]=name[cpt_element];

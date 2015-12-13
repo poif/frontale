@@ -119,9 +119,19 @@ bool network_interface::getRecbool(){
 	return recBool;
 }
 
+void network_interface::setRecbool(bool reBool){
+
+	recBool = reBool;
+}
+
 string network_interface::getResp(){
 
 	return responseRec;
+}
+
+void network_interface::setResp(string reResp){
+
+	responseRec = reResp;
 }
 
 string network_interface::encrypto_rsa(string& plain){
@@ -167,18 +177,26 @@ string network_interface::decrypto_rsa(string& cipher){
 	AutoSeededRandomPool rng;
 	string recovered;
 
-	////////////////////////////////////////////////
-	// Decryption
-	RSAES_OAEP_SHA_Decryptor d(privateKey);
+	try
+	{
+		////////////////////////////////////////////////
+		// Decryption
+		RSAES_OAEP_SHA_Decryptor d(privateKey);
 
-	StringSource ss2(cipher, true,
-	    new PK_DecryptorFilter(rng, d,
-	        new StringSink(recovered)
-	   ) // PK_DecryptorFilter
-	); // StringSource
+		StringSource ss2(cipher, true,
+		    new PK_DecryptorFilter(rng, d,
+		        new StringSink(recovered)
+		   ) // PK_DecryptorFilter
+		); // StringSource
 
-	return recovered;
-
+		return recovered;
+	}
+	catch( const CryptoPP::Exception& e )
+	{
+		cerr << e.what() << endl;
+		cout << "Ce paquet n'est pas pour moi." << endl;
+		return "";
+	}
 	
 
 }
@@ -218,7 +236,6 @@ string network_interface::encrypto_aes(SecByteBlock key, byte* iv, string& plain
 	catch( const CryptoPP::Exception& e )
 	{
 	    cerr << e.what() << endl;
-	    exit(1);
 	}
 
 	return cipher;
@@ -245,7 +262,6 @@ string network_interface::decrypto_aes(SecByteBlock key, byte* iv, string& ciphe
 	catch( const CryptoPP::Exception& e )
 	{
 	    cerr << e.what() << endl;
-	    exit(1);
 	}
 
 	return recovered;
@@ -363,6 +379,8 @@ void network_interface::tor_receive(string str_data){
 	string testHeader = string(buffer, length);
 	engine_event ne;
 
+	cout << "on a recu ca : " << str_data << endl;
+
 
 	if (testHeader.compare("22 serialization::archive") == 0){
 		
@@ -370,19 +388,33 @@ void network_interface::tor_receive(string str_data){
 		boost::archive::text_iarchive archive(archive_stream);
 		
 		archive >> ne;
+		process_received_events(ne);
+		return;
 	}
 	else{
-		cout << str_data << endl;
-		string data_clear = decrypto_rsa(str_data);
-		istringstream archive_stream(data_clear);
-		boost::archive::text_iarchive archive(archive_stream);
+		string data_clear ;
 		
-		/* TODO : gestion quand pas à nous */
+		if(!(data_clear = decrypto_rsa(str_data)).empty()){
+
+			istringstream archive_stream(data_clear);
+			boost::archive::text_iarchive archive(archive_stream);
+
+			archive >> ne;
+			process_received_events(ne);
+			return;
+
+		}
+		else{
 		
-		archive >> ne;
+			cout << "J'ai recu un paquet qui n'était pas pour moi" << endl;
+			return;
+
+		}
+
 	}
 
-	process_received_events(ne);
+	cout << "J'ai recu un paquet qui n'était pas pour moi" << endl;
+
 
 	// we add the id of the expeditor
 	//ne.i_data["FROM"] = get_machine_from_address(udp_remote_endpoint.address().to_string())->get_id();
@@ -733,24 +765,40 @@ void network_interface::process_received_events(engine_event& e){
 
 			archivePckt >> r;
 
-			if (r.type == engine_event::SHOW)
-			{
-				challN = r.i_data["CHALL"];
-				if (challN%save_n == 0){
-					if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
-						if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
-							istringstream issNom(r.s_data["NOM"]);
-							istringstream issHstatut(r.s_data["HSTATUT"]);
-							string nom;
-							string hstatut; 
-							while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
-							{ 
-							    showRep += nom + "*" + hstatut + "*";
+			switch(r.type){
+				case engine_event::SHOW:{
+
+					challN = r.i_data["CHALL"];
+					if (challN%save_n == 0){
+						if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
+							if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
+								istringstream issNom(r.s_data["NOM"]);
+								istringstream issHstatut(r.s_data["HSTATUT"]);
+								string nom;
+								string hstatut; 
+								while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
+								{ 
+								    showRep += nom + "*" + hstatut + "*";
+								}
+								showRep.erase(showRep.size() - 1, 1);
+								//showRep[0] = r.s_data["NOM"];
+								//showRep[1] = r.s_data["HSTATUT"];
+								responseRec = showRep;
+								recBool = true;
 							}
-							showRep.erase(showRep.size() - 1, 1);
-							//showRep[0] = r.s_data["NOM"];
-							//showRep[1] = r.s_data["HSTATUT"];
-							responseRec = showRep;
+						}
+					}
+				}
+				case engine_event::ANSWER:{
+			
+					challN = r.i_data["CHALL"];
+					if (challN%save_n == 0){
+						if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
+							string hnom = r.s_data["HNOM"];
+							hnom.erase(hnom.size() - 1, 1);
+							cout << "hnom : " << hnom << endl;
+
+							responseRec = hnom;	
 							recBool = true;
 						}
 					}
@@ -799,8 +847,6 @@ string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
 
 void network_interface::send_look(string& affectation){
 	engine_event e;
-	engine_event r;
-	engine_event p;
 	//boost::asio::buffer network_buffer;
 	ostringstream archive_stream;
 	string pubEncoded;
@@ -824,24 +870,22 @@ void network_interface::send_look(string& affectation){
     	archive << e;
 	const string &outbound_data = archive_stream.str();
 
-	string str_data = "toto";
 	noeudthor->send(outbound_data);
 
 }
 
-string network_interface::send_exist(string& statut){
+void network_interface::send_exist(string& statut){
 	engine_event e;
-	engine_event r;
-	engine_event p;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::EXIST;
 	ostringstream archive_stream;
 	string pubEncoded;
-	int challN = 0;
 
 	/* choisir nombre entier grand */
 	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int n = bigger_prime(100000);
+	int v = rand() % 20000 + 80000;
+	int n = bigger_prime(v);
+	save_n = n;
 
 	e.i_data["CHALLENGE"] = n;
 
@@ -854,56 +898,8 @@ string network_interface::send_exist(string& statut){
     	archive << e;
 	const string &outbound_data = archive_stream.str();
 
-	//sendTor(outbound_data);
-	//receiveTor(network_buffer);
-
-	string str_data = "toto";
 	noeudthor->send(outbound_data);
 
-	//string str_data(&network_buffer[0], network_buffer.size());
-	//string data_clear = decrypto_rsa(str_data);
-	istringstream archive_streamIn(str_data);
-	boost::archive::text_iarchive archiveIn(archive_streamIn);
-
-	archiveIn >> p;
-
-	if(p.type == engine_event::SECRET){
-
-
-		string aesKey = decrypto_rsa(p.s_data["KEY"]);
-		string aesIv = decrypto_rsa(p.s_data["IV"]);
-
-		byte * iv = sToB(aesIv);
-		SecByteBlock key = sToSbb(aesKey);
-
-		string data_clear = decrypto_aes(key, iv, p.s_data["CIPHER"]);
-
-		
-		data_clear.erase(0, 16);
-		data_clear = "22 serialization" + data_clear;
-		cout << data_clear << endl;
-
-		istringstream archive_streamPckt(data_clear);
-
-		boost::archive::text_iarchive archivePckt(archive_streamPckt);
-
-		archivePckt >> r;
-
-		if (r.type == engine_event::ANSWER){
-			challN = r.i_data["CHALL"];
-			if (challN%n == 0){
-				if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
-					string hnom = r.s_data["HNOM"];
-					hnom.erase(hnom.size() - 1, 1);
-					cout << "hnom : " << hnom << endl;
-
-					return hnom;
-				}
-			}
-		}
-	}
-
-	return NULL;
 }
 
 void* network_interface::send_lookrec(string& dataType, string& statut){

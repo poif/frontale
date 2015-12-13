@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	bool respBool = false;
 
 	time_t t0;
-    	unsigned tmax = 5;
+    	unsigned tmax = 15;
 
     	network_interface netinf;
     	std::thread tspawn = netinf.spawnThread();
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
 	emission_tcp emi;
 
-    	emi.connection_tcp("127.0.0.1",32154);
+    	//emi.connection_tcp("127.0.0.1",32154);
 	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
 	
 	reception_tcp recep; 
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
 		if(req.decoupage(msg.getMsg().toStdString().c_str())){
 			req.construction();
-			recep.bind();
+			//recep.bind();
 
 			if(req.getPourBdd()){
 				versBdd = QString("%1").arg(req.getRequete());
@@ -81,9 +81,22 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				string temp = req.getRequete();			
+				string traitement = req.getRequete();
 
-				netinf.send_look(temp);
+				string option = req.getOption();
+
+				cout << option << endl;
+				cout << traitement << endl;
+
+				if(option.compare("-n")==0){/* traitement est une affectation */
+					netinf.send_look(traitement);
+					cout << "ici envoi" << endl;
+				}
+				else if(option.compare("-e")==0){/* traitement est un statut */
+					netinf.send_exist(traitement);
+				}		
+
+
 				t0 = time(NULL);
 				std::cout << "Attente " << tmax << " secondes" << std::endl;
 
@@ -92,7 +105,11 @@ int main(int argc, char *argv[])
 
 				if(respBool){
 
+				netinf.setRecbool(false);
+
 				string showRep = netinf.getResp();
+
+				netinf.setResp("");
 
 				cout << showRep << endl;
 				//cout << showRep[1] << endl;
