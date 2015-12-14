@@ -6,6 +6,10 @@
 #include <fstream>
 #include <iostream>
 #include "traitement.h"
+
+#define CLIENT_MAX_CHAMP 20 	//nombre de champ max qu'un client peut envoyer dans une réponse de récupération de références
+#define BDD_MAX_CHAMP    100    //pareil pour la bdd
+
 using namespace std;
 
 string hashString(char * to_hash){
@@ -206,9 +210,13 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
           }
 }
 
-/*****************/
-/**TRVE REQVESTS**/
-/*****************/
+
+/******************************************/
+/******************************************/
+
+	/*****************/
+	/**TRVE REQVESTS**/
+	/*****************/
 
 //fonction de formatage de requete
 string traitement_req_client(string& action, string& statut, 
@@ -268,22 +276,76 @@ string traitement_rep_client(string a_traiter){
 	char *ca_traiter = (char*)a_traiter.c_str();
 	string action = string(strtok(ca_traiter,"*"));
 	string to_send;
-	int breaker=0;		   //test requetes troll boucle infini et test si les champs de la requete 2 sont conformes
+	int iterator=0;		   //teste le numéro de champ et les sorties de boucle
 	int parity=1;		   //permet de repérer les références et les noms, tester : considérer à 1 car action l'incrémente implicitement
 	char * token;
 
 /****************************************/
- 
-	if (action == "1"){
-	//RECHERCHE REFERENCE +HASH
+
+	if (action=="1") {
+	//RECHERCHE UTILISATEUR : RECUPERATION DU NOM ET DU HASH STATUT
 		char * status = (char*)malloc(SHA_DIGEST_LENGTH * sizeof(char));
+		while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0) {
+
+		/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
+			if (strcmp(token,"none") == 0 || iterator == 2){
+			//ie 3e champ qui n'est pas EOF
+					to_send = "ERROR*";
+					free(status);
+					return to_send;
+			}
+		/***************************************************************/
+			//nom de l'utilisateur -> premiere boucle
+			if (iterator==0){
+				to_send += string(token) + "*" ;
+			} 
+		    if (iterator==1){
+			//statut : il faut hasher le statut
+				strncpy(status, token, strlen(token));
+				to_send += hashString(status) + "*";
+			}
+			iterator++;	//indique le champ
+		}
+		free(status);
+	}
+
+/****************************************/
+
+	else if (action=="2"){
+	//RECHERCHE EXISTENCE DUNE PERSONNE : RECUPERATION HASH DU NOM
+		char * username = (char*)malloc(SHA_DIGEST_LENGTH * sizeof(char));
+		while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0) {
+
+		/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
+			if (strcmp(token,"none") == 0 || iterator == 1){
+					to_send = "ERROR*";
+					free(username);
+					return to_send;
+			}
+		/***************************************************************/
+			if (iterator==0)	{ //nom
+				strncpy(username, token, strlen(token));
+				to_send = hashString(username) + "*";
+			}
+			free(username);
+		}
+	}
+
+
+/****************************************/
+
+/****************************************/
+ 
+	else if (action == "3"){
+	//RECHERCHE REFERENCE +HASH USERNAME
+		char * username = (char*)malloc(SHA_DIGEST_LENGTH * sizeof(char));
 		while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0) {
 			//token contient une reference ou un nom du couple ref;nom
 
 		/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
-			if (strcmp(token,"ERROR") == 0 || breaker == 20 ){
+			if (strcmp(token,"none") == 0 || iterator == CLIENT_MAX_CHAMP){
 					to_send = "ERROR*";
-					free(status);
+					free(username);
 					return to_send;
 			}
 		/***************************************************************/
@@ -295,13 +357,13 @@ string traitement_rep_client(string a_traiter){
 			}
 			else {
 			//on est sur un nom : il faut le hasher
-				strncpy(status, token, strlen(token));
-				to_send += ";" + hashString(status) + "*";
+				strncpy(username, token, strlen(token));
+				to_send += ";" + hashString(username) + "*";
 			}
-			breaker++;	//empêche requête du type "1,*;;;;;;;;;;;;;;;;;" trololo
+			iterator++;	//empêche requête du type "1,*;;;;;;;;;;;;;;;;;" trololo
 			parity++;	//teste si une ref est associée obligatoirement a un nom
 		}
-		free(status);
+		free(username);
 
 	/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDE*/
 		if (parity % 2 == 0){
@@ -314,31 +376,32 @@ string traitement_rep_client(string a_traiter){
 
 /*************************************************/
 
-	else if (action == "2"){
+	else if (action == "4"){
 	//RECUPERATION DOCUMENT
 		while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0){
 		//si pas d'erreur, on récupère juste le document en un token
-			if ((strcmp(token,"ERROR") == 0)){
+			if ((strcmp(token,"none") == 0)){
 					to_send = "ERROR*";
 					return to_send;
 			}
 
 	/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDES*/
-			if (breaker>0){ //ie on a déja bouclé
+			if (iterator==1){ //ie 2e champ different de EOF
 				to_send = "ERROR*";
 				return to_send;
 			}
 
 	/**********************************************************/
 
-			breaker++;
-			to_send += string(token);
+			iterator++;
+			to_send += string(token)+"*";
 		}
 	}
 
 	/*TEST D'ERREUR DE LA REPONSE : CHAMP ACTION INVALIDE*/
-	else 
+	else {
 		to_send ="ERROR*";
+	}
 	/*****************************************************/
 
 	return to_send;
@@ -409,10 +472,11 @@ string traitement_req_bdd(string& action,
 /***********************************/
 //retransmission bdd -> frontale 1
 string traitement_rep_bdd(string a_traiter){
+
 	char *ca_traiter = (char*)a_traiter.c_str();
 	string action = string(strtok(ca_traiter,"*"));
 	string to_send;
-	int breaker=0;  //juste pour vérifier que la requete document est valide
+	int iterator=0;  //juste pour vérifier que la requete document est valide
 	char * token;
 
 	/****************************/
@@ -422,13 +486,13 @@ string traitement_rep_bdd(string a_traiter){
 	//pas besoin de parity ni de hash ici, les noms étant déjà hashés par la BDD
 		while ((token = strtok(NULL,"*"))!=NULL && string(token)!="EOF") {
 			//token contient un couple reference;hash
-			if (strcmp(token,"ERROR") == 0 || breaker == 20){
-	//breaker empêche un trop grand nombre de champ
+			if (strcmp(token,"ERROR") == 0 || iterator == BDD_MAX_CHAMP){
+	//iterator empêche un trop grand nombre de champ
 				to_send = "ERROR*";
 				return to_send;
 			}
 			to_send += string(token) + "*";
-			breaker++;
+			iterator++;
 		}
 	}
 
@@ -439,19 +503,19 @@ string traitement_rep_bdd(string a_traiter){
 		while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0){
 		//si pas d'erreur, on récupère juste le document en un token
 			
-			if (strcmp(token,"ERROR") == 0){
+			if (strcmp(token,"ERROR") == 0 || iterator == 1){
 				to_send = "ERROR*";
 				return to_send;
 			}
 
 	/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDE */
-			if (breaker>0){ //ie on a déja bouclé
+			if (iterator==0){ //ie on a déja bouclé
 				to_send = "ERROR*";
 				return to_send;
 			}
 	/**********************************************************/
 
-			breaker++;
+			iterator++;
 			to_send += string(token);
 		}
 	}
