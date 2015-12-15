@@ -12,8 +12,7 @@
 #include <string>
 #include "clientFront.h"
 #include <QtNetwork>
-#include "emission_tcp.h"
-#include "reception_tcp.h"
+#include "bdd_tcp.h"
 
 using namespace std;
 
@@ -33,12 +32,11 @@ int main(int argc, char *argv[])
 	//thread
 	reception ser;
 
-	emission_tcp emi;
+	bdd_tcp bdd;
 
-    	emi.connection_tcp("127.0.0.1",32154);
+    	bdd.connection_tcp("127.0.0.1",2211);
 	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
-	
-	reception_tcp recep; 
+	 
 
 
 	QString message;
@@ -63,21 +61,21 @@ int main(int argc, char *argv[])
 
 		if(req.decoupage(msg.getMsg().toStdString().c_str())){
 			req.construction();
-			recep.bind();
+	
 
 			if(req.getPourBdd()){
 				versBdd = QString("%1").arg(req.getRequete());
-				emi.emission(versBdd);
-				
-    				if(!recep.getConnexion()){
+				bdd.emission(versBdd);
+			
+				bdd.attendLecture();
+	
+    				//if(! bdd.getYLecture){
         				//envoyer message d'erreur timeout   					
-    				}else{
-           				recep.attenteLecture();
-
-         				req.tri(recep.getMsg().toStdString().c_str());
+    				//}else{
+           				req.tri(bdd.getMsg().toStdString().c_str());
 
 					
-    				}							
+    				//}							
 			}
 			else
 			{
