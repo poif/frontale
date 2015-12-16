@@ -247,7 +247,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 		{
 			while(m_statut[i] != '\0')
 			{
-				m_requete[i]=m_statut[i]; // La requete à envoyer est composé uniquement du statut
+				m_requete[i]=m_affectation[i]; // La requete à envoyer est composé uniquement du statut
 				i++;
 			}
 			m_requete[i]='\0';

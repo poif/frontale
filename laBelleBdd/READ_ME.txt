@@ -13,4 +13,4 @@ Paramétrer MySql :
 Avant de lancer le programme :
     - vérifiez que le service mysql fonctionne (sudo service mysql status)
     - lancez le service mysql si besoin (sudo service mysql start)
-    - vous devez avoir exécuté au moins une fois le script bdd.sql (le programme vous retournera une erreur si ce n'est pas le cas
+    - vous devez avoir exécuté au moins une fois le script bdd.sql (le programme vous retournera une erreur si ce n'est pas le cas)
