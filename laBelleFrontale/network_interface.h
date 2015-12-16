@@ -46,11 +46,13 @@ public:
 	void push_received_event(engine_event& e);
 
 	bool getRecbool();
+	void setRecbool(bool reBool);
 	std::string getResp();
+	void setResp(string reResp);
 
 	// observer functions
 	void send_look(std::string& affectation);
-	std::string send_exist(std::string& statut);
+	void send_exist(std::string& statut);
 	void* send_lookrec(std::string& dataType, std::string& statut);
 	std::string send_pull(std::string& reference, std::string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote);
 

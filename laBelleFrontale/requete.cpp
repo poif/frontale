@@ -44,6 +44,9 @@ char* Requete::getResultat()
 bool Requete::getPourBdd()
 {	return pourBdd;}
 
+void Requete::setResultat(const char * buffer)
+{	strncpy(m_resultat, buffer, 63);}
+
 //Methods
 
 /* =======================================================================================================================
@@ -96,6 +99,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 
 				if(strcmp(hash,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
+
 					while(name[cpt_element] != '\0')
 					{
 						m_resultat[cpt_name]=name[cpt_element];
