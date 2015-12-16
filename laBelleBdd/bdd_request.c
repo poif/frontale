@@ -887,19 +887,11 @@ int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
             }
             else if ( return_value == TRUE )    // La référence nous intéresse
             {
-                printf ( "RSA = %d \n", RSA_size ( bdd_key ) ) ;
-                printf ( "TUP = %s \n\nTAI = %lu \n", tuple[1], strlen ( tuple[1] ) ) ;
-                printf ( "TUP2 = " ) ; int i ;
-                for ( i = 0; i < RSA_size ( bdd_key ); i++ )
-                    printf ( "%02X ", tuple[1][i] ) ;
-                printf ( "\n\n" ) ;
 
                 // On déchiffre le tuple
                 memset ( output, '\0', RSA_size ( bdd_key ) ) ;
                 if ( RSA_chiffrement ( (unsigned char*) tuple[1], (unsigned char*) output, DECHIFFREMENT ) != TRUE )
                 {
-
-                    printf ( "\n\n HEY HEY \n" ) ;
                     perror ( "Erreur_bdd_serach_modele : RSA_dechiffrement " ) ;
                     free ( output ) ;
                     free ( user ) ;
@@ -991,12 +983,6 @@ int bdd_do_request ( MYSQL* mysql_bdd, int action, char* reference, char* valeur
                 }
             }
         }
-
-        printf ( "INS = %s \n\nTAI = %lu \n", insertion, strlen ( insertion ) ) ;
-        printf ( "INS2 = " ) ;
-        for ( i = 0; i < RSA_size ( bdd_key ); i++ )
-            printf ( "%02X ", insertion[i] ) ;
-        printf ( "\n\n" ) ;
     }
 
     // On prépare la requête selon l'action à faire
