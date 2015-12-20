@@ -37,8 +37,9 @@ int traiter_commande(char *a_traiter)
 		{
 			affectation[j] = *(save_ptr++);
 			j++;
-		} 
+		}
 
+		printf("OPTION -> %s\n", option);
 		printf("%s\n", affectation);
 
 		unsigned char a_envoyer[sizeof (char*) * 1024];
@@ -88,4 +89,77 @@ int traiter_commande(char *a_traiter)
 	}
 	
 	return true;
+}
+
+void group_traitement(char *op, char *name)
+{
+	unsigned char a_envoyer[sizeof (char*) * 1024];
+
+	if (memcmp(op, "-join", 5) || memcmp(op, "-create", 7) == 0)
+	{
+		sprintf(a_envoyer, "none*none*group*none*%s*none*none", name);
+		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+		unsigned char a_decrypt[sizeof(a_envoyer)];
+		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
+		envoi_requete(a_envoyer_crypt);
+		//traiter retour frontale gestionnaire signal ?
+		create_group(name);
+	}
+
+	else puts("Mauvais argument");
+}
+
+void share_traitement(char *op, char *name, char *path, char *group_name)
+{
+	unsigned char a_envoyer[sizeof (char*) * 1024];
+
+	if (memcmp(op, "-local", 7))
+	{
+		//sprintf(a_envoyer, "none*share*%s*%s*0*%s*none", name, path, group_name);
+		//unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+		//unsigned char a_decrypt[sizeof(a_envoyer)];
+		//crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
+		//envoi_requete(a_envoyer_crypt);
+		partage_create(name, path, 0, group_name);
+	}
+	if (memcmp(op, "-bdd", 4))
+	{
+		sprintf(a_envoyer, "none*share*%s*%s*1*%s*none", name, path, group_name);
+		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+		unsigned char a_decrypt[sizeof(a_envoyer)];
+		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
+		envoi_requete(a_envoyer_crypt);
+		//traiter retour frontale gestionnaire signal ?
+		partage_create(name, path, 1, group_name);
+	}
+	else puts("Mauvais argument");
+
+}
+void delete_traitement(char *op, char *name, char *path)
+{
+	unsigned char a_envoyer[sizeof (char*) * 1024];
+
+	if (memcmp(op, "-local", 7))
+	{
+		//sprintf(a_envoyer, "none*none*delete*%s*0*%s*none", name, path);
+		//unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+		//unsigned char a_decrypt[sizeof(a_envoyer)];
+		//crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
+		//envoi_requete(a_envoyer_crypt);
+		partage_delete(name, path);
+	}
+
+	if (memcmp(op, "-bdd", 4))
+	{
+		sprintf(a_envoyer, "none*none*delete*%s*1*%s*none", name, path);
+		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+		unsigned char a_decrypt[sizeof(a_envoyer)];
+		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
+		envoi_requete(a_envoyer_crypt);
+		//traiter retour frontale gestionnaire signal ?
+		partage_delete(name, path);
+	}
+
+	else puts("Mauvais argument");
+
 }

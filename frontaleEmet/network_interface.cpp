@@ -10,6 +10,8 @@
 
 #include <string>
 
+#include <QCoreApplication>
+
 #include <cryptopp/rsa.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/osrng.h>
@@ -19,6 +21,8 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
+#include "clientFront.h"
+#include "reception.h"
 #include "network_interface.h"
 #include "engine_event.h"
 #include "utils.h"
@@ -31,7 +35,7 @@ using namespace CryptoPP;
 /**
  * constructeur
  */
-network_interface::network_interface(){
+network_interface::network_interface(bdd_tcp * outbdd): bdd(outbdd){
 	running = true;
 	host_rem = "127.0.0.1";
     	port_rem = 8082;
@@ -486,15 +490,58 @@ void network_interface::process_received_events(engine_event& e){
 
 		      engine_event r;
 		      engine_event p;
+		      vector<string> liste;
 
 		      string *finalList = new string[2];
+		      string en_cours;
+
 		      int nRemote = e.i_data["CHALLENGE"];
 
 		      string pubStringRemote = e.s_data["PUB"];
-		      string affectationReq = e.s_data["AFFECTATION"];
+		      string &affectationReq = e.s_data["AFFECTATION"];
 
 		      /*Traitement de la requete */
-		      finalList = traitement_look(affectationReq);
+		      //finalList = traitement_look(affectationReq);
+
+		      /*en_cours = traitement_req_bdd(1, 
+						  "none", 
+						  affectation, 
+						  "none", 
+						  "none", 
+						  "none", 
+						  "none");
+
+		      QString mon_cours = QString("%1").arg(en_cours);
+
+		      bdd->emission(mon_cours);
+		      bdd->attendLecture();
+
+		      Qtring recu = bdd->getMsg();
+
+		      string recuStr = recu.toStdSring();*/
+		      liste.push_back("none");
+		      en_cours = traitement_req_client("1", "none", affectationReq, liste,"none","none", "none");
+
+		      QString mon_cours = QString("%1").arg(en_cours.data());
+
+		      clientFront cli;
+
+		      cli.socBind();
+		      cli.emission(mon_cours);
+
+		      reception ser;
+
+		      ser.ecoute(-1); // timeout= -1 == pas de timeout
+
+		      QString message = ser.getMsg();
+
+		      string recuStr = message.toStdString();
+
+		      string list = traitement_rep_client(recuStr);
+
+
+		      //envoi_bdd 
+
 		      string hashStatList = finalList[0];
 		      string nomList = finalList[1];
 
@@ -502,8 +549,7 @@ void network_interface::process_received_events(engine_event& e){
 		      {
 			        r.type = engine_event::SHOW;
 			        r.i_data["CHALL"] = nRemote;
-			        r.s_data["NOM"] = nomList;
-			        r.s_data["HSTATUT"] = hashStatList;
+			        r.s_data["REPONSE"] = list;
 
 			        boost::archive::text_oarchive archive(archive_stream);
 			        archive << r;
@@ -770,22 +816,20 @@ void network_interface::process_received_events(engine_event& e){
 
 					challN = r.i_data["CHALL"];
 					if (challN%save_n == 0){
-						if(!r.s_data["NOM"].empty() && r.s_data["NOM"] != ""){
-							if(!r.s_data["HSTATUT"].empty() && r.s_data["HSTATUT"] != ""){
-								istringstream issNom(r.s_data["NOM"]);
-								istringstream issHstatut(r.s_data["HSTATUT"]);
+						if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
+								/*istringstream issListe(r.s_data["REPONSE"]);
 								string nom;
 								string hstatut; 
 								while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
 								{ 
 								    showRep += nom + "*" + hstatut + "*";
 								}
-								showRep.erase(showRep.size() - 1, 1);
+								showRep.erase(showRep.size() - 1, 1);*/
 								//showRep[0] = r.s_data["NOM"];
 								//showRep[1] = r.s_data["HSTATUT"];
-								responseRec = showRep;
+								responseRec = r.s_data["REPONSE"];
 								recBool = true;
-							}
+							
 						}
 					}
 				}

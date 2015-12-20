@@ -1,5 +1,15 @@
 #include "traitement_recu.h"
 
+
+/*======================================================================
+**  Nom          : traiter_recu
+**  Description  : Permet d'effectuer les actions en fonction de ce que
+**                 la requete reçu de la frontale
+** ---------------------------------------------------------------------
+**  Parametres   :
+**      char * requete_recu : requete reçu par la frontale
+**======================================================================*/
+
 int traiter_recu (char * requete_recu)
 {
 	unsigned char requete_decrypt[sizeof(requete_recu)];

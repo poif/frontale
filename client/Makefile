@@ -11,8 +11,8 @@ clean:
 	rm *.o *.gch $(CIBLES)
 
 
-client: client.o traitement_commande.o traitement_recu.o ecoute.o crypt.o recup_config.o envoi.o
-	$(CC) $(CFLAGS) -o $@ client.o traitement_commande.o traitement_recu.o crypt.o ecoute.o envoi.o recup_config.o $(LIBS)
+client: client.o traitement_commande.o partage.o groupe.o traitement_recu.o ecoute.o crypt.o recup_config.o envoi.o
+	$(CC) $(CFLAGS) -o $@ client.o partage.o groupe.o traitement_commande.o traitement_recu.o crypt.o ecoute.o envoi.o recup_config.o $(LIBS)
 
 client.o: client.c
 		$(CC) $(CFLAGS) -c client.c crypt.h client.h
@@ -34,3 +34,9 @@ crypt.o: crypt.c
 
 traitement_recu.o: traitement_recu.c
 		$(CC) $(CFLAGS) -c traitement_recu.c traitement_recu.h envoi.h
+
+groupe.o: groupe.c
+		$(CC) $(CFLAGS) -c groupe.c groupe.h
+
+partage.o: partage.c
+		$(CC) $(CFLAGS) -c partage.c partage.h

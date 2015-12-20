@@ -18,6 +18,7 @@
 
 #include "engine_event.h"
 #include "noeudthor.h"
+#include "bdd_tcp.h"
 
 #define BUFFER_SIZE 2048
 
@@ -27,7 +28,7 @@ class NoeudThor;
 
 class network_interface{
 public:
-	network_interface();
+	network_interface(bdd_tcp *outbdd);
 	~network_interface();
 
 	void spawn();
@@ -98,6 +99,8 @@ private:
 
 	RSA::PrivateKey privateKey;
 	RSA::PublicKey publicKey;
+
+	bdd_tcp * bdd;
 	
 	int type;
 	int save_n;
