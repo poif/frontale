@@ -490,6 +490,7 @@ void network_interface::process_received_events(engine_event& e){
 
 		      engine_event r;
 		      engine_event p;
+		      vector<string> liste;
 
 		      string *finalList = new string[2];
 		      string en_cours;
@@ -518,7 +519,8 @@ void network_interface::process_received_events(engine_event& e){
 		      Qtring recu = bdd->getMsg();
 
 		      string recuStr = recu.toStdSring();*/
-		      en_cours = traitement_req_client("1", NULL, affectationReq, NULL,NULL,NULL, NULL);
+		      liste.push_back("none");
+		      en_cours = traitement_req_client("1", "none", affectationReq, liste,"none","none", "none");
 
 		      QString mon_cours = QString("%1").arg(en_cours.data());
 
