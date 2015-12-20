@@ -1,6 +1,5 @@
 #include "envoi.h"
 
-
 /*======================================================================
 **  Nom          : envoi_requete
 **  Description  : Permet l'envoi d'une requête vers la frontale
@@ -14,7 +13,7 @@ int envoi_requete(char *requete)
   int sockfd;
   struct sockaddr_in serveur; 
   fd_set readfds;
-
+  printf("Longueur du paquet -> %i\n", strlen(requete));
   sockfd = socket(AF_INET,/*SOCK_STREAM*/SOCK_DGRAM,/*IPPROTO_TCP*/IPPROTO_UDP);
 
   serveur.sin_family = AF_INET;
@@ -42,7 +41,7 @@ int envoi_requete(char *requete)
   }*/
 
   printf("requete -> %s\n", requete);
-                                           
+
   if(send(sockfd,requete,strlen(requete),0) == -1)
   {
     perror("Erreur lors de l'appel a send -> ");

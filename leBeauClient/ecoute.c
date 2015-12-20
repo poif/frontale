@@ -10,33 +10,23 @@ void * ecoute_thread_client()
 
   int sockfd_ecoute, sockfd_distant;       
   fd_set readfds;              
-                        
-  char buf[1024];
-  char bufout[1024];           
 
-  memset(buf,'\0',1024);  
-  memset(bufout,'\0',1024);       
+  char buf[1024];               
+
+  memset(buf,'\0',1024);        
 
   struct sockaddr_in my_addr;  
   struct sockaddr_in client;    
 
   socklen_t sin_size = sizeof(struct sockaddr_in);
 
-  //sockfd_ecoute = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
-
-  sockfd_ecoute = socket(AF_INET, SOCK_DGRAM, 0);
-  sockfd_distant = socket(AF_INET, SOCK_DGRAM, 0);
-  if(sockfd_ecoute == -1)
-  {
-      perror("socket()");
-      exit(1);
-  }
+  sockfd_ecoute = socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
 
   my_addr.sin_family = AF_INET;
 
   my_addr.sin_port = ntohs(recup_valeur_entier ( "uport" ));
 
-  my_addr.sin_addr.s_addr=inet_addr("127.0.0.1");//htonl(INADDR_ANY);
+  my_addr.sin_addr.s_addr=htonl(INADDR_ANY);
 
   if(bind(sockfd_ecoute,(struct sockaddr*)&my_addr,sizeof(my_addr)) != 0)
   {
@@ -48,55 +38,64 @@ void * ecoute_thread_client()
   {
     perror("Erreur lors de l'appel a listen -> ");
     exit(2);
-  }
-
+  }*/
   while(1)
   {
-  	FD_ZERO(&readfds);
-  	
-  	if(sockfd_ecoute != 0)	FD_SET(sockfd_ecoute, &readfds);
+    memset(buf, '\0', sizeof(buf));
+    puts("YOLO");
 
-  	if( select(sockfd_ecoute, &readfds, NULL, NULL, NULL) == -1 )
+    if (recvfrom(sockfd_ecoute, buf, sizeof(buf), 0, (struct sockaddr*)&client,&sin_size) == -1)
+    {
+      perror("Error recvfrom -> ");
+      close(sockfd_ecoute);
+      exit(2);
+    }
+    printf("BUF -> %s\n", buf);
+    traiter_recu(buf);
+    puts("AFTER");
+/*
+	puts("HIHA");
+  	FD_ZERO(&readfds);
+	puts("NIANIA");
+  	if(sockfd_ecoute != 0 || sockfd_distant != 0)
+	{
+		FD_SET(sockfd_ecoute, &readfds);
+		FD_SET(sockfd_distant, &readfds);
+	}
+
+  	*if( select(sockfd_ecoute, &readfds, NULL, NULL, NULL) == -1 )
   	{
   		perror("Erreur lors de l'appel a select -> ");
         exit(1);
   	}
 
   	if(FD_ISSET(sockfd_ecoute,&readfds))
-  	{                           
-        if((sockfd_distant = accept(sockfd_ecoute,(struct sockaddr*)&client,&sin_size)) == -1)
-        {
-            perror("Erreur lors de accept -> ");
-            exit(3);
+  	{
+          if((sockfd_distant = accept(sockfd_ecoute,(struct sockaddr*)&client,&sin_size)) == -1)
+          {
+              perror("Erreur lors de accept -> ");
+              exit(3);
+          }
+	  printf("socket -> %i\n", sockfd_distant);
+	  puts("YOLO");
+	  yolo=1;
         }
-    }
-
+if(yolo){
     if(FD_ISSET(sockfd_distant, &readfds))
     {
-    	if(recv(sockfd_distant,&buf,1024,0) == -1)
+	puts("ARG");
+    	if(recv_from(sockfd_distant,&buf,1024,0) == -1)
     	{
     		perror("Erreur lors du recv ->");
     		exit(4);
     	}
-
+	puts("j'ai recu un truc");
+	traiter_recu(buf);
       //appel a la fonction de decryptage
     }
-  }*/
-     int n = 0;
+  }}*/
 
-    if((n = recvfrom(sockfd_ecoute, buf, sizeof buf - 1, 0, (struct sockaddr*)&client, &sin_size)) < 0)
-    {
-        perror("recvfrom()");
-        exit(1);
-    }
-    buf[n] = '\0';
-    decrypt(buf, bufout , strlen(buf));
-    FILE *f = fopen("receptfile.txt", "w");
-
-    fprintf(f, "reception message de la frontale : %s\n",bufout );
-    fclose(f);
-    
-    //puts("buffer : %s\n", buf);
+  }
 }
 
 /*======================================================================

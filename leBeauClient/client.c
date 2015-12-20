@@ -7,7 +7,8 @@ int main (void)
 	//unsigned char entre[] = "bonjourj'aimelecheval";
 	//unsigned char sortie[sizeof(entre)];// = malloc (sizeof(entre));
 	//unsigned char lafin[sizeof(entre)];// = malloc (sizeof(entre));
-	system("clear");
+
+	partage_create("fichier.txt", "/home/valou/fichier.txt", 0, "mongroup,niania");
 
 	if(memcmp(recup_valeur("accueil_visible"), "true", 4) == 0)
 		accueil();
