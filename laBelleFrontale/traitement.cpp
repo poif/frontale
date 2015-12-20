@@ -219,24 +219,27 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
 	/*****************/
 
 //fonction de formatage de requete
-string traitement_req_client(string& action, string& statut, 
-								string& affectation, 
-								vector<string>& groupes_client,
-								string& typeData,
-								string& ref, string& user){	
+//ex : tring testreq = traitement_req_client(action,"none",affectation,vector<string>(),datatype,reference,user);
+string traitement_req_client(string action, 
+								string statut, 
+								string affectation, 
+								vector<string> groupes_client,
+								string typeData,
+								string ref, 
+								string user){	
   string to_send = action + "*";
   if (statut == "none")
-    to_send +="NULL*";
+    to_send +="none*";
   else 
     to_send += statut + "*";
 
   if (affectation == "none")
-    to_send += "NULL*";
+    to_send += "none*";
   else 
     to_send += affectation + "*"; 
 
-  if (groupes_client[0] == "none")
-    to_send += "NULL*";
+  if (groupes_client.size()==0)
+    to_send += "none*";
   else {
     for (unsigned int i = 0; i < groupes_client.size(); i++){
       if (i==(groupes_client.size()-1))
@@ -248,17 +251,17 @@ string traitement_req_client(string& action, string& statut,
   }
 
   if (typeData == "none")
-    to_send += "NULL*";
+    to_send += "none*";
   else 
     to_send += typeData + "*";
 
   if (ref == "none")
-    to_send += "NULL*";
+    to_send += "none*";
   else 
     to_send += ref + "*";
 
   if (user== "none")
-    to_send += "NULL*";
+    to_send += "none*";
   else
     to_send += user + "*";
 
@@ -415,13 +418,13 @@ string traitement_rep_client(string a_traiter){
 /////////////////////////
 
 //formatage requete bdd
-string traitement_req_bdd(string& action, 
-						  string& statut, 
-						  string& affectation, 
-						  vector<string>& groupes_client, 
-						  string& typeData, 
-						  string& ref, 
-						  string& user){
+string traitement_req_bdd(string action, 
+						  string statut, 
+						  string affectation, 
+						  vector<string> groupes_client, 
+						  string typeData, 
+						  string ref, 
+						  string user){
 	
   string to_send = action + "*";
   if (statut == "none")
@@ -434,7 +437,7 @@ string traitement_req_bdd(string& action,
   else 
     to_send += affectation + "*"; 
 
-  if (groupes_client[0] == "none")
+  if (groupes_client.size() == 0)
     to_send += "NULL*";
   else {
     for (unsigned int i = 0; i < groupes_client.size(); i++){
