@@ -50,17 +50,21 @@ int traiter_recu (char * requete_recu)
 				;
 
 				char *status_requete = malloc (sizeof (char*) * 1024);
+				char *affectation_requete = malloc (sizeof (char*) * 1024);
 				char *test = malloc (sizeof (char*) * 1024);
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
 				printf("RECUP_STATUS -> %s\n", recup_valeur("status"));
+				printf("RECUP_STATUS -> %s\n", recup_valeur("affectation"));
 				status_requete = strtok_r(NULL, "*", &save_ptr);
-				test = strtok_r(NULL, "*", &save_ptr);
+				affectation_requete = strtok_r(NULL, "*", &save_ptr);
+				//test = strtok_r(NULL, "*", &save_ptr);
 				//printf("TEST -> %s\n", test);
 				printf("STATUS -> %s\n", status_requete);
-				
-				if( strcmp(recup_valeur("status"), status_requete) == 0)
+				printf("AFFECTATION -> %s\n", affectation_requete);
+
+				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0)
 				{
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char *) * 1024];

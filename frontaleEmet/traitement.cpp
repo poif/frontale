@@ -227,7 +227,8 @@ string traitement_req_client(string action,
 								string typeData,
 								string ref, 
 								string user){	
-  string to_send = action + "*";
+  //string to_send = action + "*";
+  string to_send;
   if (statut == "none")
     to_send +="none*";
   else 

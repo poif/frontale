@@ -28,6 +28,7 @@
 #include "utils.h"
 #include "traitement.h"
 #include "noeudthor.h"
+#include "message.h"
 
 using namespace std;
 using namespace CryptoPP;
@@ -304,6 +305,7 @@ byte* network_interface::sToB(string plain){
 	byte * conv = new byte(clear.size()+1);
 	conv = reinterpret_cast<unsigned char*>(const_cast<char*>(clear.data()));
 
+
 	return conv;
 }
 
@@ -480,7 +482,10 @@ void network_interface::process_received_events_queue(){
 }
 
 void network_interface::process_received_events(engine_event& e){
+
 	// we just have received e from the network
+
+	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
 
 	ostringstream archive_stream;
 	ostringstream archive_streamOut;
@@ -521,31 +526,44 @@ void network_interface::process_received_events(engine_event& e){
 		      string recuStr = recu.toStdSring();*/
 		      liste.push_back("none");
 		      en_cours = traitement_req_client("1", "none", affectationReq, liste,"none","none", "none");
-
+		      cout << "la" << en_cours << endl;
 		      QString mon_cours = QString("%1").arg(en_cours.data());
+
+		      Message msg2(mon_cours,'1','*');
+		      msg2.entete();
+		      msg2.chiffrement(key);
+
+		      string toto = msg2.getChiffre().toStdString();
+		      cout << "ici : " << toto << endl;
 
 		      clientFront cli;
 
-		      cli.socBind();
-		      cli.emission(mon_cours);
-
 		      reception ser;
 
+		     
+
+		      cli.socBind();
+		      cli.emission(msg2.getChiffre());
 		      ser.ecoute(-1); // timeout= -1 == pas de timeout
 
 		      QString message = ser.getMsg();
 
-		      string recuStr = message.toStdString();
+		      Message msg(message,'*');
+		      msg.dechiffrement(key);
+
+		      string recuStr = msg.getMsg().toStdString();
+
+		      cout << "core " << recuStr << endl ;
 
 		      string list = traitement_rep_client(recuStr);
 
-
+		      cout << "list " << list << endl ;
 		      //envoi_bdd 
 
-		      string hashStatList = finalList[0];
-		      string nomList = finalList[1];
+		      //string hashStatList = finalList[0];
+		      //string nomList = finalList[1];
 
-		      if (!hashStatList.empty() || hashStatList != "")
+		      if (!list.empty() || list != "")
 		      {
 			        r.type = engine_event::SHOW;
 			        r.i_data["CHALL"] = nRemote;
