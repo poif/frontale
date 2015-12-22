@@ -525,7 +525,7 @@ void network_interface::process_received_events(engine_event& e){
 		      string recuStr = recu.toStdSring();*/
 		      liste.push_back("none");
 		      en_cours = traitement_req_client("1", "none", affectationReq, liste,"none","none", "none");
-		      cout << "la" << en_cours << endl;
+
 		      QString mon_cours = QString("%1").arg(en_cours.data());
 
 		      Message msg2(mon_cours,'1','*');
@@ -533,7 +533,6 @@ void network_interface::process_received_events(engine_event& e){
 		      msg2.chiffrement(key);
 
 		      string toto = msg2.getChiffre().toStdString();
-		      cout << "ici : " << toto << endl;
 
 		      clientFront cli;
 
@@ -550,11 +549,8 @@ void network_interface::process_received_events(engine_event& e){
 
 		      string recuStr = msg.getMsg().toStdString();
 
-		      cout << "core " << recuStr << endl ;
-
 		      string list = traitement_rep_client(recuStr);
 
-		      cout << "list " << list << endl ;
 		      //envoi_bdd 
 
 		      //string hashStatList = finalList[0];
@@ -627,7 +623,7 @@ void network_interface::process_received_events(engine_event& e){
 
 			liste.push_back("none");
 			en_cours = traitement_req_client("2", "none", affectationReq, liste,"none","none", "none");
-			cout << "la" << en_cours << endl;
+
 			QString mon_cours = QString("%1").arg(en_cours.data());
 
 			Message msg2(mon_cours,'2','*');
@@ -635,7 +631,6 @@ void network_interface::process_received_events(engine_event& e){
 			msg2.chiffrement(key);
 
 			string toto = msg2.getChiffre().toStdString();
-			cout << "ici : " << toto << endl;
 
 			clientFront cli;
 
@@ -644,7 +639,6 @@ void network_interface::process_received_events(engine_event& e){
 			cli.socBind();
 			cli.emission(msg2.getChiffre());
 			ser.ecoute(-1); // timeout= -1 == pas de timeout
-			cout << "terter" << endl ;
 
 			QString message = ser.getMsg();
 
@@ -653,11 +647,7 @@ void network_interface::process_received_events(engine_event& e){
 
 			string recuStr = msg.getMsg().toStdString();
 
-			cout << "core " << recuStr << endl ;
-
 			string list = traitement_rep_client(recuStr);
-
-			cout << "list " << list << endl ;
 
 			if (!list.empty() || list != "")
 			{

@@ -279,7 +279,6 @@ string traitement_req_client(string action,
 string traitement_rep_client(string a_traiter){
 	char *ca_traiter = (char*)a_traiter.c_str();
 	string action = string(strtok(ca_traiter,"*"));
-  cout << "toto" << endl;
 	string to_send;
 	int iterator=0;		   //teste le numéro de champ et les sorties de boucle
 	int parity=1;		   //permet de repérer les références et les noms, tester : considérer à 1 car action l'incrémente implicitement
@@ -317,7 +316,6 @@ string traitement_rep_client(string a_traiter){
 /****************************************/
 
 	else if (action=="2"){
-    cout << "toto" << endl;
 	//RECHERCHE EXISTENCE DUNE PERSONNE : RECUPERATION HASH DU NOM
 		char * username = (char*)malloc(100 * sizeof(char));
 		while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0) {
@@ -331,12 +329,9 @@ string traitement_rep_client(string a_traiter){
 		/***************************************************************/
 			if (iterator==0)	{ //nom
 				strcat(username, token);
-                        cout << "toto" << endl;
                         if((token = strtok(NULL, "*;")) && strcmp(token,"EOF") != 0) {
                           strcat(username, token);
-                          cout << "before hash " << username << endl;
 				  to_send = hashString(username) + "*";
-                          cout << "tosend : " << to_send << endl;
                         }
 			}
 			free(username);
