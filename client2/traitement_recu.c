@@ -37,7 +37,7 @@ int traiter_recu (char * requete_recu)
 
 	switch(type[0])
 	{
-		case 'R' :
+		case 'R' :{
 				  while (*save_ptr != '\0')	
 				  {
 					donnee[j] = *(save_ptr++);
@@ -45,9 +45,9 @@ int traiter_recu (char * requete_recu)
 				  }
 				printf("DONNEE de la reponse -> %s\n", donnee);
 				break;
-
-		case '1' :
-				;
+		}
+		case '1' :{
+				
 
 				char *status_requete = malloc (sizeof (char*) * 1024);
 				char *affectation_requete = malloc (sizeof (char*) * 1024);
@@ -55,8 +55,8 @@ int traiter_recu (char * requete_recu)
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
-				printf("RECUP_STATUS -> %s\n", recup_valeur("status"));
-				printf("RECUP_STATUS -> %s\n", recup_valeur("affectation"));
+				printf("RECUP_STATUT -> %s\n", recup_valeur("status"));
+				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
 				status_requete = strtok_r(NULL, "*", &save_ptr);
 				affectation_requete = strtok_r(NULL, "*", &save_ptr);
 				//test = strtok_r(NULL, "*", &save_ptr);
@@ -82,8 +82,45 @@ int traiter_recu (char * requete_recu)
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 					envoi_requete(a_envoyer_crypt);	
 				}
-				break;
+		break;
+		}
+		case '2' :{
+				char *status_requete = malloc (sizeof (char*) * 1024);
+				char *affectation_requete = malloc (sizeof (char*) * 1024);
+				char *test = malloc (sizeof (char*) * 1024);
+				char *nom = recup_valeur("nom");
+				printf("NOM -> %s\n", nom);
+				//char *status = recup_valeur("status");
+				printf("RECUP_STATUT -> %s\n", recup_valeur("status"));
+				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
+				status_requete = strtok_r(NULL, "*", &save_ptr);
+				affectation_requete = strtok_r(NULL, "*", &save_ptr);
+				//test = strtok_r(NULL, "*", &save_ptr);
+				//printf("TEST -> %s\n", test);
+				printf("STATUT -> %s\n", status_requete);
+				printf("AFFECTATION -> %s\n", affectation_requete);
 
+				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0)
+				{
+					puts("Correspond");
+					unsigned char a_envoyer[sizeof (char *) * 1024];
+					sprintf(a_envoyer, "2*%s*%s", nom, recup_valeur("status"));
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
+					envoi_requete(a_envoyer_crypt);
+				}
+				else
+				{
+					puts("NOP");
+					unsigned char a_envoyer[sizeof (char *) * 1024];
+					sprintf(a_envoyer, "2*none");
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
+					envoi_requete(a_envoyer_crypt);	
+				}
+		break;
+
+		}
 	}
 	return 0;
 

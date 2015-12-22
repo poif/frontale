@@ -497,7 +497,6 @@ void network_interface::process_received_events(engine_event& e){
 		      engine_event p;
 		      vector<string> liste;
 
-		      string *finalList = new string[2];
 		      string en_cours;
 
 		      int nRemote = e.i_data["CHALLENGE"];
@@ -539,8 +538,6 @@ void network_interface::process_received_events(engine_event& e){
 		      clientFront cli;
 
 		      reception ser;
-
-		     
 
 		      cli.socBind();
 		      cli.emission(msg2.getChiffre());
@@ -621,32 +618,67 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::EXIST:{
 			engine_event r;
 			engine_event p;
+			string en_cours;
+			vector<string> liste;
 			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
-			string statutReq = e.s_data["STATUT"];
+			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
-			string hashNomList = traitement_exist(statutReq);
 
-			if (!hashNomList.empty() || hashNomList != "")
+			liste.push_back("none");
+			en_cours = traitement_req_client("2", "none", affectationReq, liste,"none","none", "none");
+			cout << "la" << en_cours << endl;
+			QString mon_cours = QString("%1").arg(en_cours.data());
+
+			Message msg2(mon_cours,'2','*');
+			msg2.entete();
+			msg2.chiffrement(key);
+
+			string toto = msg2.getChiffre().toStdString();
+			cout << "ici : " << toto << endl;
+
+			clientFront cli;
+
+			reception ser;
+
+			cli.socBind();
+			cli.emission(msg2.getChiffre());
+			ser.ecoute(-1); // timeout= -1 == pas de timeout
+			cout << "terter" << endl ;
+
+			QString message = ser.getMsg();
+
+			Message msg(message,'*');
+			msg.dechiffrement(key);
+
+			string recuStr = msg.getMsg().toStdString();
+
+			cout << "core " << recuStr << endl ;
+
+			string list = traitement_rep_client(recuStr);
+
+			cout << "list " << list << endl ;
+
+			if (!list.empty() || list != "")
 			{
-				r.type = engine_event::ANSWER;
-				r.i_data["CHALL"] = nRemote;
-				r.s_data["HNOM"] = hashNomList;
+			       r.type = engine_event::ANSWER;
+			       r.i_data["CHALL"] = nRemote;
+			       r.s_data["HASH"] = list;
 
-				boost::archive::text_oarchive archive(archive_stream);
-			    	archive << r;
-				string outbound_data = archive_stream.str();
+			       boost::archive::text_oarchive archive(archive_stream);
+			       archive << r;
+			       string outbound_data = archive_stream.str();
 
-				string pubRemote;
-				StringSource ss(pubStringRemote, true,
-					new Base64Decoder(
-						new StringSink(pubRemote)
-					) // Base64Decoder
-				); // StringSource
-				StringSource ss2(pubRemote, true /*pumpAll*/);
+			       string pubRemote;
+			       StringSource ss(pubStringRemote, true,
+				new Base64Decoder(
+					new StringSink(pubRemote)
+				) // Base64Decoder
+			        ); // StringSource
+			        StringSource ss2(pubRemote, true /*pumpAll*/);
 
-				RSA::PublicKey publicRemoteKey;
-				publicRemoteKey.Load(ss2);
+			        RSA::PublicKey publicRemoteKey;
+			        publicRemoteKey.Load(ss2);
 			        AutoSeededRandomPool prng;
 
 			        SecByteBlock key(AES::DEFAULT_KEYLENGTH);
@@ -855,12 +887,12 @@ void network_interface::process_received_events(engine_event& e){
 			
 					challN = r.i_data["CHALL"];
 					if (challN%save_n == 0){
-						if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
-							string hnom = r.s_data["HNOM"];
-							hnom.erase(hnom.size() - 1, 1);
-							cout << "hnom : " << hnom << endl;
+						if(!r.s_data["HASH"].empty() && r.s_data["HASH"] != ""){
+							string hash = r.s_data["HASH"];
+							//hnom.erase(hnom.size() - 1, 1);
+							cout << "hash : " << hash << endl;
 
-							responseRec = hnom;	
+							responseRec = hash;	
 							recBool = true;
 						}
 					}
@@ -936,7 +968,7 @@ void network_interface::send_look(string& affectation){
 
 }
 
-void network_interface::send_exist(string& statut){
+void network_interface::send_exist(string& affectation){
 	engine_event e;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::EXIST;
@@ -954,7 +986,7 @@ void network_interface::send_exist(string& statut){
 	pubEncoded = Pub_toB64string();
 
 	e.s_data["PUB"]=pubEncoded;
-	e.s_data["STATUT"]=statut;
+	e.s_data["AFFECTATION"]=affectation;
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
@@ -980,7 +1012,8 @@ void* network_interface::send_lookrec(string& dataType, string& statut){
 
 	/* choisir nombre entier grand */
 	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int n = bigger_prime(100000);
+	int v = rand() % 20000 + 80000;
+	int n = bigger_prime(v);
 	save_n = n;
 
 	e.s_data["PUB"]=pubEncoded;

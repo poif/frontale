@@ -60,6 +60,7 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 	int cpt_name=0;
 	char sep = '*';
 	char hash_recu[512];
+	char condensate[512];
 	char name[512];
 	char reference[512];
 
@@ -116,8 +117,11 @@ int Requete::tri(const char *resultat) //tri les resultats recu et garde les él
 
 		else if (strcmp(m_option,"-e") ==0)
 		{
-			SHA1_Update(&ctx,m_parametre,strlen(m_parametre));
-                        SHA1_Final((unsigned char*)hash,&ctx);
+			strcat(condensate, m_parametre);
+			strcat(condensate, m_statut);
+			printf("le condensate : %s\n", condensate);
+			SHA1_Update(&ctx,condensate,strlen(condensate));
+                        	SHA1_Final((unsigned char*)hash,&ctx);
 
 			do
 			{
@@ -249,9 +253,9 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 		else if(strcmp(m_option,"-e") == 0) // Si on cherche l'existance
 		{
-			while(m_statut[i] != '\0')
+			while(m_affectation[i] != '\0')
 			{
-				m_requete[i]=m_affectation[i]; // La requete à envoyer est composé uniquement du statut
+				m_requete[i]=m_affectation[i]; // La requete à envoyer est composé uniquement de l'affectation
 				i++;
 			}
 			m_requete[i]='\0';
