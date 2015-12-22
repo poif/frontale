@@ -1,1 +1,1 @@
-client2/groupe.c
+../client2/groupe.c

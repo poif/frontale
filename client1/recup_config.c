@@ -1,1 +1,1 @@
-client2/recup_config.c
+../client2/recup_config.c

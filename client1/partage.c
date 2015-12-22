@@ -1,1 +1,1 @@
-client2/partage.c
+../client2/partage.c

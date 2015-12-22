@@ -1,1 +1,1 @@
-client2/traitement_commande.c
+../client2/traitement_commande.c

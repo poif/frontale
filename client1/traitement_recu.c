@@ -1,1 +1,1 @@
-client2/traitement_recu.c
+../client2/traitement_recu.c
