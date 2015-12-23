@@ -88,13 +88,15 @@ void Fusionneur::timeoutCallback(string token)
 	/* TODO */
 	/* Appeler une fonction de traitement qui ) partir de la liste va retrouver le / les bonnes réponses pour les renvoyer au client */
 
-	IpPort ipPortDuClient;
-	ipPortDuClient.hostAddress= tokenToClient[token].hostAddress;
-	ipPortDuClient.port=tokenToClient[token].port;
+	delete listeReponse;
+
+	IpPort ipPortDuClient = tokenToClient[token];
 	tokenToClient.erase(token);
 
 	/* TODO */
-	tokenToTimer.erase(token);
 	/*Faire l'envoi au client*/
+
+	delete tokenToTimer[token];
+	tokenToTimer.erase(token);
 	cout << "Le slot à été appelé correctement avec le token" << token << endl;
 }
