@@ -82,6 +82,7 @@ void Fusionneur::addMessageToList(string token, string msg)
 
 void Fusionneur::timeoutCallback(string token)
 {
+	cout << __FUNCTION << " appelée avec le token:" << token << " en argument" << std::endl;
 	std::list<string>* listeReponse = tokenToMsgList[token];
 	tokenToMsgList.erase(token);
 
