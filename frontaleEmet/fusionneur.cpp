@@ -20,7 +20,7 @@ Fusionneur* Fusionneur::getInstance()
 	return _instance;
 }
 
-std::string Fusionneur::GenToken()
+std::string Fusionneur::GenToken(QHostAddress addr, quint16 port)
 {
 	ostringstream tokenContainer;
 	tokenContainer << time(NULL)-t0<< rand()%100;
@@ -30,40 +30,71 @@ std::string Fusionneur::GenToken()
 	char hashChar[SHA_DIGEST_LENGTH];
 	SHA1_Update(&ctx,tokenContainer.str().c_str(),tokenContainer.str().length());
 	SHA1_Final((unsigned char*)hashChar,&ctx);
-	string hash = string(hashChar, SHA_DIGEST_LENGTH);
-	return hash;
-}
+	string token = string(hashChar, SHA_DIGEST_LENGTH);
 
-//a appeler avant de send au réseau: créé l'espace de stockage des résultats avant défloutage
-//créé aussi le timer qu'on lancera avec startTimer('token') juste après l'envoi des données sur le réseau
-void Fusionneur::createDataStorage(string token)
-{
-	if (tokenToTimer[token] == NULL){
-		tokenToTimer[token]=new TimerToken(token);
+	if (tokenToTimer.find(token) == tokenToTimer.cend()){
+		tokenToTimer.emplace(token, new QTimer());
 		tokenToTimer[token]->setInterval(2000);
 		tokenToTimer[token]->setSingleShot(true);
-		connect(tokenToTimer[token], SIGNAL(timeout()), this, SLOT(dataRecieved(tokenToTimer[token].token)));
+		connect(tokenToTimer[token], SIGNAL(timeout()), this, SLOT(timeoutCallback(token)));
 	}
 	else {
-		cerr << "Erreur la map n'est pas censé avoir un TimerToken à cet emplacement avant d'avoir recu ce token" << endl;
+		cerr << "Erreur : tokenToTimer n'est pas censé avoir un TimerToken à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
 	}
-	if (tokenMsgList[token] == NULL){
-		tokenMsgList[token] = new list<string>();
+	if (tokenToMsgList.find(token) == tokenToMsgList.cend()){
+		tokenToMsgList.emplace(token, new list<string>());
 	}
 	else {
 		// Ne devrait jamais s'afficher
-		cerr << "Erreur la map n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
+		cerr << "Erreur : tokenToMsgList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
 	}
+	if (tokenToClient.find(token) == tokenToClient.cend()){
+		IpPort p;
+		p.hostAddress=addr;
+		p.port=port;
+		tokenToClient.emplace(token, p);
+	}
+	else {
+		cerr << "Erreur : tokenToClient n'est pas censé avoir un TimerToken à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
+	}
+	return token;
 }
 
 void Fusionneur::startTimer(string token)
 {
-	if (tokenToTimer[token] != NULL){
+	if (tokenToTimer.find(token) != tokenToTimer.cend()){
 		tokenToTimer[token]->start();
 	}
 }
 
-void Fusionneur::doNothingForTestingPurpose(string token)
+void Fusionneur::addMessageToList(string token, string msg)
 {
+	if (tokenToMsgList.find(token) != tokenToMsgList.cend()){
+		tokenToMsgList[token]->push_back(msg);
+	}
+	else {
+		cerr << "Erreur : on tente de rajoutter des messages alors que le token n'existe pas. Timeout dépassé ou tentative d'attaque." << endl;
+	}
+}
+
+void Fusionneur::timeoutCallback(string token)
+{
+	std::list<string>* listeReponse = tokenToMsgList[token];
+	tokenToMsgList.erase(token);
+
+	/* TODO */
+	/* Appeler une fonction de traitement qui ) partir de la liste va retrouver le / les bonnes réponses pour les renvoyer au client */
+
+	IpPort ipPortDuClient;
+	ipPortDuClient.hostAddress= tokenToClient[token].hostAddress;
+	ipPortDuClient.port=tokenToClient[token].port;
+	tokenToClient.erase(token);
+
+	/* TODO */
+	tokenToTimer.erase(token);
+	/*Faire l'envoi au client*/
 	cout << "Le slot à été appelé correctement avec le token" << token << endl;
 }
