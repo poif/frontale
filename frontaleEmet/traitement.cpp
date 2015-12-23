@@ -220,15 +220,16 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
 
 //fonction de formatage de requete
 //ex : tring testreq = traitement_req_client(action,"none",affectation,vector<string>(),datatype,reference,user);
-string traitement_req_client(string action, 
+string traitement_req_client(	string numero,
+								string action, 
 								string statut, 
 								string affectation, 
 								vector<string> groupes_client,
 								string typeData,
 								string ref, 
-								string user){	
-  //string to_send = action + "*";
-  string to_send;
+								string user){
+  string to_send = numero + "*";	
+  to_send = action + "*";
   if (statut == "none")
     to_send +="none*";
   else 
@@ -276,6 +277,7 @@ string traitement_req_client(string action,
 
 //retransmission client->frontale1
 //il faut hasher le statut si action1, il faut hasher le nom si action2
+/*
 string traitement_rep_client(string a_traiter){
 	char *ca_traiter = (char*)a_traiter.c_str();
 	string action = string(strtok(ca_traiter,"*"));
@@ -284,21 +286,21 @@ string traitement_rep_client(string a_traiter){
 	int parity=1;		   //permet de repérer les références et les noms, tester : considérer à 1 car action l'incrémente implicitement
 	char * token;
 
-/****************************************/
 
-	if (action=="1") {
+*/
+/*	if (action=="1") {
 	//RECHERCHE UTILISATEUR : RECUPERATION DU NOM ET DU HASH STATUT
 		char * status = (char*)malloc(SHA_DIGEST_LENGTH * sizeof(char));
 		while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0) {
-
+*/
 		/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
-			if (strcmp(token,"none") == 0 || iterator == 2){
+/*			if (strcmp(token,"none") == 0 || iterator == 2){
 			//ie 3e champ qui n'est pas EOF
 					to_send = "ERROR*";
 					free(status);
 					return to_send;
 			}
-		/***************************************************************/
+		
 			//nom de l'utilisateur -> premiere boucle
 			if (iterator==0){
 				to_send += string(token) + "*" ;
@@ -313,52 +315,43 @@ string traitement_rep_client(string a_traiter){
 		free(status);
 	}
 
-/****************************************/
 
 	else if (action=="2"){
 	//RECHERCHE EXISTENCE DUNE PERSONNE : RECUPERATION HASH DU NOM
-		char * username = (char*)malloc(100 * sizeof(char));
+		char * username = (char*)malloc(SHA_DIGEST_LENGTH * sizeof(char));
 		while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0) {
-
+*/
 		/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
-			if (strcmp(token,"none") == 0 || iterator == 1){
+/*			if (strcmp(token,"none") == 0 || iterator == 1){
 					to_send = "ERROR*";
 					free(username);
 					return to_send;
 			}
-		/***************************************************************/
+		
 			if (iterator==0)	{ //nom
-				strcat(username, token);
-                        if((token = strtok(NULL, "*;")) && strcmp(token,"EOF") != 0) {
-                          strcat(username, token);
-				  to_send = hashString(username) + "*";
-                        }
+				strncpy(username, token, strlen(token));
+				to_send = hashString(username) + "*";
 			}
 			free(username);
 		}
 	}
 
 
-/****************************************/
-
-/****************************************/
- 
 	else if (action == "3"){
 	//RECHERCHE REFERENCE +HASH USERNAME
 		char * username = (char*)malloc(SHA_DIGEST_LENGTH * sizeof(char));
 		while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0) {
 			//token contient une reference ou un nom du couple ref;nom
-
+*/
 		/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
-			if (strcmp(token,"none") == 0 || iterator == CLIENT_MAX_CHAMP){
+/*			if (strcmp(token,"none") == 0 || iterator == CLIENT_MAX_CHAMP){
 					to_send = "ERROR*";
 					free(username);
 					return to_send;
 			}
-		/***************************************************************/
-
+*/
 /*A PRIORI IMPOSSIBLE QU'UN NOM OU UNE REFERENCE SOIT SEUL -> testé avec parity*/
-			if (parity%2==1){
+/*			if (parity%2==1){
 			//on est sur une référence
 				to_send += string(token);
 			}
@@ -371,17 +364,17 @@ string traitement_rep_client(string a_traiter){
 			parity++;	//teste si une ref est associée obligatoirement a un nom
 		}
 		free(username);
-
+*/
 	/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDE*/
-		if (parity % 2 == 0){
+/*		if (parity % 2 == 0){
 		//EOF NE COMPTE PAS
      		to_send = "ERROR*";
 			return to_send;
 		}
-	/*********************************************************/
+
 	}
 
-/*************************************************/
+
 
 	else if (action == "4"){
 	//RECUPERATION DOCUMENT
@@ -391,46 +384,264 @@ string traitement_rep_client(string a_traiter){
 					to_send = "ERROR*";
 					return to_send;
 			}
-
+*/
 	/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDES*/
-			if (iterator==1){ //ie 2e champ different de EOF
+/*			if (iterator==1){ //ie 2e champ different de EOF
 				to_send = "ERROR*";
 				return to_send;
 			}
 
-	/**********************************************************/
 
 			iterator++;
 			to_send += string(token)+"*";
 		}
 	}
-
+*/
 	/*TEST D'ERREUR DE LA REPONSE : CHAMP ACTION INVALIDE*/
-	else {
+/*	else {
 		to_send ="ERROR*";
 	}
-	/*****************************************************/
+	
 
 	return to_send;
 }
 
 
-
+*/
 /***************************************************/
+
+
+
+//VERSION AVEC TOKEN EN PARAM ET RECUPERATION DES REQUETES 
+string traitement_rep_client(string num){
+	vector<string> a_traiter = vector<string>();
+	//fonction pour recuperer les requetes depuis le réseau
+	/*BLOC DE TEST EN ATTENDANT*/
+	/*REPONSES 1/2*/
+//	a_traiter.push_back("123*1*Eichler*prof*EOF");
+//	a_traiter.push_back("123*1*Castelain*directeur*EOF");
+//	a_traiter.push_back("123*1*Megy*tyran*EOF");
+//	a_traiter.push_back("123*1*Hernance*general anti-cafe*EOF");
+	/*REPONSES 3*/
+//	a_traiter.push_back("123*3*ref1*Toinard*ljn*EOF");			//malformée vérifiable
+//	a_traiter.push_back("123*3*ref2*Eichler*ok*ok*EOF");		//malformée invérifiable
+//	a_traiter.push_back("123*3*ref3*Castelain*ok*EOF");			//malformée vérifiable
+//	a_traiter.push_back("123*3*lol*ref3*Megy*EOF");				//malformée vérifiable
+//	a_traiter.push_back("123*3*lol*ref4*Hernance*EOF");			//malformée vérifiable
+//	a_traiter.push_back("123*ref5*Abdallah*EOF")				//bien formée
+
+	/*REPONSES 4*/
+	a_traiter.push_back("123*4*Ta_mere.mp4*EOF");
+	a_traiter.push_back("123*4*EddyMalou.tar.gz*EOF");
+	a_traiter.push_back("123*4*windows10.exe*EOF");
+	a_traiter.push_back("123*4*traitement.cpp*EOF");
+
+	/****************************/
+
+	vector<string> vectToSend=vector<string>();
+	/*Il vaut mieux décomposer comme ca : Si on se rend compte qu'une requete est invalide
+	par exemple un nom sans référence, on pourra simplement annuler cette réponse par error
+	On pourra également négliger les envois d'erreur si une réponse est valide*/
+	string to_send;
+	int firstRep = 0;		//c'est votre premiere bafouille?
+
+
+/***********************************************************/
+
+	for (unsigned int i = 0; i < a_traiter.size(); i++) {
+		//chaque réponse est dans une case du tableau
+		//on renvoie toutes les réponses concaténées
+		char *ca_traiter = (char*)a_traiter[i].c_str();
+
+		string numero = string(strtok(ca_traiter,"*"));
+		if (firstRep==0){
+			to_send += numero + "*";
+			firstRep=1;
+		}
+
+		string action= strtok(NULL,"*");
+		int iterator=0;		 		    //teste le numéro de champ et les sorties de boucle
+		int parity=1;				    //permet de repérer les références et les noms, tester : considérer à 1 car action l'incrémente implicitement
+		char * token;
+		int breaker=0;					//indique qu'il faut passer a la boucle suivante en cas d'erreur
+		string stringInTheVector;		//chaine qu'on va push dans le vector
+
+	
+	/*LE NUMERO NE SERA RENVOYEE QU'UNE SEULE FOIS*/
+
+	/*Le numero empêche les problèmes avec des actions différentes*/
+
+	/****************************************/
+
+		if (action=="1") {
+		//RECHERCHE UTILISATEUR : RECUPERATION DU NOM ET DU HASH STATUT
+			while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0 && breaker==0) {
+			breaker=0;
+			/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
+				if (strcmp(token,"none") == 0 || iterator == 2){
+				//ie 3e champ qui n'est pas EOF
+					stringInTheVector ="ERROR*";
+					breaker=1;
+				}
+			/***************************************************************/
+				//nom de l'utilisateur -> premiere boucle
+				if (breaker==0){
+					if (iterator==0){
+						stringInTheVector += string(token) + "*" ;
+					} 
+			   		if (iterator==1){
+						//c'est un statut : il faut hasher le statut
+						stringInTheVector += hashString(token) + "*";
+					}
+					iterator++;	//indique le champ
+				}
+			}
+		}
+
+	/****************************************/
+
+		else if (action=="2"){
+		//RECHERCHE EXISTENCE DUNE PERSONNE : RECUPERATION DU NOM ET DU STATUT
+			while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0 && breaker==0) {
+			/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
+				breaker=0;
+				if (strcmp(token,"none") == 0 || iterator >= 2){
+					stringInTheVector = "ERROR*";
+					breaker=1;
+				}
+			/***************************************************************/
+				if (breaker==0){		//EVITE DOUBLONS *ERROR*
+					if (iterator==0)	{ //nom
+						string username = string(token);
+						string status = string(strtok(NULL,"*")); //récupération statut
+						if (status == "none" || status == "EOF"){
+							stringInTheVector = "ERROR*";
+							breaker=1;
+						}
+						string to_hash = username + status;
+						char *hash = (char*)to_hash.c_str();
+						iterator++;
+						stringInTheVector += hashString(hash) + "*";
+					}
+				}
+			}
+		}
+
+
+	/****************************************/
+
+	/****************************************/
+ 
+		else if (action == "3"){
+		//RECHERCHE REFERENCE +HASH USERNAME
+			while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0 && breaker==0) {
+				//token contient une reference ou un nom du couple ref;nom
+			/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
+				if (strcmp(token,"none") == 0 || iterator == CLIENT_MAX_CHAMP){
+					stringInTheVector = "ERROR*";
+					breaker=1;
+				}
+			/***************************************************************/	
+
+		    	if (breaker==0){
+	/*A PRIORI IMPOSSIBLE QU'UN NOM OU UNE REFERENCE SOIT SEUL -> testé avec parity*/
+					if (parity%2==1)
+						stringInTheVector += string(token);
+					else {
+					//on est sur un nom : il faut le hasher
+						stringInTheVector += ";" + hashString(token) + "*";
+					}
+					iterator++;	//empêche requête du type "1,*;;;;;;;;;;;;;;;;;" trololo
+					parity++;	//teste si une ref est associée obligatoirement a un nom
+				}
+			}		//SORTIE WHILE
+
+		/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDE*/
+			if (parity%2==0) {		//IE ON A PAS FINI SUR UNE REFERENCE
+			//EOF NE COMPTE PAS
+				stringInTheVector = "ERROR*";
+				breaker = 1;
+			}
+
+		/*********************************************************/
+		}
+
+	/*************************************************/
+
+		else if (action == "4"){
+		//RECUPERATION DOCUMENT
+			while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0 && breaker==0){
+			//si pas d'erreur, on récupère juste le document en un token
+				if (strcmp(token,"none") == 0){
+					stringInTheVector = "ERROR*";
+					breaker = 1;
+				}
+
+		/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDES*/
+				if (iterator==1 || breaker!=0){ //ie 2e champ different de EOF
+					stringInTheVector = "ERROR*";
+				}
+
+		/**********************************************************/
+
+				iterator++;
+				stringInTheVector += string(token)+"*";
+			}
+		}
+
+		/*TEST D'ERREUR DE LA REPONSE : CHAMP ACTION INVALIDE*/
+		else {
+			stringInTheVector ="ERROR*";
+		}
+
+		/*****************************************************/
+
+		vectToSend.push_back(stringInTheVector);
+		//on ajoute une réponse traitée dans le vector
+	}
+
+/**********************************************************************/
+//ON BOUCLE POUR TESTER SIL EXISTE UNE REPONSE QUI NEST PAS UNE ERREUR//
+/**********************************************************************/
+	int valid_existence=0;
+	unsigned int i=0;
+	while (i<vectToSend.size() && valid_existence==0){
+		if (vectToSend[i] !="ERROR*"){
+			valid_existence = 1;
+		 }
+		 i++;
+	}
+
+//On remplit to_send avec les réponses valides, ou avec ERROR* si aucune n'est valide 
+
+	if (valid_existence==0)
+		to_send += "ERROR*";
+	else {
+		for (i=0;i<vectToSend.size();i++){
+			if (vectToSend[i] != "ERROR*")
+				to_send += vectToSend[i];
+		}
+	}
+
+	return to_send;
+}
+
+
 /////////////////////////
 /*         BDD         */
 /////////////////////////
 
 //formatage requete bdd
-string traitement_req_bdd(string action, 
+string traitement_req_bdd(string numero,
+						  string action, 
 						  string statut, 
 						  string affectation, 
 						  vector<string> groupes_client, 
 						  string typeData, 
 						  string ref, 
 						  string user){
-	
-  string to_send = action + "*";
+  string to_send = numero + "*";
+  to_send = action + "*";
   if (statut == "none")
     to_send +="NULL*";
   else 
