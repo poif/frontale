@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdexcept>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <iostream>
 #include "traitement.h"
 
@@ -19,9 +22,21 @@ string hashString(char * to_hash){
     SHA1_Init(&ctx);
     SHA1_Update(&ctx, to_hash, strlen(to_hash));
     SHA1_Final((unsigned char*)hash, &ctx);
-    sHash = string(hash,SHA_DIGEST_LENGTH);
+    sHash = HexFormate((const unsigned char*) hash, SHA_DIGEST_LENGTH);
     free(hash);
     return sHash;
+}
+
+string HexFormate(const unsigned char * hash, size_t length){
+	//init OSS
+    ostringstream os;
+    os.fill('0');
+    os << hex;
+    //parcours de la chaine et copie de 2 caractères hexa
+    for(const unsigned char * ptr = hash ; ptr < hash + length ; ptr++)
+        os << setw(2) << (unsigned int) *ptr;
+
+    return os.str();
 }
 
 //////////////////////////
@@ -423,12 +438,7 @@ string traitement_rep_client(vector<string> a_traiter){
 //	a_traiter.push_back("123*1*Megy*tyran*EOF");
 //	a_traiter.push_back("123*1*Hernance*general anti-cafe*EOF");
 	/*REPONSES 3*/
-//	a_traiter.push_back("123*3*ref1*Toinard*ljn*EOF");			//malformée vérifiable
-//	a_traiter.push_back("123*3*ref2*Eichler*ok*ok*EOF");		//malformée invérifiable
-//	a_traiter.push_back("123*3*ref3*Castelain*ok*EOF");			//malformée vérifiable
-//	a_traiter.push_back("123*3*lol*ref3*Megy*EOF");				//malformée vérifiable
-//	a_traiter.push_back("123*3*lol*ref4*Hernance*EOF");			//malformée vérifiable
-//	a_traiter.push_back("123*ref5*Abdallah*EOF")				//bien formée
+
 
 	/*REPONSES 4*/
 //	a_traiter.push_back("123*4*Ta_mere.mp4*EOF");
