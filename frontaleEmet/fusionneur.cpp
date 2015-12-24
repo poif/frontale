@@ -1,3 +1,4 @@
+#include "traitement.h"
 #include "fusionneur.h"
 #include <iostream>
 #include <sstream>
@@ -86,9 +87,7 @@ void Fusionneur::timeoutCallback(string token)
 	std::list<string>* listeReponse = tokenToMsgList[token];
 	tokenToMsgList.erase(token);
 
-	/* TODO */
-	/* Appeler une fonction de traitement qui ) partir de la liste va retrouver le / les bonnes réponses pour les renvoyer au client */
-
+	traitement_rep_client(listeReponse);
 	delete listeReponse;
 
 	IpPort ipPortDuClient = tokenToClient[token];
