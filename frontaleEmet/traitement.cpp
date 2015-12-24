@@ -413,8 +413,8 @@ string traitement_rep_client(string a_traiter){
 
 
 //VERSION AVEC TOKEN EN PARAM ET RECUPERATION DES REQUETES 
-string traitement_rep_client(string num){
-	vector<string> a_traiter = vector<string>();
+string traitement_rep_client(vector<string> a_traiter){
+//	vector<string> a_traiter = vector<string>();
 	//fonction pour recuperer les requetes depuis le réseau
 	/*BLOC DE TEST EN ATTENDANT*/
 	/*REPONSES 1/2*/
@@ -431,10 +431,10 @@ string traitement_rep_client(string num){
 //	a_traiter.push_back("123*ref5*Abdallah*EOF")				//bien formée
 
 	/*REPONSES 4*/
-	a_traiter.push_back("123*4*Ta_mere.mp4*EOF");
-	a_traiter.push_back("123*4*EddyMalou.tar.gz*EOF");
-	a_traiter.push_back("123*4*windows10.exe*EOF");
-	a_traiter.push_back("123*4*traitement.cpp*EOF");
+//	a_traiter.push_back("123*4*Ta_mere.mp4*EOF");
+//	a_traiter.push_back("123*4*EddyMalou.tar.gz*EOF");
+//	a_traiter.push_back("123*4*windows10.exe*EOF");
+//	a_traiter.push_back("123*4*traitement.cpp*EOF");
 
 	/****************************/
 
