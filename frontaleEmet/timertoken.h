@@ -5,6 +5,9 @@
 
 class TimerToken : public QTimer
 {
+		Q_OBJECT
+	signals:
+		void timeOutMyToken(std::string token);
 	private:
 		std::string token;
 		bool firstTime=true;
@@ -12,6 +15,8 @@ class TimerToken : public QTimer
 		TimerToken(std::string token);
 		std::string getToken() const;
 		void setToken(const std::string &value);
+	public slots:
+		void emitToken();
 };
 
 #endif // TIMERTOKEN_H

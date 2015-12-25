@@ -1,6 +1,7 @@
 #include "traitement.h"
 #include "fusionneur.h"
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <openssl/sha.h>
 
@@ -11,6 +12,19 @@ Fusionneur::Fusionneur()
 {
 	t0=time(NULL);
 	srand(t0);
+}
+
+string Fusionneur::HexFormate(const unsigned char *hash, size_t length)
+{
+	//init OSS
+	ostringstream os;
+	os.fill('0');
+	os << hex;
+	//parcours de la chaine et copie de 2 caractères hexa
+	for(const unsigned char * ptr = hash ; ptr < hash + length ; ptr++)
+		os << setw(2) << (unsigned int) *ptr;
+
+	return os.str();
 }
 
 Fusionneur* Fusionneur::getInstance()
@@ -31,13 +45,14 @@ std::string Fusionneur::GenToken(QHostAddress addr, quint16 port)
 	char hashChar[SHA_DIGEST_LENGTH];
 	SHA1_Update(&ctx,tokenContainer.str().c_str(),tokenContainer.str().length());
 	SHA1_Final((unsigned char*)hashChar,&ctx);
-	string token = string(hashChar, SHA_DIGEST_LENGTH);
+	string token = HexFormate((const unsigned char*) hashChar, SHA_DIGEST_LENGTH);
 
+	cout << "TOKEN GENERE : " << token << endl;
 	if (tokenToTimer.find(token) == tokenToTimer.cend()){
-		tokenToTimer.emplace(token, new QTimer());
+		tokenToTimer.emplace(token, new TimerToken(token));
 		tokenToTimer[token]->setInterval(2000);
 		tokenToTimer[token]->setSingleShot(true);
-		connect(tokenToTimer[token], SIGNAL(timeout()), this, SLOT(timeoutCallback(token)));
+		cout << "Resultat du connect" << connect(tokenToTimer[token], SIGNAL(timeOutMyToken(std::string)), this, SLOT(timeoutCallback(std::string))) << endl;
 	}
 	else {
 		cerr << "Erreur : tokenToTimer n'est pas censé avoir un TimerToken à cet emplacement avant d'avoir recu ce token" << endl;
@@ -68,6 +83,10 @@ void Fusionneur::startTimer(string token)
 {
 	if (tokenToTimer.find(token) != tokenToTimer.cend()){
 		tokenToTimer[token]->start();
+		cout << "Timer lancé" << std::endl;
+	}
+	else {
+		cout << "Timer pas lancéé" << std::endl;
 	}
 }
 

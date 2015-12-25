@@ -2,10 +2,10 @@
 #define FUSIONNEUR_H
 
 #include <QtNetwork>
-#include <timertoken.h>
 #include <map>
 #include <string>
 #include <list>
+#include "timertoken.h"
 
 class IpPort {
 	public:
@@ -15,14 +15,15 @@ class IpPort {
 
 class Fusionneur : public QObject
 {
-		QOBJECT_H
+		Q_OBJECT
 	protected:
 		Fusionneur();
 		std::map<std::string, IpPort> tokenToClient;
 		std::map<std::string, std::list<std::string>* > tokenToMsgList;
-		std::map<std::string, QTimer*> tokenToTimer;
+		std::map<std::string, TimerToken*> tokenToTimer;
 		static Fusionneur* _instance;
 		time_t t0;
+		std::string HexFormate(const unsigned char * hash, size_t length);
 	public:
 		static Fusionneur *getInstance();
 		std::string GenToken(QHostAddress addr, quint16 port);
