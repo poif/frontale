@@ -18,13 +18,16 @@
 // Déclarations des constantes
 //----------------------------------------------------------
 #define PORT                2211
-#define TAILLE_MAX_TRAME    245
+#define TAILLE_MAX_TRAME    500
+#define NB_MAX_REQ          20
 
 
 //----------------------------------------------------------
 // Déclarations des variables globales
 //----------------------------------------------------------
 extern int fermeture ;
+pthread_t thread_traitement[NB_MAX_REQ] ;
+pthread_mutex_t mutex_bdd ;
 pthread_t thread_receive ;
 struct sockaddr_in  addr_server ;
 struct sockaddr_in  addr_client ;
@@ -40,6 +43,7 @@ int res_activation () ;
 void res_close () ;
 void res_receive () ;
 void* fct_thread_res_receive () ;
+void* fct_thread_do_req ( void* p_data ) ;
 void res_send ( char *trame ) ;
 
 

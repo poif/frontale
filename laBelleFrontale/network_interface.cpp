@@ -28,6 +28,7 @@
 #include "utils.h"
 #include "traitement.h"
 #include "noeudthor.h"
+#include "message.h"
 
 using namespace std;
 using namespace CryptoPP;
@@ -304,6 +305,7 @@ byte* network_interface::sToB(string plain){
 	byte * conv = new byte(clear.size()+1);
 	conv = reinterpret_cast<unsigned char*>(const_cast<char*>(clear.data()));
 
+
 	return conv;
 }
 
@@ -480,7 +482,10 @@ void network_interface::process_received_events_queue(){
 }
 
 void network_interface::process_received_events(engine_event& e){
+
 	// we just have received e from the network
+
+	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
 
 	ostringstream archive_stream;
 	ostringstream archive_streamOut;
@@ -492,10 +497,7 @@ void network_interface::process_received_events(engine_event& e){
 		      engine_event p;
 		      vector<string> liste;
 
-		      string *finalList = new string[2];
 		      string en_cours;
-
-		      int nRemote = e.i_data["CHALLENGE"];
 
 		      string pubStringRemote = e.s_data["PUB"];
 		      string &affectationReq = e.s_data["AFFECTATION"];
@@ -524,31 +526,37 @@ void network_interface::process_received_events(engine_event& e){
 
 		      QString mon_cours = QString("%1").arg(en_cours.data());
 
-		      clientFront cli;
+		      Message msg2(mon_cours,'1','*');
+		      msg2.entete();
+		      msg2.chiffrement(key);
 
-		      cli.socBind();
-		      cli.emission(mon_cours);
+		      string toto = msg2.getChiffre().toStdString();
+
+		      clientFront cli;
 
 		      reception ser;
 
+		      cli.socBind();
+		      cli.emission(msg2.getChiffre());
 		      ser.ecoute(-1); // timeout= -1 == pas de timeout
 
 		      QString message = ser.getMsg();
 
-		      string recuStr = message.toStdString();
+		      Message msg(message,'*');
+		      msg.dechiffrement(key);
+
+		      string recuStr = msg.getMsg().toStdString();
 
 		      string list = traitement_rep_client(recuStr);
 
-
 		      //envoi_bdd 
 
-		      string hashStatList = finalList[0];
-		      string nomList = finalList[1];
+		      //string hashStatList = finalList[0];
+		      //string nomList = finalList[1];
 
-		      if (!hashStatList.empty() || hashStatList != "")
+		      if (!list.empty() || list != "")
 		      {
 			        r.type = engine_event::SHOW;
-			        r.i_data["CHALL"] = nRemote;
 			        r.s_data["REPONSE"] = list;
 
 			        boost::archive::text_oarchive archive(archive_stream);
@@ -603,32 +611,59 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::EXIST:{
 			engine_event r;
 			engine_event p;
-			int nRemote = e.i_data["CHALLENGE"];
+			string en_cours;
+			vector<string> liste;
 			string pubStringRemote = e.s_data["PUB"];
-			string statutReq = e.s_data["STATUT"];
+			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
-			string hashNomList = traitement_exist(statutReq);
 
-			if (!hashNomList.empty() || hashNomList != "")
+			liste.push_back("none");
+			en_cours = traitement_req_client("2", "none", affectationReq, liste,"none","none", "none");
+
+			QString mon_cours = QString("%1").arg(en_cours.data());
+
+			Message msg2(mon_cours,'2','*');
+			msg2.entete();
+			msg2.chiffrement(key);
+
+			string toto = msg2.getChiffre().toStdString();
+
+			clientFront cli;
+
+			reception ser;
+
+			cli.socBind();
+			cli.emission(msg2.getChiffre());
+			ser.ecoute(-1); // timeout= -1 == pas de timeout
+
+			QString message = ser.getMsg();
+
+			Message msg(message,'*');
+			msg.dechiffrement(key);
+
+			string recuStr = msg.getMsg().toStdString();
+
+			string list = traitement_rep_client(recuStr);
+
+			if (!list.empty() || list != "")
 			{
-				r.type = engine_event::ANSWER;
-				r.i_data["CHALL"] = nRemote;
-				r.s_data["HNOM"] = hashNomList;
+			       r.type = engine_event::ANSWER;
+			       r.s_data["HASH"] = list;
 
-				boost::archive::text_oarchive archive(archive_stream);
-			    	archive << r;
-				string outbound_data = archive_stream.str();
+			       boost::archive::text_oarchive archive(archive_stream);
+			       archive << r;
+			       string outbound_data = archive_stream.str();
 
-				string pubRemote;
-				StringSource ss(pubStringRemote, true,
-					new Base64Decoder(
-						new StringSink(pubRemote)
-					) // Base64Decoder
-				); // StringSource
-				StringSource ss2(pubRemote, true /*pumpAll*/);
+			       string pubRemote;
+			       StringSource ss(pubStringRemote, true,
+				new Base64Decoder(
+					new StringSink(pubRemote)
+				) // Base64Decoder
+			        ); // StringSource
+			        StringSource ss2(pubRemote, true /*pumpAll*/);
 
-				RSA::PublicKey publicRemoteKey;
-				publicRemoteKey.Load(ss2);
+			        RSA::PublicKey publicRemoteKey;
+			        publicRemoteKey.Load(ss2);
 			        AutoSeededRandomPool prng;
 
 			        SecByteBlock key(AES::DEFAULT_KEYLENGTH);
@@ -667,31 +702,51 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::LOOKREC:{
 			engine_event r;
 			engine_event p;
-			int nRemote = e.i_data["CHALLENGE"];
+			vector<string> liste;
+			string en_cours;
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
-			string statutReq = e.s_data["STATUT"];
+			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
-			string *finalList = new string[2];
+			/*string *finalList = new string[2];
 			finalList = traitement_lookrec(dataType, statutReq);
 			string reference = finalList[0];
 			string hashNomList = finalList[1];
+			*/
 
+			liste.push_back("none");
+			en_cours = traitement_req_client("3", "none", affectationReq, liste,"none","none", "none");
 
-			if (!hashNomList.empty() || hashNomList != "")
+			QString mon_cours = QString("%1").arg(en_cours.data());
+
+			Message msg2(mon_cours,'2','*');
+			msg2.entete();
+			msg2.chiffrement(key);
+
+			string toto = msg2.getChiffre().toStdString();
+
+			clientFront cli;
+
+			reception ser;
+
+			cli.socBind();
+			cli.emission(msg2.getChiffre());
+			ser.ecoute(-1); // timeout= -1 == pas de timeout
+
+			QString message = ser.getMsg();
+
+			Message msg(message,'*');
+			msg.dechiffrement(key);
+
+			string recuStr = msg.getMsg().toStdString();
+
+			string list = traitement_rep_client(recuStr);
+
+			if (!list.empty() || list != "")
 			{
 				r.type = engine_event::SHOWREC;
-				r.i_data["CHALL"] = nRemote;
-				save_nRemote = nRemote;
 
-				/* choisir nombre entier grand */
-				/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-				int n = bigger_prime(25000);
-				r.i_data["CHALL2"] = n;
-				save_n = n;
-
-				r.s_data["REFERENCE"] = reference;
-				r.s_data["HNOM"] = hashNomList;
+				r.s_data["REPONSE"] = list;
 
 				string pubEncoded = Pub_toB64string();
 				r.s_data["PUBKEY"] = pubEncoded;
@@ -739,10 +794,6 @@ void network_interface::process_received_events(engine_event& e){
 
 			           noeudthor->send(data_encoded);
 
-			           //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
-			           cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
-			           //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
-			           //sendTor(outbound_data);
 			}
 			
 			break;
@@ -750,38 +801,32 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::PULL:{
 			engine_event r;
 
+			string aesKey = e.s_data["KEY"];
+			string aesIv = e.s_data["IV"];
+			string reference = e.s_data["REFERENCE"];
+			string groClient = e.s_data["GRCLIENT"];
+			vector<string> groupeClient;
+			groupeClient.push_back(groClient);
+			/*Traitement de la requete */
+			string document = traitement_pull(reference, groupeClient);
 
-			int challenge = e.i_data["CHALL2"];
+			if (!document.empty() || document != "")
+			{
+				r.type = engine_event::PUSH;
+				r.s_data["DOCUMENT"] = document;
 
-			if (challenge%save_n == 0){
+				boost::archive::text_oarchive archive(archive_stream);
+				archive << r;
+				string outbound_data = archive_stream.str();
 
-				string aesKey = e.s_data["KEY"];
-				string aesIv = e.s_data["IV"];
-				string reference = e.s_data["REFERENCE"];
-				string groClient = e.s_data["GRCLIENT"];
-				vector<string> groupeClient;
-				groupeClient.push_back(groClient);
-				/*Traitement de la requete */
-				string document = traitement_pull(reference, groupeClient);
+				byte * iv = sToB(aesIv);
+				SecByteBlock key = sToSbb(aesKey);
 
-				if (!document.empty() || document != "")
-				{
-					r.type = engine_event::PUSH;
-					r.i_data["CHALL"] = save_nRemote;
-					r.s_data["DOCUMENT"] = document;
+				const string &data_encoded = encrypto_aes(key, iv, outbound_data);
 
-					boost::archive::text_oarchive archive(archive_stream);
-				    	archive << r;
-					string outbound_data = archive_stream.str();
-
-					byte * iv = sToB(aesIv);
-					SecByteBlock key = sToSbb(aesKey);
-
-					const string &data_encoded = encrypto_aes(key, iv, outbound_data);
-
-					noeudthor->send(data_encoded);
-					//sendTor(outbound_data);
-				}
+				noeudthor->send(data_encoded);
+				//sendTor(outbound_data);
+				
 			}
 			
 			break;
@@ -789,7 +834,6 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::SECRET:{
 			engine_event r;
 			
-			int challN = 0;
 			string showRep = "";
 
 			string aesKey = decrypto_rsa(e.s_data["KEY"]);
@@ -814,38 +858,47 @@ void network_interface::process_received_events(engine_event& e){
 			switch(r.type){
 				case engine_event::SHOW:{
 
-					challN = r.i_data["CHALL"];
-					if (challN%save_n == 0){
-						if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
-								/*istringstream issListe(r.s_data["REPONSE"]);
-								string nom;
-								string hstatut; 
-								while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
-								{ 
-								    showRep += nom + "*" + hstatut + "*";
-								}
-								showRep.erase(showRep.size() - 1, 1);*/
-								//showRep[0] = r.s_data["NOM"];
-								//showRep[1] = r.s_data["HSTATUT"];
-								responseRec = r.s_data["REPONSE"];
-								recBool = true;
-							
-						}
+					if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
+	
+						//showRep[0] = r.s_data["NOM"];
+						//showRep[1] = r.s_data["HSTATUT"];
+						responseRec = r.s_data["REPONSE"];
+						recBool = true;
 					}
 				}
 				case engine_event::ANSWER:{
 			
-					challN = r.i_data["CHALL"];
-					if (challN%save_n == 0){
-						if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
-							string hnom = r.s_data["HNOM"];
-							hnom.erase(hnom.size() - 1, 1);
-							cout << "hnom : " << hnom << endl;
+					if(!r.s_data["HASH"].empty() && r.s_data["HASH"] != ""){
+						string hash = r.s_data["HASH"];
+						//hnom.erase(hnom.size() - 1, 1);
+						cout << "hash : " << hash << endl;
 
-							responseRec = hnom;	
+						responseRec = hash;	
+						recBool = true;
+					
+					}
+				}
+				case engine_event::SHOWREC:{
+
+					if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
+						if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
+							string encKey = r.s_data["PUBKEY"];
+							StringSource ss(encKey, true,
+							    new Base64Decoder(
+							        new StringSink(pubRemote)
+							    ) // Base64Decoder
+							); // StringSource
+							StringSource ss2(pubRemote, true /*pumpAll*/);
+
+							RSA::PublicKey publicKeyRemote;
+							publicKey.Load(ss2);
+
+							responseRec = r.s_data["REPONSE"] + "*" + Pub_toB64string(publicKeyRemote);
 							recBool = true;
+							
 						}
 					}
+
 				}
 			}	
 		}
@@ -897,13 +950,6 @@ void network_interface::send_look(string& affectation){
 
 
 	e.type = engine_event::LOOK;
-	/* choisir nombre entier grand */
-	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int v = rand() % 20000 + 80000;
-	int n = bigger_prime(v);
-	save_n = n;
-
-	e.i_data["CHALLENGE"] = n;
 
 	pubEncoded = Pub_toB64string();
 	
@@ -918,25 +964,17 @@ void network_interface::send_look(string& affectation){
 
 }
 
-void network_interface::send_exist(string& statut){
+void network_interface::send_exist(string& affectation){
 	engine_event e;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::EXIST;
 	ostringstream archive_stream;
 	string pubEncoded;
 
-	/* choisir nombre entier grand */
-	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int v = rand() % 20000 + 80000;
-	int n = bigger_prime(v);
-	save_n = n;
-
-	e.i_data["CHALLENGE"] = n;
-
 	pubEncoded = Pub_toB64string();
 
 	e.s_data["PUB"]=pubEncoded;
-	e.s_data["STATUT"]=statut;
+	e.s_data["AFFECTATION"]=affectation;
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
@@ -946,32 +984,20 @@ void network_interface::send_exist(string& statut){
 
 }
 
-void* network_interface::send_lookrec(string& dataType, string& statut){
+void network_interface::send_lookrec(string& dataType, string& affectation){
 	engine_event e;
-	engine_event r;
-	engine_event p;
-	//boost::asio::buffer network_buffer;
+
 	e.type = engine_event::LOOKREC;
 	ostringstream archive_stream;
 	string pubEncoded;
-	string pubRemote;
 
-	string * showRep= new string[5];
-
-	int challN = 0, nRemote = 0;
-
-	/* choisir nombre entier grand */
-	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int n = bigger_prime(100000);
-	save_n = n;
-
-	e.s_data["PUB"]=pubEncoded;
-	e.i_data["CHALLENGE"] = n;
 
 	pubEncoded = Pub_toB64string();
 
+	e.s_data["PUB"]=pubEncoded;
+
 	e.s_data["TYPE"]=dataType;
-	e.s_data["STATUT"]=statut;
+	e.s_data["AFFECTATION"]=affectation;
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
@@ -979,81 +1005,11 @@ void* network_interface::send_lookrec(string& dataType, string& statut){
 
 	//sendTor(outbound_data);
 	//receiveTor(network_buffer);
-	string str_data = "toto";
 	noeudthor->send(outbound_data);
 
-	//string str_data(&network_buffer[0], network_buffer.size());
-	//string data_clear = decrypto_rsa(str_data);
-	istringstream archive_streamIn(str_data);
-	boost::archive::text_iarchive archiveIn(archive_streamIn);
-
-	archiveIn >> p;
-
-	if(p.type == engine_event::SECRET){
-
-
-		string aesKey = decrypto_rsa(p.s_data["KEY"]);
-		string aesIv = decrypto_rsa(p.s_data["IV"]);
-
-		byte * iv = sToB(aesIv);
-		SecByteBlock key = sToSbb(aesKey);
-
-		string data_clear = decrypto_aes(key, iv, p.s_data["CIPHER"]);
-
-		
-		data_clear.erase(0, 16);
-		data_clear = "22 serialization" + data_clear;
-		cout << data_clear << endl;
-
-		istringstream archive_streamPckt(data_clear);
-
-		boost::archive::text_iarchive archivePckt(archive_streamPckt);
-
-		archivePckt >> r;
-
-		if (r.type == engine_event::SHOWREC){
-			challN = r.i_data["CHALL"];
-			if (challN%n == 0){
-				nRemote = r.i_data["CHALL2"];
-				if(!r.s_data["REFERENCE"].empty() && r.s_data["REFERENCE"] != "" ){
-					if(!r.s_data["HNOM"].empty() && r.s_data["HNOM"] != ""){
-						if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
-							string encKey = r.s_data["PUBKEY"];
-							StringSource ss(encKey, true,
-							    new Base64Decoder(
-							        new StringSink(pubRemote)
-							    ) // Base64Decoder
-							); // StringSource
-							StringSource ss2(pubRemote, true /*pumpAll*/);
-
-							RSA::PublicKey publicKeyRemote;
-							publicKey.Load(ss2);
-
-							istringstream issReference(r.s_data["REFERENCE"]);
-							istringstream issHnom(r.s_data["HNOM"]);
-							string reference;
-							string hnom; 
-							showRep[0] = "";
-							while ( std::getline( issReference, reference, '*' ) && std::getline( issHnom, hnom, '*' )) 
-							{ 
-							    showRep[0] += reference + "*" + hnom + "*";
-							}
-							showRep[0].erase(showRep[0].size() - 1, 1);
-
-							showRep[1] = to_string(nRemote);
-							showRep[2] = to_string(n);
-							showRep[3] = Pub_toB64string(publicKeyRemote);
-							return showRep;
-						}
-					}
-				}
-			}
-		}
-	}
-	return NULL;
 }
 
-string network_interface::send_pull(string& reference, string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote){
+void network_interface::send_pull(string& reference, string& groupeClient, RSA::PublicKey& pubRemote){
 	engine_event e;
 	engine_event r;
 	engine_event p;
@@ -1064,10 +1020,6 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 	string pubEncoded;
 	string document;
 	string encDocument;
-	int challN = 0;
-
-	//TODO : choisir un nombre aléatoire plutôt que 3
-	e.i_data["CHALL2"] = nRemote*3;
 
 	AutoSeededRandomPool prng;
 
@@ -1130,17 +1082,14 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 	archiveIn >> r;	
 
 	if (r.type == engine_event::PUSH){
-		challN = r.i_data["CHALL"];
-		if (challN%n == 0){
-			if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != "" ){
-				encDocument = r.s_data["DOCUMENT"];
-				StringSource ss(encDocument, true,
-				    new Base64Decoder(
-				        new StringSink(document)
-				    ) // Base64Decoder
-				); // StringSource
-				return document;
-			}
+		if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != "" ){
+			encDocument = r.s_data["DOCUMENT"];
+			StringSource ss(encDocument, true,
+			    new Base64Decoder(
+			        new StringSink(document)
+			    ) // Base64Decoder
+			); // StringSource
+			return document;
 		}
 	}
 	return NULL;

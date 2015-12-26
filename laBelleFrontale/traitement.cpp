@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdexcept>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
 #include <iostream>
 #include "traitement.h"
 
@@ -19,9 +22,21 @@ string hashString(char * to_hash){
     SHA1_Init(&ctx);
     SHA1_Update(&ctx, to_hash, strlen(to_hash));
     SHA1_Final((unsigned char*)hash, &ctx);
-    sHash = string(hash,SHA_DIGEST_LENGTH);
+    sHash = HexFormate((const unsigned char*) hash, SHA_DIGEST_LENGTH);
     free(hash);
     return sHash;
+}
+
+string HexFormate(const unsigned char * hash, size_t length){
+	//init OSS
+    ostringstream os;
+    os.fill('0');
+    os << hex;
+    //parcours de la chaine et copie de 2 caractères hexa
+    for(const unsigned char * ptr = hash ; ptr < hash + length ; ptr++)
+        os << setw(2) << (unsigned int) *ptr;
+
+    return os.str();
 }
 
 //////////////////////////
@@ -413,8 +428,8 @@ string traitement_rep_client(string a_traiter){
 
 
 //VERSION AVEC TOKEN EN PARAM ET RECUPERATION DES REQUETES 
-string traitement_rep_client(string num){
-	vector<string> a_traiter = vector<string>();
+string traitement_rep_client(vector<string> a_traiter){
+//	vector<string> a_traiter = vector<string>();
 	//fonction pour recuperer les requetes depuis le réseau
 	/*BLOC DE TEST EN ATTENDANT*/
 	/*REPONSES 1/2*/
@@ -423,18 +438,13 @@ string traitement_rep_client(string num){
 //	a_traiter.push_back("123*1*Megy*tyran*EOF");
 //	a_traiter.push_back("123*1*Hernance*general anti-cafe*EOF");
 	/*REPONSES 3*/
-//	a_traiter.push_back("123*3*ref1*Toinard*ljn*EOF");			//malformée vérifiable
-//	a_traiter.push_back("123*3*ref2*Eichler*ok*ok*EOF");		//malformée invérifiable
-//	a_traiter.push_back("123*3*ref3*Castelain*ok*EOF");			//malformée vérifiable
-//	a_traiter.push_back("123*3*lol*ref3*Megy*EOF");				//malformée vérifiable
-//	a_traiter.push_back("123*3*lol*ref4*Hernance*EOF");			//malformée vérifiable
-//	a_traiter.push_back("123*ref5*Abdallah*EOF")				//bien formée
+
 
 	/*REPONSES 4*/
-	a_traiter.push_back("123*4*Ta_mere.mp4*EOF");
-	a_traiter.push_back("123*4*EddyMalou.tar.gz*EOF");
-	a_traiter.push_back("123*4*windows10.exe*EOF");
-	a_traiter.push_back("123*4*traitement.cpp*EOF");
+//	a_traiter.push_back("123*4*Ta_mere.mp4*EOF");
+//	a_traiter.push_back("123*4*EddyMalou.tar.gz*EOF");
+//	a_traiter.push_back("123*4*windows10.exe*EOF");
+//	a_traiter.push_back("123*4*traitement.cpp*EOF");
 
 	/****************************/
 
@@ -548,8 +558,16 @@ string traitement_rep_client(string num){
 					if (parity%2==1)
 						stringInTheVector += string(token);
 					else {
-					//on est sur un nom : il faut le hasher
-						stringInTheVector += ";" + hashString(token) + "*";
+					//on est sur un couple nom +statut : il faut le hasher
+                                    string username = string(token);
+                                    string status = string(strtok(NULL,"*")); //récupération statut
+                                    if (status == "none" || status == "EOF"){
+                                      stringInTheVector = "ERROR*";
+                                      breaker=1;
+                                    }
+                                    string to_hash = username + status;
+                                    char *hash = (char*)to_hash.c_str();
+                                    stringInTheVector += ";" + hashString(hash) + "*";
 					}
 					iterator++;	//empêche requête du type "1,*;;;;;;;;;;;;;;;;;" trololo
 					parity++;	//teste si une ref est associée obligatoirement a un nom

@@ -13,13 +13,13 @@ prog_bdd: main.o bdd.o bdd_request.o crypt.o res.o
 main.o: main.c default.h bdd.h crypt.h res.h
 	$(CC) -c main.c $(CFLAGS)
 
-bdd.o: bdd.c bdd.h default.h res.h
+bdd.o: bdd.c bdd.h default.h crypt.h res.h
 	$(CC) -c bdd.c $(CFLAGS)
 
 bdd_request.o: bdd_request.c bdd.h default.h crypt.h res.h
 	$(CC) -c bdd_request.c $(CFLAGS)
 
-crypt.o: crypt.c crypt.h default.h
+crypt.o: crypt.c crypt.h default.h bdd.h res.h
 	$(CC) -c crypt.c $(CFLAGS)
 
 res.o: res.c res.h default.h bdd.h

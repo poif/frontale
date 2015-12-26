@@ -1,11 +1,11 @@
 ﻿/** ====================================================================
-**   Auteur  : Delvarre / Bourillon      | Date    : DD/MM/2015
+**   Auteur  : Delvarre / Bourillon      | Date    : 07/01/2016
 **  --------------------------------------------------------------------
 **   Langage : C                         | Systeme : Linux
 **  --------------------------------------------------------------------
 **   Nom fichier : res.c                 | Version : 1.0
 **  --------------------------------------------------------------------
-**   Description : /
+**   Description : Gestion du réseau
 ** =====================================================================*/
 #include "res.h"
 #include "bdd.h"
@@ -221,6 +221,20 @@ void res_receive ()
     int return_value ;
     fd_set rfds ;
     int nc ;
+    int i, j ;
+    int stop ;
+
+    // Initialisation thread_req
+    for ( i = 0; i < NB_MAX_REQ; i++ )
+        thread_traitement[i] = ZERO ;
+
+    // Initialisation tab_req
+    char tab_req[NB_MAX_REQ][TAILLE_MAX_TRAME] ;
+    for ( i = 0; i < NB_MAX_REQ; i++ )
+        memset ( &tab_req[i][0], '\0', TAILLE_MAX_TRAME ) ;
+
+    // Initialisation mutex
+    pthread_mutex_init ( &mutex_bdd, NULL);
 
     // Boucle infinie : attente de requêtes
     while ( 1 )
@@ -272,9 +286,51 @@ void res_receive ()
                 // Debug
                 printf ( "Trame recu -> %s de la part de %s \n\n", trame, inet_ntoa ( addr_client.sin_addr ) ) ;
 
-                // On transmet la trame pour le traitement
-                if ( ( return_value = bdd_parser ( trame ) ) == ERRNO )
-                    fprintf ( stderr, "Trame non traité : %s \n", trame ) ;
+                // On envoie le traitement dans un thread
+                stop = FALSE ;
+                for ( i = 0; i < NB_MAX_REQ; i++ )
+                {
+                    if ( stop == FALSE )
+                    {
+                        if ( thread_traitement[i] == ZERO )
+                        {
+                            // On prépare arg
+                            memset ( &tab_req[i][0], '\0', TAILLE_MAX_TRAME ) ;
+                            sprintf ( tab_req[i], "%s", trame ) ;
+
+                            // On thread
+                            if ( ( return_value = pthread_create ( &thread_traitement[i], NULL, fct_thread_do_req, (void*) tab_req[i] ) ) == 0 )
+                            {
+                                stop = TRUE ;   // On stop
+
+                                // On nettoie (boucle récurrente)
+                                if ( i == 9 )
+                                {
+                                    for ( j = 10; j < NB_MAX_REQ; j++ )
+                                        thread_traitement[j] = ZERO ;
+                                }
+                                if ( i == 19 )
+                                {
+                                    for ( j = 0; j < 10; j++ )
+                                        thread_traitement[j] = ZERO ;
+                                }
+                            }
+                            else
+                            {
+                                stop = ERRNO ;
+                                bdd_send_msg ( 0, ERROR, "THREAD", FALSE ) ;
+                                perror ( "Erreur THREAD : impossible lancer le thread req " ) ;
+                            }
+                        }
+                    }
+                }
+
+                // Debug
+                if ( stop == FALSE )
+                {
+                    bdd_send_msg ( 0, ERROR, "THREAD", FALSE ) ;
+                    perror ( "Erreur THREAD : full tab " ) ;
+                }
             }
         }
     }
@@ -292,6 +348,40 @@ void* fct_thread_res_receive ()
     return NULL ;
 }
 
+
+//----------------------------------------------------------
+// void* fct_thread_do_req ( void* p_data )
+//----------------------------------------------------------
+// Fonction pointeur pour thread
+
+void* fct_thread_do_req ( void* p_data )
+{
+    // Ini
+    int terminer = FALSE ;
+
+    // On récupère la trame
+    char* trame = (char*) p_data ;
+
+    // Attente exécution req
+    while ( terminer != TRUE )
+    {
+        // On mutex
+        pthread_mutex_lock ( &mutex_bdd ) ;
+
+        // On transmet la trame pour le traitement
+        if ( bdd_parser ( trame ) == ERRNO )
+           fprintf ( stderr, " ID trame non traité : %s \n", trame ) ;
+
+        // On quitte
+        terminer = TRUE ;
+
+        // End mutex
+        pthread_mutex_unlock ( &mutex_bdd ) ;
+    }
+
+    // Return
+    return NULL ;
+}
 
 //----------------------------------------------------------
 // void res_send ( char *trame )

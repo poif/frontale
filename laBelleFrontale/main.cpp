@@ -1,6 +1,6 @@
 #include <QCoreApplication>
 #include <message.h>
-#include <requete.h>
+#include "requete.h"
 #include "engine_event.h"
 #include "network_interface.h"
 #include <cstdlib>
@@ -58,17 +58,17 @@ int main(int argc, char *argv[])
 
 		QTextStream(stdout) << msg.getMsg() << endl;
 
-		if(req.decoupage(msg.getMsg().toStdString().c_str())){
+		if(req.decoupage(msg.getMsg().toStdString())){
 			req.construction();
 
 			if(req.getPourBdd()){
-				versBdd = QString("%1").arg(req.getRequete());
+				versBdd = QString("%1").arg(req.getRequete().c_str());
 
 				bdd.emission(versBdd);
 				
 				bdd.attendLecture();
 
-    				req.tri(bdd.getMsg().toStdString().c_str());							
+    				req.tri(bdd.getMsg().toStdString());							
 			}
 			else
 			{
@@ -85,6 +85,9 @@ int main(int argc, char *argv[])
 				}
 				else if(option.compare("-e")==0){/* traitement est un statut */
 					netinf.send_exist(traitement);
+				}
+				if(option.compare("-p")==0){
+					netinf.send_lookrec("picture",affectation);
 				}		
 
 
@@ -108,17 +111,19 @@ int main(int argc, char *argv[])
 				string sep = "*";
 
 				//char * triq = new char(showRep[0].size()+showRep[1].size()+sep.size());
-				char * triq = new char(showRep.size());
+				
+				/*char * triq = new char(showRep.size());
 				//int triqlength = showRep[0].size()+showRep[1].size()+sep.size();
 				int triqlength = showRep.size();
 				//triq = const_cast <char *>((showRep[0] + sep + showRep[1]).data());
 				triq = const_cast <char *>(showRep.data());
-				triq[triqlength] = '\0';
+				triq[triqlength] = '\0';*/
+
 				/*cout << triqlength << endl;
 				  cout << strlen(triq) << endl;
 				  cout.write(triq, triqlength);*/
 
-				req.tri(triq);
+				req.tri(showRep);
 
 				}
 				else{
@@ -129,7 +134,7 @@ int main(int argc, char *argv[])
 			}
 
 			QString retour;
-			retour = QString("%1").arg(req.getResultat());
+			retour = QString("%1").arg(req.getResultat().c_str());
 
 			Message msg2(retour,'R', '*');
 			msg2.entete();

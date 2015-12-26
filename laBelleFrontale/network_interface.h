@@ -53,9 +53,9 @@ public:
 
 	// observer functions
 	void send_look(std::string& affectation);
-	void send_exist(std::string& statut);
-	void* send_lookrec(std::string& dataType, std::string& statut);
-	std::string send_pull(std::string& reference, std::string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote);
+	void send_exist(std::string& affectation);
+	void send_lookrec(std::string& dataType, std::string& statut);
+	void send_pull(std::string& reference, std::string& groupeClient, RSA::PublicKey& pubRemote);
 
 	std::string encrypto_rsa(std::string& plain);
 	std::string encrypto_rsa(std::string& plain, RSA::PublicKey pubRemote);
@@ -103,8 +103,6 @@ private:
 	bdd_tcp * bdd;
 	
 	int type;
-	int save_n;
-	int save_nRemote;
 	bool running;
 	std::string host_rem;
     	int port_rem;

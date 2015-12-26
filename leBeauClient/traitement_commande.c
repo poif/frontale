@@ -25,22 +25,6 @@ int traiter_commande(char *a_traiter)
 
 		char *save_ptr;
 		action = strtok_r(a_traiter, " ", &save_ptr);
-		option = strtok_r(NULL, " ", &save_ptr);
-		cible = strtok_r(NULL, " ", &save_ptr);
-		statut = strtok_r(NULL, " ", &save_ptr);
-		
-		int j = 0;
-
-		puts("YOLO");
-
-		while (*save_ptr != '\0')	
-		{
-			affectation[j] = *(save_ptr++);
-			j++;
-		}
-
-		printf("OPTION -> %s\n", option);
-		printf("%s\n", affectation);
 
 		unsigned char a_envoyer[sizeof (char*) * 1024];
 
@@ -54,9 +38,57 @@ int traiter_commande(char *a_traiter)
 
 		else if (memcmp(action, "search", 6) == 0)
 		{
-			if(memcmp(option, "-n", 2) == 0)
+			option = strtok_r(NULL, " ", &save_ptr);
+
+			if(memcmp(option, "-n", 2) == 0){
+
+				printf("On recherche le ou les noms d'une ou plusieurs personnes !\n");
+
+				statut = strtok_r(NULL, " ", &save_ptr);
+		
+				int j = 0;
+
+				while (*save_ptr != '\0')	
+				{
+					affectation[j] = *(save_ptr++);
+					j++;
+				}
 				sprintf(a_envoyer, "%s*%s*%s*%s*none*none*none", affectation, statut, action, option);
-			else 	sprintf(a_envoyer, "%s*%s*%s*%s*%s*none*none", affectation, statut, action, option, cible);
+			}
+			else if(memcmp(option, "-e", 2) == 0){
+
+				printf("On recherche l'existence d'une personne !\n");
+
+				cible = strtok_r(NULL, " ", &save_ptr);
+				statut = strtok_r(NULL, " ", &save_ptr);
+		
+				int j = 0;
+
+				while (*save_ptr != '\0')	
+				{
+					affectation[j] = *(save_ptr++);
+					j++;
+				}
+
+				sprintf(a_envoyer, "%s*%s*%s*%s*%s*none*none", affectation, statut, action, option, cible);
+			}
+			else if(memcmp(option, "-p",2) == 0) {
+
+				printf("On recherche la reference d'une photo !\n");
+
+				cible = strtok_r(NULL, " ", &save_ptr);
+				statut = strtok_r(NULL, " ", &save_ptr);
+		
+				int j = 0;
+
+				while (*save_ptr != '\0')	
+				{
+					affectation[j] = *(save_ptr++);
+					j++;
+				}
+
+				sprintf(a_envoyer, "%s*%s*%s*%s*%s*none*none", affectation, statut, action, option, cible);
+			}
 			printf("%s\n", a_envoyer);
 			printf("SIZE -> %d\n", strlen(a_envoyer));
 			unsigned char a_envoyer_crypt[sizeof(a_envoyer)];

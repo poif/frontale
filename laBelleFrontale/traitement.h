@@ -29,8 +29,9 @@ std::string traitement_req_bdd(std::string numero,
 							   std::string ref, 
 							   std::string user);
 
-std::string traitement_rep_client(std::string num);
+std::string traitement_rep_client(std::vector<std::string> reponses);
 std::string traitement_rep_bdd(std::string num);
 std::string hashString(char * to_hash);
+std::string HexFormate(const unsigned char * hash, size_t length);
 
 #endif
