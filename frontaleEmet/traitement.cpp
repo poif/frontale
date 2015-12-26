@@ -558,8 +558,16 @@ string traitement_rep_client(vector<string> a_traiter){
 					if (parity%2==1)
 						stringInTheVector += string(token);
 					else {
-					//on est sur un nom : il faut le hasher
-						stringInTheVector += ";" + hashString(token) + "*";
+					//on est sur un couple nom +statut : il faut le hasher
+                                    string username = string(token);
+                                    string status = string(strtok(NULL,"*")); //récupération statut
+                                    if (status == "none" || status == "EOF"){
+                                      stringInTheVector = "ERROR*";
+                                      breaker=1;
+                                    }
+                                    string to_hash = username + status;
+                                    char *hash = (char*)to_hash.c_str();
+                                    stringInTheVector += ";" + hashString(hash) + "*";
 					}
 					iterator++;	//empêche requête du type "1,*;;;;;;;;;;;;;;;;;" trololo
 					parity++;	//teste si une ref est associée obligatoirement a un nom
