@@ -2,36 +2,36 @@
 #define FUSIONNEUR_H
 
 #include <QtNetwork>
-#include <timertoken.h>
 #include <map>
 #include <string>
 #include <list>
+#include "timertoken.h"
 
 class IpPort {
 	public:
-		IpPort();
 	QHostAddress hostAddress;
 	quint16 port;
 };
 
 class Fusionneur : public QObject
 {
-		QOBJECT_H
+		Q_OBJECT
 	protected:
 		Fusionneur();
 		std::map<std::string, IpPort> tokenToClient;
-		std::map<std::string, std::list<std::string>* > tokenMsgList;
+		std::map<std::string, std::list<std::string>* > tokenToMsgList;
 		std::map<std::string, TimerToken*> tokenToTimer;
 		static Fusionneur* _instance;
 		time_t t0;
+		std::string HexFormate(const unsigned char * hash, size_t length);
 	public:
 		static Fusionneur *getInstance();
-		std::string GenToken();
+		std::string GenToken(QHostAddress addr, quint16 port);
 		std::list<std::string>* getReponses(std::string token);
-		void createDataStorage(std::string token);
 		void startTimer(std::string token);
+		void addMessageToList(std::string token, std::string msg);
 	public slots:
-		void doNothingForTestingPurpose(std::string token);
+		void timeoutCallback(std::string token);
 };
 
 #endif // FUSIONNEUR_H
