@@ -950,13 +950,6 @@ void network_interface::send_look(string& affectation){
 
 
 	e.type = engine_event::LOOK;
-	/* choisir nombre entier grand */
-	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int v = rand() % 20000 + 80000;
-	int n = bigger_prime(v);
-	save_n = n;
-
-	e.i_data["CHALLENGE"] = n;
 
 	pubEncoded = Pub_toB64string();
 	
@@ -978,14 +971,6 @@ void network_interface::send_exist(string& affectation){
 	ostringstream archive_stream;
 	string pubEncoded;
 
-	/* choisir nombre entier grand */
-	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int v = rand() % 20000 + 80000;
-	int n = bigger_prime(v);
-	save_n = n;
-
-	e.i_data["CHALLENGE"] = n;
-
 	pubEncoded = Pub_toB64string();
 
 	e.s_data["PUB"]=pubEncoded;
@@ -1001,28 +986,15 @@ void network_interface::send_exist(string& affectation){
 
 void network_interface::send_lookrec(string& dataType, string& affectation){
 	engine_event e;
-	engine_event r;
-	engine_event p;
-	//boost::asio::buffer network_buffer;
+
 	e.type = engine_event::LOOKREC;
 	ostringstream archive_stream;
 	string pubEncoded;
-	string pubRemote;
 
-	string * showRep= new string[5];
-
-	int challN = 0, nRemote = 0;
-
-	/* choisir nombre entier grand */
-	/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-	int v = rand() % 20000 + 80000;
-	int n = bigger_prime(v);
-	save_n = n;
-
-	e.s_data["PUB"]=pubEncoded;
-	e.i_data["CHALLENGE"] = n;
 
 	pubEncoded = Pub_toB64string();
+
+	e.s_data["PUB"]=pubEncoded;
 
 	e.s_data["TYPE"]=dataType;
 	e.s_data["AFFECTATION"]=affectation;
@@ -1037,7 +1009,7 @@ void network_interface::send_lookrec(string& dataType, string& affectation){
 
 }
 
-string network_interface::send_pull(string& reference, string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote){
+void network_interface::send_pull(string& reference, string& groupeClient, RSA::PublicKey& pubRemote){
 	engine_event e;
 	engine_event r;
 	engine_event p;
@@ -1048,10 +1020,6 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 	string pubEncoded;
 	string document;
 	string encDocument;
-	int challN = 0;
-
-	//TODO : choisir un nombre aléatoire plutôt que 3
-	e.i_data["CHALL2"] = nRemote*3;
 
 	AutoSeededRandomPool prng;
 
@@ -1114,17 +1082,14 @@ string network_interface::send_pull(string& reference, string& groupeClient, int
 	archiveIn >> r;	
 
 	if (r.type == engine_event::PUSH){
-		challN = r.i_data["CHALL"];
-		if (challN%n == 0){
-			if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != "" ){
-				encDocument = r.s_data["DOCUMENT"];
-				StringSource ss(encDocument, true,
-				    new Base64Decoder(
-				        new StringSink(document)
-				    ) // Base64Decoder
-				); // StringSource
-				return document;
-			}
+		if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != "" ){
+			encDocument = r.s_data["DOCUMENT"];
+			StringSource ss(encDocument, true,
+			    new Base64Decoder(
+			        new StringSink(document)
+			    ) // Base64Decoder
+			); // StringSource
+			return document;
 		}
 	}
 	return NULL;
