@@ -53,8 +53,8 @@ public:
 
 	// observer functions
 	void send_look(std::string& affectation);
-	void send_exist(std::string& statut);
-	void* send_lookrec(std::string& dataType, std::string& statut);
+	void send_exist(std::string& affectation);
+	void send_lookrec(std::string& dataType, std::string& statut);
 	std::string send_pull(std::string& reference, std::string& groupeClient, int n, int nRemote, RSA::PublicKey& pubRemote);
 
 	std::string encrypto_rsa(std::string& plain);

@@ -257,18 +257,18 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 		else if(m_option.compare("-p") == 0) // Si on cherche une photo(donnée)
 		{
-			while(m_option[i] != '\0')
+			/*while(m_option[i] != '\0')
 			{
 				m_requete[i]=m_option[i]; // Premiere partie de la requete : l'option de la requete
 				i++;
 			}
 			m_requete[i]=sep;
-			i++;
+			i++;*/
 
-			while(m_statut[j] != '\0')
+			while(m_statut[i] != '\0')
 			{
-				m_requete[i]=m_statut[j]; // Deuxieme partie : le statut
-				j++;
+				m_requete[i]=m_affectation[i]; // Deuxieme partie : le statut
+				//j++;
 				i++;
 			}
 			m_requete[i]='\0';

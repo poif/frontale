@@ -85,6 +85,9 @@ int main(int argc, char *argv[])
 				}
 				else if(option.compare("-e")==0){/* traitement est un statut */
 					netinf.send_exist(traitement);
+				}
+				if(option.compare("-p")==0){
+					netinf.send_lookrec("picture",affectation);
 				}		
 
 
