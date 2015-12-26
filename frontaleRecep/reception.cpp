@@ -10,7 +10,7 @@ reception::reception()
 
 void reception::ecoute(int timeout){
     soc = new QUdpSocket(this);
-    soc->bind(12345,QUdpSocket::ShareAddress);
+    soc->bind(12346,QUdpSocket::ShareAddress);
     soc->waitForReadyRead(timeout);
     procReception();
 
