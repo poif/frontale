@@ -499,8 +499,6 @@ void network_interface::process_received_events(engine_event& e){
 
 		      string en_cours;
 
-		      int nRemote = e.i_data["CHALLENGE"];
-
 		      string pubStringRemote = e.s_data["PUB"];
 		      string &affectationReq = e.s_data["AFFECTATION"];
 
@@ -559,7 +557,6 @@ void network_interface::process_received_events(engine_event& e){
 		      if (!list.empty() || list != "")
 		      {
 			        r.type = engine_event::SHOW;
-			        r.i_data["CHALL"] = nRemote;
 			        r.s_data["REPONSE"] = list;
 
 			        boost::archive::text_oarchive archive(archive_stream);
@@ -616,7 +613,6 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event p;
 			string en_cours;
 			vector<string> liste;
-			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
@@ -652,7 +648,6 @@ void network_interface::process_received_events(engine_event& e){
 			if (!list.empty() || list != "")
 			{
 			       r.type = engine_event::ANSWER;
-			       r.i_data["CHALL"] = nRemote;
 			       r.s_data["HASH"] = list;
 
 			       boost::archive::text_oarchive archive(archive_stream);
@@ -709,7 +704,6 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event p;
 			vector<string> liste;
 			string en_cours;
-			int nRemote = e.i_data["CHALLENGE"];
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
 			string affectationReq = e.s_data["AFFECTATION"];
@@ -747,20 +741,12 @@ void network_interface::process_received_events(engine_event& e){
 			string recuStr = msg.getMsg().toStdString();
 
 			string list = traitement_rep_client(recuStr);
-			if (!hashNomList.empty() || hashNomList != "")
+
+			if (!list.empty() || list != "")
 			{
 				r.type = engine_event::SHOWREC;
-				r.i_data["CHALL"] = nRemote;
-				save_nRemote = nRemote;
 
-				/* choisir nombre entier grand */
-				/* TODO : prendre un random < 100.000 à passer dans bigger_prime */
-				int n = bigger_prime(25000);
-				r.i_data["CHALL2"] = n;
-				save_n = n;
-
-				r.s_data["REFERENCE"] = reference;
-				r.s_data["HNOM"] = hashNomList;
+				r.s_data["REPONSE"] = list;
 
 				string pubEncoded = Pub_toB64string();
 				r.s_data["PUBKEY"] = pubEncoded;
@@ -808,10 +794,6 @@ void network_interface::process_received_events(engine_event& e){
 
 			           noeudthor->send(data_encoded);
 
-			           //const string &data_encoded = encrypto_rsa(outbound_data, publicRemoteKey);
-			           cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
-			           //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
-			           //sendTor(outbound_data);
 			}
 			
 			break;
@@ -819,38 +801,32 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::PULL:{
 			engine_event r;
 
+			string aesKey = e.s_data["KEY"];
+			string aesIv = e.s_data["IV"];
+			string reference = e.s_data["REFERENCE"];
+			string groClient = e.s_data["GRCLIENT"];
+			vector<string> groupeClient;
+			groupeClient.push_back(groClient);
+			/*Traitement de la requete */
+			string document = traitement_pull(reference, groupeClient);
 
-			int challenge = e.i_data["CHALL2"];
+			if (!document.empty() || document != "")
+			{
+				r.type = engine_event::PUSH;
+				r.s_data["DOCUMENT"] = document;
 
-			if (challenge%save_n == 0){
+				boost::archive::text_oarchive archive(archive_stream);
+				archive << r;
+				string outbound_data = archive_stream.str();
 
-				string aesKey = e.s_data["KEY"];
-				string aesIv = e.s_data["IV"];
-				string reference = e.s_data["REFERENCE"];
-				string groClient = e.s_data["GRCLIENT"];
-				vector<string> groupeClient;
-				groupeClient.push_back(groClient);
-				/*Traitement de la requete */
-				string document = traitement_pull(reference, groupeClient);
+				byte * iv = sToB(aesIv);
+				SecByteBlock key = sToSbb(aesKey);
 
-				if (!document.empty() || document != "")
-				{
-					r.type = engine_event::PUSH;
-					r.i_data["CHALL"] = save_nRemote;
-					r.s_data["DOCUMENT"] = document;
+				const string &data_encoded = encrypto_aes(key, iv, outbound_data);
 
-					boost::archive::text_oarchive archive(archive_stream);
-				    	archive << r;
-					string outbound_data = archive_stream.str();
-
-					byte * iv = sToB(aesIv);
-					SecByteBlock key = sToSbb(aesKey);
-
-					const string &data_encoded = encrypto_aes(key, iv, outbound_data);
-
-					noeudthor->send(data_encoded);
-					//sendTor(outbound_data);
-				}
+				noeudthor->send(data_encoded);
+				//sendTor(outbound_data);
+				
 			}
 			
 			break;
@@ -858,7 +834,6 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::SECRET:{
 			engine_event r;
 			
-			int challN = 0;
 			string showRep = "";
 
 			string aesKey = decrypto_rsa(e.s_data["KEY"]);
@@ -883,74 +858,44 @@ void network_interface::process_received_events(engine_event& e){
 			switch(r.type){
 				case engine_event::SHOW:{
 
-					challN = r.i_data["CHALL"];
-					if (challN%save_n == 0){
-						if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
-								/*istringstream issListe(r.s_data["REPONSE"]);
-								string nom;
-								string hstatut; 
-								while ( std::getline( issNom, nom, '*' ) && std::getline( issHstatut, hstatut, '*' )) 
-								{ 
-								    showRep += nom + "*" + hstatut + "*";
-								}
-								showRep.erase(showRep.size() - 1, 1);*/
-								//showRep[0] = r.s_data["NOM"];
-								//showRep[1] = r.s_data["HSTATUT"];
-								responseRec = r.s_data["REPONSE"];
-								recBool = true;
-							
-						}
+					if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
+	
+						//showRep[0] = r.s_data["NOM"];
+						//showRep[1] = r.s_data["HSTATUT"];
+						responseRec = r.s_data["REPONSE"];
+						recBool = true;
 					}
 				}
 				case engine_event::ANSWER:{
 			
-					challN = r.i_data["CHALL"];
-					if (challN%save_n == 0){
-						if(!r.s_data["HASH"].empty() && r.s_data["HASH"] != ""){
-							string hash = r.s_data["HASH"];
-							//hnom.erase(hnom.size() - 1, 1);
-							cout << "hash : " << hash << endl;
+					if(!r.s_data["HASH"].empty() && r.s_data["HASH"] != ""){
+						string hash = r.s_data["HASH"];
+						//hnom.erase(hnom.size() - 1, 1);
+						cout << "hash : " << hash << endl;
 
-							responseRec = hash;	
-							recBool = true;
-						}
+						responseRec = hash;	
+						recBool = true;
+					
 					}
 				}
-				case engine_event::LOOKREC:{
-					challN = r.i_data["CHALL"];
-					if (challN%save_n == 0){
-						nRemote = r.i_data["CHALL2"];
-						if(!r.s_data["REFERENCE"].empty() && r.s_data["REFERENCE"] != "" ){
-							if(!r.s_data["HASH"].empty() && r.s_data["HASH"] != ""){
-								if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
-									string encKey = r.s_data["PUBKEY"];
-									StringSource ss(encKey, true,
-									    new Base64Decoder(
-									        new StringSink(pubRemote)
-									    ) // Base64Decoder
-									); // StringSource
-									StringSource ss2(pubRemote, true /*pumpAll*/);
+				case engine_event::SHOWREC:{
 
-									RSA::PublicKey publicKeyRemote;
-									publicKey.Load(ss2);
+					if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
+						if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
+							string encKey = r.s_data["PUBKEY"];
+							StringSource ss(encKey, true,
+							    new Base64Decoder(
+							        new StringSink(pubRemote)
+							    ) // Base64Decoder
+							); // StringSource
+							StringSource ss2(pubRemote, true /*pumpAll*/);
 
-									istringstream issReference(r.s_data["REFERENCE"]);
-									istringstream issHnom(r.s_data["HNOM"]);
-									string reference;
-									string hnom; 
-									showRep[0] = "";
-									while ( std::getline( issReference, reference, '*' ) && std::getline( issHnom, hnom, '*' )) 
-									{ 
-									    showRep[0] += reference + "*" + hnom + "*";
-									}
-									showRep[0].erase(showRep[0].size() - 1, 1);
+							RSA::PublicKey publicKeyRemote;
+							publicKey.Load(ss2);
 
-									showRep[1] = to_string(nRemote);
-									showRep[2] = to_string(n);
-									showRep[3] = Pub_toB64string(publicKeyRemote);
-									return showRep;
-								}
-							}
+							responseRec = r.s_data["REPONSE"] + "*" + Pub_toB64string(publicKeyRemote);
+							recBool = true;
+							
 						}
 					}
 
