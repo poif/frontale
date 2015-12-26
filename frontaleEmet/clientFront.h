@@ -10,7 +10,7 @@ class clientFront: public QObject
 public:
     clientFront();
     void socBind();
-    void emission(QString message);
+    void emission(QString message, QHostAddress hostAddr, quint16 hostPort);
 
 private:
         QUdpSocket *soc;
