@@ -1,13 +1,14 @@
 ﻿/** ====================================================================
-**   Auteur  : Delvarre / Bourillon      | Date    : DD/MM/2015
+**   Auteur  : Delvarre / Bourillon      | Date    : 07/01/2016
 **  --------------------------------------------------------------------
 **   Langage : C                         | Systeme : Linux
 **  --------------------------------------------------------------------
 **   Nom fichier : bdd.c                 | Version : 1.0
 **  --------------------------------------------------------------------
-**   Description : /
+**   Description : Gestion de la BDD
 ** =====================================================================*/
 #include "bdd.h"
+#include "crypt.h"
 #include "res.h"
 
 
@@ -16,6 +17,7 @@
 //----------------------------------------------------------
 MYSQL* mysql_bdd = NULL ;
 int nbr_tuples = 0 ;
+int traitement = FALSE ;
 
 
 //----------------------------------------------------------
@@ -34,7 +36,7 @@ MYSQL* bdd_start_connection ()
     }
 
     // Applications d'options supplémentaires
-    if ( ( mysql_options ( mysql_bdd, MYSQL_READ_DEFAULT_GROUP, "Lien avec my.cnf" ) ) != 0 )           // J'ai vus du SSL, A REGARDER
+    if ( ( mysql_options ( mysql_bdd, MYSQL_READ_DEFAULT_GROUP, "Lien avec my.cnf" ) ) != 0 )
     {
         perror ( "Erreur_bdd_start_connection : mysql_options " ) ;
         return NULL ;
@@ -379,21 +381,48 @@ int bdd_verification_partage ( char* politiques, char* atester )
 
 
 //----------------------------------------------------------
-// void bdd_send_error ( int flag, char* texte )
+// void bdd_send_msg ( int id, int flag, char* texte )
 //----------------------------------------------------------
 // Permet d'envoyer un code d'erreur / message à la frontale
 
-void bdd_send_msg ( int flag, char* texte )
+void bdd_send_msg ( int id, int flag, char* texte, int chiffre )
 {
     // Initialisation
     char* trame = (char*) malloc ( TAILLE_MAX_TRAME * sizeof ( char ) ) ;
+    memset ( trame, '\0', TAILLE_MAX_TRAME ) ;
 
     // On créé le message
-    sprintf ( trame, "%d*%s*EOF", flag, texte ) ;
+    sprintf ( trame, "%d*%d*%s*EOF", id, flag, texte ) ;
 
-    // On envoi le message
-    res_send ( trame ) ;
+    // Chiffré ou non ?
+    if ( chiffre == TRUE )
+    {
+        // On chiffre le message
+        int olen = strlen ( trame ) * 2  ;
+        char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
+        memset ( out, '\0', olen ) ;
+        if ( AES_chiffrement ( trame, out, olen, CHIFFREMENT ) != TRUE )
+        {
+            perror ( "Erreur_bdd_send_msg : AES_chiffrement " ) ;
+            free ( out ) ;
+            free ( trame ) ;
+        }
+        else
+        {
+            // On envoi le message
+            res_send ( out ) ;
 
-    // Free
-    free ( trame ) ;
+            // Free
+            free ( trame ) ;
+            free ( out ) ;
+        }
+    }
+    else if ( chiffre == FALSE )
+    {
+        // On envoi le message
+        res_send ( trame ) ;
+
+        // Free
+        free ( trame ) ;
+    }
 }

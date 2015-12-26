@@ -1,11 +1,11 @@
 ﻿/** ====================================================================
-**   Auteur  : Delvarre / Bourillon      | Date    : DD/MM/2015
+**   Auteur  : Delvarre / Bourillon      | Date    : 07/01/2016
 **  --------------------------------------------------------------------
 **   Langage : C                         | Systeme : Linux
 **  --------------------------------------------------------------------
 **   Nom fichier : bdd_request.c         | Version : 1.0
 **  --------------------------------------------------------------------
-**   Description : /
+**   Description : Traitement des requêtes
 ** =====================================================================*/
 #include "bdd.h"
 #include "crypt.h"
@@ -19,70 +19,261 @@
 
 int bdd_parser ( char *trame )
 {
+    // Ini
+    char* clair = NULL ;
+    int do_free = FALSE ;
+
+    // Déchiffrement !!
+    if ( traitement == TRUE )
+    {
+        // On déchiffre le tuple
+        do_free = TRUE ;
+        int olen = strlen ( trame ) * 2  ;
+        clair = (char*) malloc ( olen * sizeof ( char ) ) ;
+        memset ( clair, '\0', olen ) ;
+        if ( AES_chiffrement ( trame, clair, olen,  DECHIFFREMENT ) != TRUE )
+        {
+            perror ( "Erreur_bdd_parser : AES_dechiffrement " ) ;
+            free ( clair ) ;
+            bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
+            return ERRNO ;
+        }
+    }
+    else
+        clair = trame ;
+
     // Déclaration variable
+    int id = 0 ;                // Premier entire de la trame qui l'identifie de manière unique
     int flag = 0 ;              // Premier entier de la trame qui détermine ce qu'on doit faire
     char* morceau = NULL ;      // Variable contenant chaque morceau de la trame (strtok_r)
     char* safe_trame ;          // Permet d'appeler strtok_r sur le bon contenu.
+    int i ;
 
-    // On découpe la trame en morceaux repérés via un "*"
-    if ( ( morceau = strtok_r ( trame, "*", &safe_trame ) ) == NULL )
+    // Pré-traitement
+    for ( i = 0; i < 2; i++ )
     {
-        perror ( "Erreur_bdd_parser : information manquante " ) ;
-        bdd_send_msg ( ERROR, "ERROR" ) ;
-        return ERRNO ;
-    }
+        // On découpe la trame en morceaux repérés via un "*"
+        if ( i == ZERO )
+        {
+            if ( ( morceau = strtok_r ( clair, "*", &safe_trame ) ) == NULL )
+            {
+                perror ( "Erreur_bdd_parser : information manquante " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
+                return ERRNO ;
+            }
+        }
+        else
+        {
+            if ( ( morceau = strtok_r ( NULL, "*", &safe_trame ) ) == NULL )
+            {
+                perror ( "Erreur_bdd_parser : information manquante " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
+                return ERRNO ;
+            }
+        }
 
-    // On vérifie que l'information est présente
-    if ( ( ( strcmp ( morceau, "NULL") ) == 0 ) || ( strlen ( morceau ) == 0 ) )
-    {
-        perror ( "Erreur_bdd_do_insert : information manquante " ) ;
-        bdd_send_msg ( ERROR, "ERROR" ) ;
-        return ERRNO ;
-    }
+        // On vérifie que l'information est présente
+        if ( ( ( strcmp ( morceau, "NULL") ) == 0 ) || ( strlen ( morceau ) == 0 ) )
+        {
+            perror ( "Erreur_bdd_do_insert : information manquante " ) ;
+            if ( do_free == TRUE )
+                free ( clair ) ;
+            bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
+            return ERRNO ;
+        }
 
-    // Le premier morceau est le flag qui détermine l'action à traiter
-    flag = atoi ( morceau ) ;
+        switch ( i )
+        {
+            case ZERO :
+                id = atoi ( morceau ) ;   // Le premier morceau est l'id
+                break ;
+
+            case UN :
+                flag = atoi ( morceau ) ;   // Le deuxième morceau est le flag qui détermine l'action à traiter
+                break ;
+
+            default :
+                perror ( "Erreur_bdd_parser : Overflow i " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( ZERO, flag, "ERROR", TRUE ) ;
+                return ERRNO ;
+                break ;
+        }
+    }
 
     // En fonction du flag, on appelle le bon traitement
     switch ( flag )
     {
         case INSERT :
-            if ( bdd_do_insert ( safe_trame ) == ERRNO )
+            if ( traitement == TRUE )
             {
-                perror ( "Erreur_bdd_parser : bdd_do_insert() " ) ;
+                if ( bdd_do_insert ( id, safe_trame ) == ERRNO )
+                {
+                    perror ( "Erreur_bdd_parser : bdd_do_insert() " ) ;
+                    if ( do_free == TRUE )
+                        free ( clair ) ;
+                    return ERRNO ;
+                }
+            }
+            else
+            {
+                perror ( "Erreur_bdd_parser : bad ini " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( id, flag, "ERROR", FALSE ) ;
                 return ERRNO ;
             }
             break ;
 
         case DELETE :
-            if ( bdd_do_delete ( safe_trame ) == ERRNO )
+            if ( traitement == TRUE )
             {
-                perror ( "Erreur_bdd_parser : bdd_do_delete() " ) ;
+                if ( bdd_do_delete ( id, safe_trame ) == ERRNO )
+                {
+                    perror ( "Erreur_bdd_parser : bdd_do_delete() " ) ;
+                    if ( do_free == TRUE )
+                        free ( clair ) ;
+                    return ERRNO ;
+                }
+            }
+            else
+            {
+                perror ( "Erreur_bdd_parser : bad ini " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( id, flag, "ERROR", FALSE ) ;
                 return ERRNO ;
             }
             break ;
 
         case SEEK :
-            if ( bdd_do_seek ( safe_trame ) == ERRNO )
+            if ( traitement == TRUE )
             {
-                perror ( "Erreur_bdd_parser : bdd_do_seek() " ) ;
+                if ( bdd_do_seek ( id, safe_trame ) == ERRNO )
+                {
+                    perror ( "Erreur_bdd_parser : bdd_do_seek() " ) ;
+                    if ( do_free == TRUE )
+                        free ( clair ) ;
+                    return ERRNO ;
+                }
+            }
+            else
+            {
+                perror ( "Erreur_bdd_parser : bad ini " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( id, flag, "ERROR", FALSE ) ;
                 return ERRNO ;
             }
             break ;
 
         case SELECT :
-            if ( bdd_do_select ( safe_trame ) == ERRNO )
+            if ( traitement == TRUE )
             {
-                perror ( "Erreur_bdd_parser : bdd_do_select() " ) ;
+                if ( bdd_do_select ( id, safe_trame ) == ERRNO )
+                {
+                    perror ( "Erreur_bdd_parser : bdd_do_select() " ) ;
+                    if ( do_free == TRUE )
+                        free ( clair ) ;
+                    return ERRNO ;
+                }
+            }
+            else
+            {
+                perror ( "Erreur_bdd_parser : bad ini " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( id, flag, "ERROR", FALSE ) ;
+                return ERRNO ;
+            }
+            break ;
+
+        case INIT :
+            if ( traitement == FALSE )
+            {
+                if ( bdd_do_init ( id, safe_trame ) == ERRNO )
+                {
+                    perror ( "Erreur_bdd_parser : bdd_do_init() " ) ;
+                    if ( do_free == TRUE )
+                        free ( clair ) ;
+                    return ERRNO ;
+                }
+                else
+                    traitement = TRUE ;
+            }
+            else
+            {
+                perror ( "Erreur_bdd_parser : bad ini bis " ) ;
+                if ( do_free == TRUE )
+                    free ( clair ) ;
+                bdd_send_msg ( id, flag, "ERROR", TRUE ) ;
                 return ERRNO ;
             }
             break ;
 
         default :
             perror ( "Erreur_bdd_parser : flag incorrect " ) ;
-            bdd_send_msg ( flag, "ERROR" ) ;
+            if ( do_free == TRUE )
+                free ( clair ) ;
+            bdd_send_msg ( id, flag, "ERROR", TRUE ) ;
             return ERRNO ;
             break ;
+    }
+
+    // Free
+    if ( do_free == TRUE )
+        free ( clair ) ;
+
+    // On indique que tout s'est bien déroulé
+    return TRUE ;
+}
+
+
+//----------------------------------------------------------
+// int bdd_do_init ( int id, char *safe_trame )
+//----------------------------------------------------------
+// Permet de traiter une trame de type initialisation : id*304*RSA_pub*EOF
+
+int bdd_do_init ( int id, char *safe_trame )
+{
+    // Déclaration variable
+    char* key_pub = NULL ;
+
+    // On découpe la trame en morceaux repérés via un "*"
+    if ( ( key_pub = strtok_r ( NULL, "*", &safe_trame ) ) == NULL )
+    {
+        perror ( "Erreur_bdd_do_init : information manquante " ) ;
+        bdd_send_msg ( id, INIT, "ERROR", FALSE ) ;
+        return ERRNO ;
+    }
+
+    // On vérifie que l'information est présente
+    if ( strcmp ( key_pub, "EOF") == 0 )
+    {
+        perror ( "Erreur_bdd_do_init : information manquante II " ) ;
+        bdd_send_msg ( id, INIT, "ERROR", FALSE ) ;
+        return ERRNO ;
+    }
+
+    // On récupère la clé dans une structure RSA
+    if ( RSA_recup_key_pub ( (unsigned char*) key_pub ) == ERRNO )
+    {
+        perror ( "Erreur_bdd_do_init : RSA_recup_key_pub() " ) ;
+        bdd_send_msg ( id, INIT, "ERROR", FALSE ) ;
+        return ERRNO ;
+    }
+
+    // On envoi la clé AES pour l'échange en chiffré
+    if ( AES_envoi_key_aes ( id ) == ERRNO )
+    {
+        perror ( "Erreur_bdd_do_init : AES_envoi_key_aes() " ) ;
+        bdd_send_msg ( id, INIT, "ERROR", FALSE ) ;
+        return ERRNO ;
     }
 
     // On indique que tout s'est bien déroulé
@@ -91,11 +282,11 @@ int bdd_parser ( char *trame )
 
 
 //----------------------------------------------------------
-// int bdd_do_insert ( char *safe_trame )
+// int bdd_do_insert ( int id, char *safe_trame )
 //----------------------------------------------------------
-// Permet de traiter une trame de type insertion : 302*statut*affectation*groupes*type*val*user*politique*EOF
+// Permet de traiter une trame de type insertion : id*302*statut*affectation*groupes*type*val*user*politique*EOF
 
-int bdd_do_insert ( char *safe_trame )
+int bdd_do_insert ( int id, char *safe_trame )
 {
     // Déclaration variable
     Ref modele ;                    // Modèle propre à la trame qui sera appliqué en requête sur la BDD
@@ -122,7 +313,7 @@ int bdd_do_insert ( char *safe_trame )
                 free ( politiques ) ;
             if ( groupes_free == TRUE )
                 free ( groupes ) ;
-            bdd_send_msg ( INSERT, "ERROR" ) ;
+            bdd_send_msg ( id, INSERT, "ERROR", TRUE ) ;
             return ERRNO ;
         }
 
@@ -134,7 +325,7 @@ int bdd_do_insert ( char *safe_trame )
                 free ( politiques ) ;
             if ( groupes_free == TRUE )
                 free ( groupes ) ;
-            bdd_send_msg ( INSERT, "ERROR" ) ;
+            bdd_send_msg ( id, INSERT, "ERROR", TRUE ) ;
             return ERRNO ;
         }
         else
@@ -184,7 +375,7 @@ int bdd_do_insert ( char *safe_trame )
                         free ( politiques ) ;
                     if ( groupes_free == TRUE )
                         free ( groupes ) ;
-                    bdd_send_msg ( INSERT, "ERROR" ) ;
+                    bdd_send_msg ( id, INSERT, "ERROR", TRUE ) ;
                     return ERRNO ;
                     break ;
             }
@@ -210,7 +401,7 @@ int bdd_do_insert ( char *safe_trame )
         perror ( "Erreur_bdd_do_insert : politiques() " ) ;
         free ( politiques ) ;
         free ( groupes ) ;
-        bdd_send_msg ( INSERT, "ERROR" ) ;
+        bdd_send_msg ( id, INSERT, "ERROR", TRUE ) ;
         return ERRNO ;
     }
 
@@ -274,7 +465,7 @@ int bdd_do_insert ( char *safe_trame )
                 free ( valeur_finale ) ;
                 free ( groupes ) ;
                 free ( temporaire ) ;
-                bdd_send_msg ( INSERT, "ERROR" ) ;
+                bdd_send_msg ( id, INSERT, "ERROR", TRUE ) ;
                 return ERRNO ;
             }
 
@@ -291,7 +482,7 @@ int bdd_do_insert ( char *safe_trame )
                 free ( valeur_finale ) ;
                 free ( groupes ) ;
                 free ( temporaire ) ;
-                bdd_send_msg ( INSERT, "ERROR" ) ;
+                bdd_send_msg ( id, INSERT, "ERROR", TRUE ) ;
                 return ERRNO ;
             }
             else
@@ -311,12 +502,34 @@ int bdd_do_insert ( char *safe_trame )
         }
     } while ( morceau != NULL ) ;
 
-    // On envoie la réponse
-    taille = strlen ( temporaire ) + 10 ;
+    printf ( "\n\n HEYHEYHEYHEY \n\n" ) ;
+
+    // On prépare la réponse
+    taille = strlen ( temporaire ) + 20 ;
     reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
     memset ( reponse, '\0', taille ) ;
-    sprintf ( reponse, "%d*%s*EOF", INSERT, temporaire ) ;
-    res_send ( reponse ) ;
+    sprintf ( reponse, "%d*%d*%s*EOF", id, INSERT, temporaire ) ;
+
+    // On chiffre la réponse
+    int olen = taille * 2  ;
+    char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
+    memset ( out, '\0', olen ) ;
+    if ( AES_chiffrement ( reponse, out, olen, CHIFFREMENT ) != TRUE )
+    {
+        perror ( "Erreur_do_insert : AES_chiffrement " ) ;
+        free ( out ) ;
+        free ( reponse ) ;
+        free ( politiques ) ;
+        free ( reference_str ) ;
+        free ( valeur_finale ) ;
+        free ( groupes ) ;
+        free ( temporaire ) ;
+        bdd_send_msg ( id, INSERT, "ERROR", TRUE ) ;
+        return ERRNO ;
+    }
+
+    // On envoie la réponse
+    res_send ( out ) ;
 
     // Free
     free ( politiques ) ;
@@ -325,6 +538,7 @@ int bdd_do_insert ( char *safe_trame )
     free ( groupes ) ;
     free ( temporaire ) ;
     free ( reponse ) ;
+    free ( out ) ;
 
     // On indique que tout s'est bien déroulé
     return TRUE ;
@@ -332,11 +546,11 @@ int bdd_do_insert ( char *safe_trame )
 
 
 //----------------------------------------------------------
-// int bdd_do_delete ( char *safe_trame )
+// int bdd_do_delete (  int id, char *safe_trame )
 //----------------------------------------------------------
-// Permet de traiter une trame de type suppression : 303*ref*user*EOF
+// Permet de traiter une trame de type suppression : id*303*ref*user*EOF
 
-int bdd_do_delete ( char *safe_trame )
+int bdd_do_delete ( int id, char *safe_trame )
 {
     // Déclaration variable
     char* morceau = NULL ;      // Variable contenant chaque morceau de la trame (strtok_r)
@@ -352,7 +566,7 @@ int bdd_do_delete ( char *safe_trame )
         if ( ( morceau = strtok_r ( NULL, "*", &safe_trame ) ) == NULL )
         {
             perror ( "Erreur_bdd_do_delete : information manquante " ) ;
-            bdd_send_msg ( DELETE, "ERROR" ) ;
+            bdd_send_msg ( id, DELETE, "ERROR", TRUE ) ;
             return ERRNO ;
         }
 
@@ -360,7 +574,7 @@ int bdd_do_delete ( char *safe_trame )
         if ( strcmp ( morceau, "EOF") == 0 )
         {
             perror ( "Erreur_bdd_do_delete : information manquante II" ) ;
-            bdd_send_msg ( DELETE, "ERROR" ) ;
+            bdd_send_msg ( id, DELETE, "ERROR", TRUE ) ;
             return ERRNO ;
         }
         else
@@ -378,7 +592,7 @@ int bdd_do_delete ( char *safe_trame )
 
                 default :
                     perror ( "Erreur_do_delete : overflow compteur cpt " ) ;
-                    bdd_send_msg ( DELETE, "ERROR" ) ;
+                    bdd_send_msg ( id, DELETE, "ERROR", TRUE ) ;
                     return ERRNO ;
                     break ;
             }
@@ -392,7 +606,7 @@ int bdd_do_delete ( char *safe_trame )
     {
         perror ( "Erreur_bdd_do_delete : bdd_search_nom() " ) ;
         free ( user_ref ) ;
-        bdd_send_msg ( DELETE, "ERROR" ) ;
+        bdd_send_msg ( id, DELETE, "ERROR", TRUE ) ;
         return ERRNO ;
     }
 
@@ -404,7 +618,7 @@ int bdd_do_delete ( char *safe_trame )
         {
             perror ( "Erreur_bdd_do_delete : bdd_do_request() " ) ;
             free ( user_ref ) ;
-            bdd_send_msg ( DELETE, "ERROR" ) ;
+            bdd_send_msg ( id, DELETE, "ERROR", TRUE ) ;
             return ERRNO ;
         }
         else
@@ -414,7 +628,7 @@ int bdd_do_delete ( char *safe_trame )
     {
         printf ( "Erreur_bdd_do_delete : bad user " ) ;
         free ( user_ref ) ;
-        bdd_send_msg ( DELETE, "BAD-PERMISSION" ) ;
+        bdd_send_msg ( id, DELETE, "BAD-PERMISSION", TRUE ) ;
         return FALSE ;
     }
 
@@ -422,17 +636,17 @@ int bdd_do_delete ( char *safe_trame )
     free ( user_ref ) ;
 
     // On indique que tout s'est bien déroulé
-    bdd_send_msg ( DELETE, "DONE" ) ;
+    bdd_send_msg ( id, DELETE, "DONE", TRUE ) ;
     return TRUE ;
 }
 
 
 //----------------------------------------------------------
-// int bdd_do_seek ( char *safe_trame )
+// int bdd_do_seek ( int id, char *safe_trame )
 //----------------------------------------------------------
-// Permet de traiter une trame de type recherche liste référence : 300*statut*affectation*groupe*type*EOF
+// Permet de traiter une trame de type recherche liste référence : id*300*statut*affectation*groupe*type*EOF
 
-int bdd_do_seek ( char *safe_trame )
+int bdd_do_seek ( int id, char *safe_trame )
 {
     // Déclaration variable
     char* morceau = NULL ;      // Variable contenant chaque morceau de la trame (strtok_r)
@@ -447,7 +661,7 @@ int bdd_do_seek ( char *safe_trame )
         if ( ( morceau = strtok_r ( NULL, "*", &safe_trame ) ) == NULL )
         {
             perror ( "Erreur_bdd_do_seek : information manquante " ) ;
-            bdd_send_msg ( SEEK, "ERROR" ) ;
+            bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
             return ERRNO ;
         }
 
@@ -455,7 +669,7 @@ int bdd_do_seek ( char *safe_trame )
         if ( strcmp ( morceau, "EOF" ) == 0 )
         {
             perror ( "Erreur_bdd_do_seek : information manquante II" ) ;
-            bdd_send_msg ( SEEK, "ERROR" ) ;
+            bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
             return ERRNO ;
         }
         else
@@ -487,7 +701,7 @@ int bdd_do_seek ( char *safe_trame )
 
                 default :
                     perror ( "Erreur_do_seek : overflow compteur cpt " ) ;
-                    bdd_send_msg ( SEEK, "ERROR" ) ;
+                    bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
                     return ERRNO ;
                     break ;
             }
@@ -495,7 +709,7 @@ int bdd_do_seek ( char *safe_trame )
     }
 
     // Maintenant qu'on a le modele de référence, on cherche toutes les références y répondant
-    if ( bdd_search_ref ( &modele ) == ERRNO )
+    if ( bdd_search_ref ( id, &modele ) == ERRNO )
     {
         perror ( "Erreur_bdd_do_seek : bdd_search_ref() " ) ;
         return ERRNO ;
@@ -507,11 +721,11 @@ int bdd_do_seek ( char *safe_trame )
 
 
 //----------------------------------------------------------
-// int bdd_do_select ( char *safe_trame )
+// int bdd_do_select ( int id, char *safe_trame )
 //----------------------------------------------------------
-// Permet de traiter une trame de type selection : 301*statut*affectation*groupes*ref*EOF
+// Permet de traiter une trame de type selection : id*301*statut*affectation*groupes*ref*EOF
 
-int bdd_do_select ( char *safe_trame )
+int bdd_do_select ( int id, char *safe_trame )
 {
     // Déclaration variable
     char* morceau = NULL ;          // Variable contenant chaque morceau de la trame (strtok_r)
@@ -534,7 +748,7 @@ int bdd_do_select ( char *safe_trame )
         if ( ( morceau = strtok_r ( NULL, "*", &safe_trame ) ) == NULL )
         {
             perror ( "Erreur_bdd_do_select : information manquante " ) ;
-            bdd_send_msg ( SELECT, "ERROR" ) ;
+            bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
             return ERRNO ;
         }
 
@@ -542,7 +756,7 @@ int bdd_do_select ( char *safe_trame )
         if ( strcmp ( morceau, "EOF") == 0 )
         {
             perror ( "Erreur_bdd_do_select : information manquante II" ) ;
-            bdd_send_msg ( SELECT, "ERROR" ) ;
+            bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
             return ERRNO ;
         }
         else
@@ -568,7 +782,7 @@ int bdd_do_select ( char *safe_trame )
 
                 default :
                     perror ( "Erreur_do_select : overflow compteur cpt " ) ;
-                    bdd_send_msg ( SELECT, "ERROR" ) ;
+                    bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
                     return ERRNO ;
                     break ;
             }
@@ -580,7 +794,7 @@ int bdd_do_select ( char *safe_trame )
     {
         perror ( "Erreur_bdd_do_select : bad requete " ) ;
         mysql_free_result ( resultat_req ) ;
-        bdd_send_msg ( SELECT, "ERROR" ) ;
+        bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
         return ERRNO ;
     }
 
@@ -589,7 +803,7 @@ int bdd_do_select ( char *safe_trame )
     {
         perror ( "Erreur_bdd_do_select : bad tuple " ) ;
         mysql_free_result ( resultat_req ) ;
-        bdd_send_msg ( SELECT, "ERROR" ) ;
+        bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
         return ERRNO ;
     }
 
@@ -601,7 +815,7 @@ int bdd_do_select ( char *safe_trame )
         perror ( "Erreur_bdd_do_select : RSA_dechiffrement " ) ;
         free ( output ) ;
         mysql_free_result ( resultat_req ) ;
-        bdd_send_msg ( SELECT, "ERROR" ) ;
+        bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
         return ERRNO ;
     }
 
@@ -621,7 +835,7 @@ int bdd_do_select ( char *safe_trame )
             perror ( "Erreur_bdd_do_select : information manquante III " ) ;
             free ( output ) ;
             mysql_free_result ( resultat_req ) ;
-            bdd_send_msg ( SELECT, "ERROR" ) ;
+            bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
             return ERRNO ;
         }
 
@@ -643,7 +857,7 @@ int bdd_do_select ( char *safe_trame )
                 perror ( "Erreur_do_select : overflow compteur cpt " ) ;
                 free ( output ) ;
                 mysql_free_result ( resultat_req ) ;
-                bdd_send_msg ( SELECT, "ERROR" ) ;
+                bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
                 return ERRNO ;
                 break ;
         }
@@ -664,7 +878,7 @@ int bdd_do_select ( char *safe_trame )
             perror ( "Erreur_bdd_do_select : information manquante IV " ) ;
             free ( output ) ;
             mysql_free_result ( resultat_req ) ;
-            bdd_send_msg ( SELECT, "ERROR" ) ;
+            bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
             return ERRNO ;
         }
 
@@ -674,7 +888,7 @@ int bdd_do_select ( char *safe_trame )
             printf ( "Erreur_bdd_do_select : BAD-PERMISSION " ) ;
             free ( output ) ;
             mysql_free_result ( resultat_req ) ;
-            bdd_send_msg ( SELECT, "BAD-PERMISSION" ) ;
+            bdd_send_msg ( id, SELECT, "BAD-PERMISSION", TRUE ) ;
             return FALSE ;
         }
         else if ( strcmp ( morceau, "+") != 0 ) // Puis si on n'est pas en accès total
@@ -698,7 +912,7 @@ int bdd_do_select ( char *safe_trame )
                     perror ( "Erreur_do_select : overflow compteur cpt " ) ;
                     free ( output ) ;
                     mysql_free_result ( resultat_req ) ;
-                    bdd_send_msg ( SELECT, "ERROR" ) ;
+                    bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
                     return ERRNO ;
                     break ;
             }
@@ -709,7 +923,7 @@ int bdd_do_select ( char *safe_trame )
                 printf ( "Erreur_bdd_do_select : bad permission " ) ;
                 free ( output ) ;
                 mysql_free_result ( resultat_req ) ;
-                bdd_send_msg ( SELECT, "BAD-PERMISSION" ) ;
+                bdd_send_msg ( id, SELECT, "BAD-PERMISSION", TRUE ) ;
                 return FALSE ;
             }
             else if ( code_retour == ERRNO )
@@ -717,23 +931,42 @@ int bdd_do_select ( char *safe_trame )
                 printf ( "Erreur_bdd_do_select : bdd_verification_partage " ) ;
                 free ( output ) ;
                 mysql_free_result ( resultat_req ) ;
-                bdd_send_msg ( SELECT, "ERROR" ) ;
+                bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
                 return ERRNO ;
             }
         }
     }
 
     // Si on arrive ici c'est que la poltique de partage est respectée : on retourne la valeur
-    int taille = strlen ( valeur ) + 10 ;
+    // On prépare la réponse
+    int taille = strlen ( valeur ) + 20 ;
     char* reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
     memset ( reponse, '\0', taille ) ;
-    sprintf ( reponse, "%d*%s*EOF", SELECT, valeur ) ;
-    res_send ( reponse ) ;
+    sprintf ( reponse, "%d*%d*%s*EOF", id, SELECT, valeur ) ;
+
+    // On chiffre la réponse
+    int olen = taille * 2  ;
+    char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
+    memset ( out, '\0', olen ) ;
+    if ( AES_chiffrement ( reponse, out, olen, CHIFFREMENT ) != TRUE )
+    {
+        perror ( "Erreur_do_select : AES_chiffrement " ) ;
+        free ( out ) ;
+        free ( output ) ;
+        mysql_free_result ( resultat_req ) ;
+        free ( reponse ) ;
+        bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
+        return ERRNO ;
+    }
+
+    // On envoie la réponse
+    res_send ( out ) ;
 
     // On free l'espace de résultat
     free ( output ) ;
     mysql_free_result ( resultat_req ) ;
     free ( reponse ) ;
+    free ( out ) ;
 
     // On indique que tout s'est bien déroulé
     return TRUE ;
@@ -773,7 +1006,6 @@ int bdd_search_nom ( char* reference, char* nom )
     memset ( output, '\0', RSA_size ( bdd_key ) ) ;
     if ( RSA_chiffrement ( (unsigned char*) tuple[0], (unsigned char*) output, DECHIFFREMENT ) != TRUE )
     {
-        printf ( "ERR = %s  %lu \n", output, strlen ( output ) ) ;
         perror ( "Erreur_bdd_serach_nom : RSA_dechiffrement " ) ;
         free ( output ) ;
         mysql_free_result ( resultat_req ) ;
@@ -793,11 +1025,11 @@ int bdd_search_nom ( char* reference, char* nom )
 
 
 //----------------------------------------------------------
-// int bdd_search_ref ( Ref* modele )
+// int bdd_search_ref ( int id, Ref* modele )
 //----------------------------------------------------------
 // Permet de trouver toutes les correspondances à un modèle avec le nom de l'utilisateur associé à la référence (hash)
 
-int bdd_search_ref ( Ref* modele )
+int bdd_search_ref ( int id, Ref* modele )
 {
     // Initialisation
     MYSQL_RES* resultat_req ;       // Object MYSQL décrivant le résultat d'une requête
@@ -807,12 +1039,12 @@ int bdd_search_ref ( Ref* modele )
     {
         perror ( "Erreur_bdd_search_ref : bad requete " ) ;
         mysql_free_result ( resultat_req ) ;
-        bdd_send_msg ( SEEK, "ERROR" ) ;
+        bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
         return ERRNO ;
     }
 
     // Puis on cherche toutes les références associées à notre modèle
-    if ( bdd_search_modele ( resultat_req, modele ) == ERRNO )
+    if ( bdd_search_modele ( id, resultat_req, modele ) == ERRNO )
     {
         perror ( "Erreur_bdd_search_ref : bad search " ) ;
         mysql_free_result ( resultat_req ) ;
@@ -828,11 +1060,11 @@ int bdd_search_ref ( Ref* modele )
 
 
 //----------------------------------------------------------
-// int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
+// int bdd_search_modele ( int id, MYSQL_RES* resultat_req, Ref* modele )
 //----------------------------------------------------------
 // Permet de traiter le résultat d'une requête sur la base de donnée : on recherche un ensemble de références correspondant à un modèle
 
-int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
+int bdd_search_modele ( int id, MYSQL_RES* resultat_req, Ref* modele )
 {
     // Initialisation
     Ref reference ;
@@ -843,6 +1075,7 @@ int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
     char* safe_tuple = NULL ;              // Permet d'appeler strtok_r sur le bon contenu.
     char* reponse = NULL ;
     int first = TRUE ;
+    int i = 0 ;
 
     // Initialisation
     user = (char*) malloc ( TAILLE_HASH_NOM * sizeof ( char ) ) ;
@@ -861,7 +1094,15 @@ int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
     {
         // On récupère un tuple
         if ( ( tuple = mysql_fetch_row ( resultat_req ) ) ==  NULL )
-            suite = FALSE ;
+        {
+            if ( i == 0 )
+                suite = ERRNO ;
+            else
+                suite = FALSE ;
+        }
+
+        // Inc i
+        i++ ;
 
         // On le traite
         if ( suite == TRUE )
@@ -871,8 +1112,9 @@ int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
             {
                 perror ( "Erreur_bdd_search_modele : ref_split " ) ;
                 free ( user ) ;
+                free ( temporaire ) ;
                 free ( output ) ;
-                bdd_send_msg ( SEEK, "ERROR" ) ;
+                bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
                 return ERRNO ;
             }
 
@@ -881,13 +1123,13 @@ int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
             {
                 perror ( "Erreur_bdd_traitement_request : ref_cmp " ) ;
                 free ( user ) ;
+                free ( temporaire ) ;
                 free ( output ) ;
-                bdd_send_msg ( SEEK, "ERROR" ) ;
+                bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
                 return ERRNO ;
             }
             else if ( return_value == TRUE )    // La référence nous intéresse
             {
-
                 // On déchiffre le tuple
                 memset ( output, '\0', RSA_size ( bdd_key ) ) ;
                 if ( RSA_chiffrement ( (unsigned char*) tuple[1], (unsigned char*) output, DECHIFFREMENT ) != TRUE )
@@ -895,7 +1137,8 @@ int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
                     perror ( "Erreur_bdd_serach_modele : RSA_dechiffrement " ) ;
                     free ( output ) ;
                     free ( user ) ;
-                    bdd_send_msg ( SEEK, "ERROR" ) ;
+                    free ( temporaire ) ;
+                    bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
                     return ERRNO ;
                 }
 
@@ -916,17 +1159,51 @@ int bdd_search_modele ( MYSQL_RES* resultat_req, Ref* modele )
     }
 
     // On envoie la réponse
-    int taille = strlen ( temporaire ) + 10 ;
-    reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
-    memset ( reponse, '\0', taille ) ;
-    sprintf ( reponse, "%d*%s*EOF", SEEK, temporaire ) ;
-    res_send ( reponse ) ;
+    if ( suite != ERRNO )
+    {
+        // On prépare la réponse
+        int taille = strlen ( temporaire ) + 20 ;
+        reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
+        memset ( reponse, '\0', taille ) ;
+        sprintf ( reponse, "%d*%d*%s*EOF", id, SEEK, temporaire ) ;
+
+        // On chiffre la réponse
+        int olen = taille * 2  ;
+        char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
+        memset ( out, '\0', olen ) ;
+        if ( AES_chiffrement ( reponse, out, olen, CHIFFREMENT ) != TRUE )
+        {
+            perror ( "Erreur_do_seek : AES_chiffrement " ) ;
+            free ( out ) ;
+            free ( reponse ) ;
+            free ( user ) ;
+            free ( output ) ;
+            free ( temporaire ) ;
+            bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
+            return ERRNO ;
+        }
+
+        // On envoie la réponse
+        res_send ( out ) ;
+
+        // Free
+        free ( reponse ) ;
+        free ( out ) ;
+    }
+    else
+    {
+        perror ( "Erreur_bdd_serach_modele : aucun tuple " ) ;
+        free ( user ) ;
+        free ( output ) ;
+        free ( temporaire ) ;
+        bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
+        return ERRNO ;
+    }
 
     // Free
-    free ( output ) ;
     free ( user ) ;
     free ( temporaire ) ;
-    free ( reponse ) ;
+    free ( output ) ;
 
     // On indique que tout s'est bien déroulé
     return TRUE ;
@@ -1011,7 +1288,8 @@ int bdd_do_request ( MYSQL* mysql_bdd, int action, char* reference, char* valeur
         default :
             perror ( "Erreur_bdd_do_request : bad action " ) ;
             free ( requete ) ;
-            free ( insertion ) ;
+            if ( insertion != NULL )
+                free ( insertion ) ;
             return ERRNO ;
             break ;
     }
@@ -1023,7 +1301,8 @@ int bdd_do_request ( MYSQL* mysql_bdd, int action, char* reference, char* valeur
         fprintf ( stderr, "Erreur_bdd_do_request : mysql_query avec requete : %s \n", requete ) ;
         fprintf ( stderr, "Erreur_bdd_do_request : mysql_query avec retour : %d \n", return_value ) ;
         free ( requete ) ;
-        free ( insertion ) ;
+        if ( insertion != NULL )
+            free ( insertion ) ;
         return ERRNO ;
     }
 
@@ -1034,14 +1313,16 @@ int bdd_do_request ( MYSQL* mysql_bdd, int action, char* reference, char* valeur
         {
             perror ( "Erreur_bdd_do_request : mysql_use_result " ) ;
             free ( requete ) ;
-            free ( insertion ) ;
+            if ( insertion != NULL )
+                free ( insertion ) ;
             return ERRNO ;
         }
     }
 
     // Free
     free ( requete ) ;
-    free ( insertion ) ;
+    if ( insertion != NULL )
+        free ( insertion ) ;
 
     // On indique que tout s'est bien déroulé
     return TRUE ;
