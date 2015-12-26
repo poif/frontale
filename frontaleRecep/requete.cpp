@@ -1,6 +1,6 @@
-#include "requete.h"
-
 #include <openssl/sha.h>
+#include "requete.h"
+#include "traitement.h"
 
 using namespace std;
 
@@ -52,19 +52,13 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 	string name;
 	string reference;
 
-	SHA_CTX ctx;
-        	char hashChar[SHA_DIGEST_LENGTH+1];
         	string hash;
-	SHA1_Init(&ctx);
 
 	if(m_action.compare("search") == 0)
 	{
 		if(m_option.compare("-n") == 0) //Si on recherche le nom de qqn
 		{
-			SHA1_Update(&ctx,m_statut.data(),m_statut.size());
-		        	SHA1_Final((unsigned char*)hashChar,&ctx); //calcul du hash et stockage dans hash
-		        	hashChar[SHA_DIGEST_LENGTH] = '\0';
-		        	hash = string(hashChar, SHA_DIGEST_LENGTH);
+		        	hash = hashString(m_statut);
 
 			do //on parcours toute la requete recu
 			{
@@ -109,10 +103,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 		{
 			condensate = m_parametre;
 			condensate += m_statut;
-			SHA1_Update(&ctx,condensate.data(),condensate.size());
-		        	SHA1_Final((unsigned char*)hashChar,&ctx); //calcul du hash et stockage dans hash
-		        	hashChar[SHA_DIGEST_LENGTH] = '\0';
-		        	hash = string(hashChar, SHA_DIGEST_LENGTH);
+			hash = hashString(condensate);
 
 			do
 			{
@@ -143,10 +134,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 
 		else if (m_option.compare("-p") ==0)
 		{
-			SHA1_Update(&ctx,m_parametre.data(),m_parametre.size());
-		        	SHA1_Final((unsigned char*)hashChar,&ctx); //calcul du hash et stockage dans hash
-		        	hashChar[SHA_DIGEST_LENGTH] = '\0';
-		        	hash = string(hashChar, SHA_DIGEST_LENGTH);
+			hash = hashString(m_parametre);
 
 			do
 			{
@@ -227,10 +215,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	int i=0;
 	int j=0;
 	char sep = '*';
-	SHA_CTX ctx;
-        	string hash; //[SHA_DIGEST_LENGTH]
-        	char hashChar[SHA_DIGEST_LENGTH];
-        	SHA1_Init(&ctx); 		//Initialisation pour calculer le hash
+        	string hash; 
 
 	if(m_action.compare("search") == 0) // Fonction recherche
 	{
@@ -279,9 +264,8 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	}
 	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
 	{
-		SHA1_Update(&ctx,m_nom.data(),m_nom.size());
-	        	SHA1_Final((unsigned char*)hashChar,&ctx); //calcul du hash et stockage dans hash
-	        	hash = string(hashChar, SHA_DIGEST_LENGTH);
+		hash = hashString(m_nom);
+
 	    	pourBdd=true;
 		m_requete[0] = '3';  // Premiere partie : l'action (insert : 302)
 		m_requete[1] = '0';
@@ -374,9 +358,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 		i++;
 		j=0;
 
-		SHA1_Update(&ctx,m_nom.data(),m_nom.size());
-	        	SHA1_Final((unsigned char*)hashChar,&ctx); //calcul du hash et stockage dans hash
-	        	hash = string(hashChar, SHA_DIGEST_LENGTH);
+		hash = hashString(m_nom);
 
 		while(hash[j] != '\0')
 		{
@@ -425,7 +407,7 @@ int Requete::test_char(char caractere) //test si le caractère est bien une lett
 
 void Requete::raz()
 {
-	m_affectation = "";
+        m_affectation = "";
         m_statut = "";
         m_action = "";
         m_option = "";
@@ -468,7 +450,7 @@ int Requete::decoupage(string chaine)
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-        {
+	{
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
@@ -479,13 +461,13 @@ int Requete::decoupage(string chaine)
 		m_statut[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-        }
-        m_statut[cpt_element] = '\0';
+	}
+	m_statut[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-        {
+	{
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
@@ -496,13 +478,13 @@ int Requete::decoupage(string chaine)
 	    m_action[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-        }
-        m_action[cpt_element] = '\0';
+	}
+	m_action[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-        {
+	{
 	    test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
@@ -513,13 +495,13 @@ int Requete::decoupage(string chaine)
                 m_option[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-        }
-        m_option[cpt_element] = '\0';
+	}
+	m_option[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-        {
+	{
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
@@ -527,11 +509,11 @@ int Requete::decoupage(string chaine)
                         return 0;
                 }
 
-		m_parametre[cpt_element]=chaine[cpt_chaine];
+	    m_parametre[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-        }
-        m_parametre[cpt_element] = '\0';
+	}
+	m_parametre[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
@@ -559,11 +541,11 @@ int Requete::decoupage(string chaine)
 			while(chaine[cpt_chaine] != sep)
 			{
 				test = test_char(chaine[cpt_chaine]);
-                        	if(test == 0)
-                        	{
-                                	cerr << "Requete malformée" << endl ;
-                                	return 0;
-                        	}
+	                        	if(test == 0)
+	                        	{
+	                                		cerr << "Requete malformée" << endl ;
+	                                		return 0;
+	                        	}
 
 				m_partage[cpt_element] = chaine[cpt_chaine];
 				cpt_chaine++;
@@ -576,7 +558,7 @@ int Requete::decoupage(string chaine)
 	}
 
 	while(chaine[cpt_chaine] != sep)
-        {
+	{
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
@@ -584,16 +566,16 @@ int Requete::decoupage(string chaine)
                         return 0;
                 }
 
-		m_groupe[cpt_element]=chaine[cpt_chaine];
+	    m_groupe[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-        }
-        m_groupe[cpt_element] = '\0';
+	}
+	m_groupe[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != '\0') //ici fin de la chaine (donc pas de séparateur)
-        {
+	{
                 test = test_char(chaine[cpt_chaine]);
                 if(test == 0)
                 {
@@ -604,7 +586,7 @@ int Requete::decoupage(string chaine)
 		m_cle[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-        }
+	}
 	m_cle[cpt_element] = '\0';
 	return 1;
 }
