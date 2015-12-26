@@ -134,7 +134,9 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 
 		else if (m_option.compare("-p") ==0)
 		{
-			hash = hashString(m_parametre);
+			condensate = m_parametre;
+			condensate += m_statut;
+			hash = hashString(condensate);
 
 			do
 			{
@@ -250,7 +252,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 			m_requete[i]=sep;
 			i++;*/
 
-			while(m_statut[i] != '\0')
+			while(m_affectation[i] != '\0')
 			{
 				m_requete[i]=m_affectation[i]; // Deuxieme partie : le statut
 				//j++;
@@ -583,7 +585,7 @@ int Requete::decoupage(string chaine)
                         return 0;
                 }
 
-		m_cle[cpt_element]=chaine[cpt_chaine];
+	    m_cle[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
 	}
