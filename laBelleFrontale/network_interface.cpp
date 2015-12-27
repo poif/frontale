@@ -495,42 +495,23 @@ void network_interface::process_received_events(engine_event& e){
 
 		      engine_event r;
 		      engine_event p;
-		      vector<string> liste;
+		      vector<string> groups;
 
-		      string en_cours;
+		      string reqFormat;
 
 		      string pubStringRemote = e.s_data["PUB"];
 		      string &affectationReq = e.s_data["AFFECTATION"];
 
-		      /*Traitement de la requete */
-		      //finalList = traitement_look(affectationReq);
+		      groups.push_back("none");
+		      reqFormat = traitement_req_client("15"/*num de token temporaire*/,"1", "none", affectationReq, groups,"none","none", "none");
 
-		      /*en_cours = traitement_req_bdd(1, 
-						  "none", 
-						  affectation, 
-						  "none", 
-						  "none", 
-						  "none", 
-						  "none");
+		      QString qreqFormat = QString("%1").arg(reqFormat.data());
 
-		      QString mon_cours = QString("%1").arg(en_cours);
-
-		      bdd->emission(mon_cours);
-		      bdd->attendLecture();
-
-		      Qtring recu = bdd->getMsg();
-
-		      string recuStr = recu.toStdSring();*/
-		      liste.push_back("none");
-		      en_cours = traitement_req_client("1", "none", affectationReq, liste,"none","none", "none");
-
-		      QString mon_cours = QString("%1").arg(en_cours.data());
-
-		      Message msg2(mon_cours,'1','*');
+		      Message msg2(qreqFormat,'1','*');
 		      msg2.entete();
 		      msg2.chiffrement(key);
 
-		      string toto = msg2.getChiffre().toStdString();
+		      //string toto = msg2.getChiffre().toStdString();
 
 		      clientFront cli;
 
@@ -545,19 +526,14 @@ void network_interface::process_received_events(engine_event& e){
 		      Message msg(message,'*');
 		      msg.dechiffrement(key);
 
-		      string recuStr = msg.getMsg().toStdString();
+		      string rep = msg.getMsg().toStdString();
 
-		      string list = traitement_rep_client(recuStr);
+		      string repFormat = traitement_rep_client(rep);
 
-		      //envoi_bdd 
-
-		      //string hashStatList = finalList[0];
-		      //string nomList = finalList[1];
-
-		      if (!list.empty() || list != "")
+		      if (!repFormat.empty() || repFormat != "")
 		      {
 			        r.type = engine_event::SHOW;
-			        r.s_data["REPONSE"] = list;
+			        r.s_data["REPONSE"] = repFormat;
 
 			        boost::archive::text_oarchive archive(archive_stream);
 			        archive << r;
@@ -601,9 +577,6 @@ void network_interface::process_received_events(engine_event& e){
 
 			        noeudthor->send(data_encoded);
 
-			        //cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
-			        //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
-			        //sendTor(outbound_data);
 		        	}
 		        
 			break;
@@ -611,22 +584,22 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::EXIST:{
 			engine_event r;
 			engine_event p;
-			string en_cours;
-			vector<string> liste;
+			string reqFormat;
+			vector<string> groups;
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
 
-			liste.push_back("none");
-			en_cours = traitement_req_client("2", "none", affectationReq, liste,"none","none", "none");
+			groups.push_back("none");
+			reqFormat = traitement_req_client("15"/*num de token temporaire*/,"2", "none", affectationReq, groups,"none","none", "none");
 
-			QString mon_cours = QString("%1").arg(en_cours.data());
+			QString qreqFormat = QString("%1").arg(reqFormat.data());
 
-			Message msg2(mon_cours,'2','*');
+			Message msg2(qreqFormat,'2','*');
 			msg2.entete();
 			msg2.chiffrement(key);
 
-			string toto = msg2.getChiffre().toStdString();
+			//string toto = msg2.getChiffre().toStdString();
 
 			clientFront cli;
 
@@ -641,14 +614,14 @@ void network_interface::process_received_events(engine_event& e){
 			Message msg(message,'*');
 			msg.dechiffrement(key);
 
-			string recuStr = msg.getMsg().toStdString();
+			string rep = msg.getMsg().toStdString();
 
-			string list = traitement_rep_client(recuStr);
+			string repFormat = traitement_rep_client(rep);
 
-			if (!list.empty() || list != "")
+			if (!repFormat.empty() || repFormat != "")
 			{
 			       r.type = engine_event::ANSWER;
-			       r.s_data["HASH"] = list;
+			       r.s_data["HASH"] = repFormat;
 
 			       boost::archive::text_oarchive archive(archive_stream);
 			       archive << r;
@@ -692,9 +665,6 @@ void network_interface::process_received_events(engine_event& e){
 
 			        noeudthor->send(data_encoded);
 
-			        //cout << "Message pret a etre envoye :\n\n" << data_encoded << "\n";
-			        //sock.send_to(boost::asio::buffer(data_encoded.data(), data_encoded.size()), sender_endpoint);
-			        //sendTor(outbound_data);
 			}
 			
 			break;
@@ -702,28 +672,22 @@ void network_interface::process_received_events(engine_event& e){
 		case engine_event::LOOKREC:{
 			engine_event r;
 			engine_event p;
-			vector<string> liste;
-			string en_cours;
+			vector<string> groups;
+			string reqFormat;
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
 			string affectationReq = e.s_data["AFFECTATION"];
-			/*Traitement de la requete */
-			/*string *finalList = new string[2];
-			finalList = traitement_lookrec(dataType, statutReq);
-			string reference = finalList[0];
-			string hashNomList = finalList[1];
-			*/
 
-			liste.push_back("none");
-			en_cours = traitement_req_client("3", "none", affectationReq, liste,"none","none", "none");
+			groups.push_back("none");
+			reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", affectationReq, groups,"none","none", "none");
 
-			QString mon_cours = QString("%1").arg(en_cours.data());
+			QString qreqFormat = QString("%1").arg(reqFormat.data());
 
-			Message msg2(mon_cours,'2','*');
+			Message msg2(qreqFormat,'2','*');
 			msg2.entete();
 			msg2.chiffrement(key);
 
-			string toto = msg2.getChiffre().toStdString();
+			//string toto = msg2.getChiffre().toStdString();
 
 			clientFront cli;
 
@@ -738,15 +702,15 @@ void network_interface::process_received_events(engine_event& e){
 			Message msg(message,'*');
 			msg.dechiffrement(key);
 
-			string recuStr = msg.getMsg().toStdString();
+			string rep = msg.getMsg().toStdString();
 
-			string list = traitement_rep_client(recuStr);
+			string repFormat = traitement_rep_client(rep);
 
-			if (!list.empty() || list != "")
+			if (!repFormat.empty() || repFormat != "")
 			{
 				r.type = engine_event::SHOWREC;
 
-				r.s_data["REPONSE"] = list;
+				r.s_data["REPONSE"] = repFormat;
 
 				string pubEncoded = Pub_toB64string();
 				r.s_data["PUBKEY"] = pubEncoded;
@@ -798,52 +762,28 @@ void network_interface::process_received_events(engine_event& e){
 			
 			break;
 		}
-		case engine_event::PULL:{
-			engine_event r;
-
-			string aesKey = e.s_data["KEY"];
-			string aesIv = e.s_data["IV"];
-			string reference = e.s_data["REFERENCE"];
-			string groClient = e.s_data["GRCLIENT"];
-			vector<string> groupeClient;
-			groupeClient.push_back(groClient);
-			/*Traitement de la requete */
-			string document = traitement_pull(reference, groupeClient);
-
-			if (!document.empty() || document != "")
-			{
-				r.type = engine_event::PUSH;
-				r.s_data["DOCUMENT"] = document;
-
-				boost::archive::text_oarchive archive(archive_stream);
-				archive << r;
-				string outbound_data = archive_stream.str();
-
-				byte * iv = sToB(aesIv);
-				SecByteBlock key = sToSbb(aesKey);
-
-				const string &data_encoded = encrypto_aes(key, iv, outbound_data);
-
-				noeudthor->send(data_encoded);
-				//sendTor(outbound_data);
-				
-			}
-			
-			break;
-		}
 		case engine_event::SECRET:{
 			engine_event r;
 			
 			string showRep = "";
 
-			string aesKey = decrypto_rsa(e.s_data["KEY"]);
-			string aesIv = decrypto_rsa(e.s_data["IV"]);
+			if(e.s_data["KEY"].compare("N/A") == 0 && e.s_data["IV"].compare("N/A") == 0){
 
-			byte * iv = sToB(aesIv);
-			SecByteBlock key = sToSbb(aesKey);
+				/* reponse push */
+				if(!aesIvTampon.empty() && !aesKeyTampon.empty() && aesIvTampon != "" && aesKeyTampon != "")
+				byte * iv = sToB(aesIvTampon);
+				SecByteBlock key = sToSbb(aesKeyTampon);
+			}
+			else{
+				string aesKey = decrypto_rsa(e.s_data["KEY"]);
+				string aesIv = decrypto_rsa(e.s_data["IV"]);
+
+				byte * iv = sToB(aesIv);
+				SecByteBlock key = sToSbb(aesKey);
+				
+			}
 
 			string data_clear = decrypto_aes(key, iv, e.s_data["CIPHER"]);
-
 			
 			data_clear.erase(0, 16);
 			data_clear = "22 serialization" + data_clear;
@@ -891,7 +831,7 @@ void network_interface::process_received_events(engine_event& e){
 							StringSource ss2(pubRemote, true /*pumpAll*/);
 
 							RSA::PublicKey publicKeyRemote;
-							publicKey.Load(ss2);
+							publicKeyRemote.Load(ss2);
 
 							responseRec = r.s_data["REPONSE"] + "*" + Pub_toB64string(publicKeyRemote);
 							recBool = true;
@@ -899,6 +839,101 @@ void network_interface::process_received_events(engine_event& e){
 						}
 					}
 
+				}
+				case engine_event::PUSH:{
+					if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != ""){
+						string encDocument = r.s_data["DOCUMENT"];
+						string document;
+
+						StringSource ss(encDocument, true,
+						    new Base64Decoder(
+						        new StringSink(document)
+						    ) // Base64Decoder
+						); // StringSource
+						//hnom.erase(hnom.size() - 1, 1);
+
+						cout << "document : " << document << endl;
+
+						responseRec = document;	
+						recBool = true;
+					
+					}
+				}
+				case engine_event::PULL:{
+					engine_event p;
+					engine_event q;
+
+					string aesKey = r.s_data["KEY"];
+					string aesIv = r.s_data["IV"];
+					string reference = r.s_data["REFERENCE"];
+					string groClient = r.s_data["GRCLIENT"];
+					vector<string> groupeClient;
+					string repFormat
+
+					istringstream issGroupe(groClient);
+					string groupeUnique;
+					while ( std::getline( issGroupe, groupeUnique, '*' )) 
+					{ 
+						groupeClient.push_back(groupeUnique);
+					}
+
+					/*Traitement de la requete */
+					
+					reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", affectationReq, groupeClient,"none","none", "none");
+
+					QString qreqFormat = QString("%1").arg(reqFormat.data());
+
+					Message msg2(qreqFormat,'2','*');
+					msg2.entete();
+					msg2.chiffrement(key);
+
+					//string toto = msg2.getChiffre().toStdString();
+
+					clientFront cli;
+
+					reception ser;
+
+					cli.socBind();
+					cli.emission(msg2.getChiffre());
+					ser.ecoute(-1); // timeout= -1 == pas de timeout
+
+					QString message = ser.getMsg();
+
+					Message msg(message,'*');
+					msg.dechiffrement(key);
+
+					string rep = msg.getMsg().toStdString();
+
+					string document = traitement_rep_client(rep);			
+
+					if (!document.empty() || document != "")
+					{
+						p.type = engine_event::PUSH;
+						p.s_data["DOCUMENT"] = document;
+
+						boost::archive::text_oarchive archive(archive_stream);
+						archive << p;
+						string outbound_data = archive_stream.str();
+
+						byte * iv = sToB(aesIv);
+						SecByteBlock key = sToSbb(aesKey);
+
+						string cipher_data = encrypto_aes(key, iv, outbound_data);
+
+					            q.type = engine_event::SECRET;
+					            q.s_data["CIPHER"] = cipher_data;
+					            q.s_data["KEY"] = "N/A";
+					            q.s_data["IV"] = "N/A";
+
+					            boost::archive::text_oarchive archiveOut(archive_streamOut);
+					            archiveOut << q;
+					            const string &data_encoded = archive_streamOut.str();
+
+						noeudthor->send(data_encoded);
+						
+					}
+					
+					break;
 				}
 			}	
 		}
@@ -1009,17 +1044,26 @@ void network_interface::send_lookrec(string& dataType, string& affectation){
 
 }
 
-void network_interface::send_pull(string& reference, string& groupeClient, RSA::PublicKey& pubRemote){
+void network_interface::send_pull(string& reference, string& groupeClient, string& encKey){
 	engine_event e;
-	engine_event r;
-	engine_event p;
-	//boost::asio::buffer network_buffer;
-	e.type = engine_event::LOOKREC;
+
+	e.type = engine_event::PULL;
 	ostringstream archive_stream;
 	ostringstream archive_streamOut;
 	string pubEncoded;
 	string document;
 	string encDocument;
+	string pubRemote;
+
+	StringSource ss(encKey, true,
+	    new Base64Decoder(
+	        new StringSink(pubRemote)
+	    ) // Base64Decoder
+	); // StringSource
+	StringSource ss2(pubRemote, true /*pumpAll*/);
+
+	RSA::PublicKey publicKeyRemote;
+	publicKeyRemote.Load(ss2);
 
 	AutoSeededRandomPool prng;
 
@@ -1038,6 +1082,8 @@ void network_interface::send_pull(string& reference, string& groupeClient, RSA::
 	e.s_data["REFERENCE"]=reference;
 	e.s_data["GRCLIENT"]=groupeClient;
 
+	aesKeyTampon = aesKey[0];
+	aesIvTampon = aesKey[1];
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
@@ -1059,8 +1105,8 @@ void network_interface::send_pull(string& reference, string& groupeClient, RSA::
            string * aesKey = new string[2];
            aesKey = aesKeyToS(key_p, iv_p);
 
-           string aesKey_encoded = encrypto_rsa(aesKey[0], pubRemote);
-           string aesIv_encoded = encrypto_rsa(aesKey[1], pubRemote);
+           string aesKey_encoded = encrypto_rsa(aesKey[0], publicKeyRemote);
+           string aesIv_encoded = encrypto_rsa(aesKey[1], publicKeyRemote);
 
            p.s_data["KEY"] = aesKey_encoded;
            p.s_data["IV"] = aesIv_encoded;
@@ -1069,28 +1115,6 @@ void network_interface::send_pull(string& reference, string& groupeClient, RSA::
            archiveOut << p;
            const string &data_encoded = archive_streamOut.str();
 
-	//sendTor(outbound_data);
-	//receiveTor(network_buffer);
-           	string str_data = "toto";
 	noeudthor->send(data_encoded);
 
-	//string str_data(&network_buffer[0], network_buffer.size());
-	string data_clear = decrypto_aes(key, iv, str_data);
-	istringstream archive_streamIn(data_clear);
-	boost::archive::text_iarchive archiveIn(archive_streamIn);
-
-	archiveIn >> r;	
-
-	if (r.type == engine_event::PUSH){
-		if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != "" ){
-			encDocument = r.s_data["DOCUMENT"];
-			StringSource ss(encDocument, true,
-			    new Base64Decoder(
-			        new StringSink(document)
-			    ) // Base64Decoder
-			); // StringSource
-			return document;
-		}
-	}
-	return NULL;
 }

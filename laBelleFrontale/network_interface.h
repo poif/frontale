@@ -55,7 +55,7 @@ public:
 	void send_look(std::string& affectation);
 	void send_exist(std::string& affectation);
 	void send_lookrec(std::string& dataType, std::string& statut);
-	void send_pull(std::string& reference, std::string& groupeClient, RSA::PublicKey& pubRemote);
+	void send_pull(std::string& reference, std::string& groupeClient, std::string& encKey);
 
 	std::string encrypto_rsa(std::string& plain);
 	std::string encrypto_rsa(std::string& plain, RSA::PublicKey pubRemote);
@@ -108,6 +108,9 @@ private:
     	int port_rem;
     	bool recBool;
     	std::string responseRec;
+
+    	std::string aesKeyTampon;
+    	std::string aesIvTampon;
 };
 
 #endif
