@@ -86,6 +86,18 @@ void Fusionneur::startTimer(string token)
 		cout << "Timer lancé" << std::endl;
 	}
 	else {
+		cout << "Timer pas lancé" << std::endl;
+	}
+}
+
+
+void startTimer(std::string token, int msec){
+	if (tokenToTimer.find(token) != tokenToTimer.cend()){
+		tokenToTimer[token]->setInterval(msec);
+		tokenToTimer[token]->start();
+		cout << "Timer lancé" << std::endl;
+	}
+	else {
 		cout << "Timer pas lancéé" << std::endl;
 	}
 }

@@ -29,6 +29,7 @@ class Fusionneur : public QObject
 		std::string GenToken(QHostAddress addr, quint16 port);
 		std::list<std::string>* getReponses(std::string token);
 		void startTimer(std::string token);
+		void startTimer(std::string token, int msec);
 		void addMessageToList(std::string token, std::string msg);
 	public slots:
 		void timeoutCallback(std::string token);
