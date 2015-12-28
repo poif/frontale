@@ -11,6 +11,7 @@ public:
     clientFront();
     void socBind();
     void emission(QString message, QHostAddress hostAddr, quint16 hostPort);
+    void emission(QString message);
 
 private:
         QUdpSocket *soc;

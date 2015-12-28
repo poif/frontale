@@ -496,6 +496,7 @@ void network_interface::process_received_events(engine_event& e){
 		      engine_event r;
 		      engine_event p;
 		      vector<string> groups;
+		      vector<string> a_traiter;
 
 		      string reqFormat;
 
@@ -528,7 +529,9 @@ void network_interface::process_received_events(engine_event& e){
 
 		      string rep = msg.getMsg().toStdString();
 
-		      string repFormat = traitement_rep_client(rep);
+		      a_traiter.push_back(rep);
+
+		      string repFormat = traitement_rep_client(a_traiter);
 
 		      if (!repFormat.empty() || repFormat != "")
 		      {
@@ -586,6 +589,8 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event p;
 			string reqFormat;
 			vector<string> groups;
+			vector<string> a_traiter;
+
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
 			/*Traitement de la requete */
@@ -616,7 +621,9 @@ void network_interface::process_received_events(engine_event& e){
 
 			string rep = msg.getMsg().toStdString();
 
-			string repFormat = traitement_rep_client(rep);
+			a_traiter.push_back(rep);
+
+			string repFormat = traitement_rep_client(a_traiter);
 
 			if (!repFormat.empty() || repFormat != "")
 			{
@@ -673,13 +680,14 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event r;
 			engine_event p;
 			vector<string> groups;
+			vector<string> a_traiter;
 			string reqFormat;
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
 			string affectationReq = e.s_data["AFFECTATION"];
 
 			groups.push_back("none");
-			reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", affectationReq, groups,"none","none", "none");
+			reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", affectationReq, groups,dataType,"none", "none");
 
 			QString qreqFormat = QString("%1").arg(reqFormat.data());
 
@@ -704,7 +712,9 @@ void network_interface::process_received_events(engine_event& e){
 
 			string rep = msg.getMsg().toStdString();
 
-			string repFormat = traitement_rep_client(rep);
+			a_traiter.push_back(rep);
+
+			string repFormat = traitement_rep_client(a_traiter);
 
 			if (!repFormat.empty() || repFormat != "")
 			{
@@ -767,21 +777,35 @@ void network_interface::process_received_events(engine_event& e){
 			
 			string showRep = "";
 
+			byte * iv;
+			SecByteBlock key;
+
+			bool stahp = false;
+
 			if(e.s_data["KEY"].compare("N/A") == 0 && e.s_data["IV"].compare("N/A") == 0){
 
 				/* reponse push */
-				if(!aesIvTampon.empty() && !aesKeyTampon.empty() && aesIvTampon != "" && aesKeyTampon != "")
-				byte * iv = sToB(aesIvTampon);
-				SecByteBlock key = sToSbb(aesKeyTampon);
+				if(!aesIvTampon.empty() && !aesKeyTampon.empty() && aesIvTampon != "" && aesKeyTampon != ""){
+					iv = sToB(aesIvTampon);
+					key = sToSbb(aesKeyTampon);
+				}
+				else {
+					iv = sToB("");
+					key = sToSbb("");
+
+					stahp = true;
+					
+				}
 			}
 			else{
 				string aesKey = decrypto_rsa(e.s_data["KEY"]);
 				string aesIv = decrypto_rsa(e.s_data["IV"]);
 
-				byte * iv = sToB(aesIv);
-				SecByteBlock key = sToSbb(aesKey);
+				iv = sToB(aesIv);
+				key = sToSbb(aesKey);
 				
 			}
+			if(stahp) break;
 
 			string data_clear = decrypto_aes(key, iv, e.s_data["CIPHER"]);
 			
@@ -823,6 +847,7 @@ void network_interface::process_received_events(engine_event& e){
 					if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
 						if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
 							string encKey = r.s_data["PUBKEY"];
+							string pubRemote;
 							StringSource ss(encKey, true,
 							    new Base64Decoder(
 							        new StringSink(pubRemote)
@@ -868,7 +893,8 @@ void network_interface::process_received_events(engine_event& e){
 					string reference = r.s_data["REFERENCE"];
 					string groClient = r.s_data["GRCLIENT"];
 					vector<string> groupeClient;
-					string repFormat
+					vector<string> a_traiter;
+					string reqFormat;
 
 					istringstream issGroupe(groClient);
 					string groupeUnique;
@@ -879,7 +905,7 @@ void network_interface::process_received_events(engine_event& e){
 
 					/*Traitement de la requete */
 					
-					reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", affectationReq, groupeClient,"none","none", "none");
+					reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", "none", groupeClient,"none",reference, "none");
 
 					QString qreqFormat = QString("%1").arg(reqFormat.data());
 
@@ -904,7 +930,9 @@ void network_interface::process_received_events(engine_event& e){
 
 					string rep = msg.getMsg().toStdString();
 
-					string document = traitement_rep_client(rep);			
+					a_traiter.push_back(rep);
+
+					string document = traitement_rep_client(a_traiter);			
 
 					if (!document.empty() || document != "")
 					{
@@ -1046,6 +1074,7 @@ void network_interface::send_lookrec(string& dataType, string& affectation){
 
 void network_interface::send_pull(string& reference, string& groupeClient, string& encKey){
 	engine_event e;
+	engine_event p;
 
 	e.type = engine_event::PULL;
 	ostringstream archive_stream;
@@ -1082,8 +1111,8 @@ void network_interface::send_pull(string& reference, string& groupeClient, strin
 	e.s_data["REFERENCE"]=reference;
 	e.s_data["GRCLIENT"]=groupeClient;
 
-	aesKeyTampon = aesKey[0];
-	aesIvTampon = aesKey[1];
+	aesKeyTampon = aesKey_1[0];
+	aesIvTampon = aesKey_1[1];
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;

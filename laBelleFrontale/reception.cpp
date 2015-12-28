@@ -19,7 +19,7 @@ void reception::ecoute(int timeout){
 void reception::procReception(){
     QByteArray datagram;
     datagram.resize(soc->pendingDatagramSize());
-    soc->readDatagram(datagram.data(),datagram.size(), hostAddr, hostPort);
+    soc->readDatagram(datagram.data(),datagram.size(), &hostAddr, &hostPort);
     msg=QString("%1").arg(datagram.data());
 
 

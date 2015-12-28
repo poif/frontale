@@ -23,4 +23,13 @@ void clientFront::emission(QString message,QHostAddress hostaddr, quint16 hostPo
 
 }
 
+void clientFront::emission(QString message){
+
+    QHostAddress addr = QHostAddress::Broadcast;
+
+    QByteArray datagram = message.toAscii().data();
+
+    soc->writeDatagram(datagram, addr,1234);
+
+}
 

@@ -20,6 +20,8 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 	
+	QHostAddress hoteCourant;
+	quint16 portCourant;
 
 	bool respBool = false;
 
@@ -41,6 +43,9 @@ int main(int argc, char *argv[])
 	QString versBdd;
 
 	while(1){
+
+		hoteCourant = ser.getHostAddr();
+		portCourant = ser.getHostPort();
 		ser.ecoute(-1); // timeout= -1 == pas de timeout
 
 		message = ser.getMsg();
@@ -87,7 +92,8 @@ int main(int argc, char *argv[])
 					netinf.send_exist(traitement);
 				}
 				if(option.compare("-p")==0){
-					netinf.send_lookrec("picture",affectation);
+					string type = "picture";
+					netinf.send_lookrec(type,traitement);
 				}		
 
 
@@ -145,7 +151,7 @@ int main(int argc, char *argv[])
 
 			clientFront cli;
 			cli.socBind();
-			cli.emission(msg2.getChiffre());
+			cli.emission(msg2.getChiffre(), hoteCourant, portCourant);
 
 		}
 

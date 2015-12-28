@@ -58,7 +58,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 	{
 		if(m_option.compare("-n") == 0) //Si on recherche le nom de qqn
 		{
-		        	hash = hashString(m_statut);
+		        	hash = hashString(m_statut.c_str());
 
 			do //on parcours toute la requete recu
 			{
@@ -103,7 +103,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 		{
 			condensate = m_parametre;
 			condensate += m_statut;
-			hash = hashString(condensate);
+			hash = hashString(condensate.c_str());
 
 			do
 			{
@@ -136,7 +136,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 		{
 			condensate = m_parametre;
 			condensate += m_statut;
-			hash = hashString(condensate);
+			hash = hashString(condensate.c_str());
 
 			do
 			{
@@ -266,7 +266,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	}
 	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
 	{
-		hash = hashString(m_nom);
+		hash = hashString(m_nom.c_str());
 
 	    	pourBdd=true;
 		m_requete[0] = '3';  // Premiere partie : l'action (insert : 302)
@@ -360,7 +360,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 		i++;
 		j=0;
 
-		hash = hashString(m_nom);
+		hash = hashString(m_nom.c_str());
 
 		while(hash[j] != '\0')
 		{

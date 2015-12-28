@@ -91,7 +91,7 @@ void Fusionneur::startTimer(string token)
 }
 
 
-void startTimer(std::string token, int msec){
+void Fusionneur::startTimer(std::string token, int msec){
 	if (tokenToTimer.find(token) != tokenToTimer.cend()){
 		tokenToTimer[token]->setInterval(msec);
 		tokenToTimer[token]->start();
@@ -118,7 +118,7 @@ void Fusionneur::timeoutCallback(string token)
 	std::list<string>* listeReponse = tokenToMsgList[token];
 	tokenToMsgList.erase(token);
 
-	traitement_rep_client(listeReponse);
+	//traitement_rep_client(listeReponse);
 	delete listeReponse;
 
 	IpPort ipPortDuClient = tokenToClient[token];

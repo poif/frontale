@@ -11,8 +11,8 @@ private :
     QUdpSocket *soc;
     QString msg;
     bool expiration;
-    QHostAddress *hostAddr;
-    quint16 * hostPort;
+    QHostAddress hostAddr;
+    quint16 hostPort;
 public:
     reception();
     void ecoute(int timeout);
