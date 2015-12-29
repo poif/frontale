@@ -44,9 +44,10 @@ int main(int argc, char *argv[])
 
 	while(1){
 
+		ser.ecoute(-1); // timeout= -1 == pas de timeout
+
 		hoteCourant = ser.getHostAddr();
 		portCourant = ser.getHostPort();
-		ser.ecoute(-1); // timeout= -1 == pas de timeout
 
 		message = ser.getMsg();
 
@@ -84,6 +85,7 @@ int main(int argc, char *argv[])
 				cout << option << endl;
 				cout << traitement << endl;
 
+				
 				if(option.compare("-n")==0){/* traitement est une affectation */
 					netinf.send_look(traitement);
 					cout << "ici envoi" << endl;
@@ -96,7 +98,7 @@ int main(int argc, char *argv[])
 					netinf.send_lookrec(type,traitement);
 				}		
 
-
+				/* THREAD TRAITEMENT */
 				t0 = time(NULL);
 				std::cout << "Attente " << tmax << " secondes" << std::endl;
 
