@@ -1,37 +1,46 @@
 #ifndef DEF_REQUETE
 #define DEF_REQUETE
 
+#include <string>
+#include <iostream>
+#include <sstream>   
+#include <list>
+
 class Requete
 {
 	private:
 
-	char m_affectation[16];
-	char m_statut[16];
-	char m_action[16];
-	char m_option[16];
-	char m_parametre[16];
-	char m_groupe[16];
-	char m_cle[256];
+	std::string m_affectation;
+	std::string m_statut;
+	std::string  m_action;
+	std::string m_option;
+	std::string m_parametre;
+	std::string m_nom;
+	std::string m_partage;
+	std::string m_groupe;
+	std::string m_cle;
+	bool pourBdd;
 
-	char m_requete[256];
-	char m_resultat[256];
+	std::string m_requete;
+	std::string m_resultat;
 
 	public:
 
 	Requete();
-	char* getAffectation();
-	char* getStatut();
-	char* getAction();
-	char* getOption();
-	char* getParametre();
-	char* getGroupe();
-	char* getCle();
-	char* getRequete();
-	char* getResultat();
-	void decoupage(const char * chaine);
-	void affichage();
+	std::string getAffectation();
+	std::string getStatut();
+	std::string getAction();
+	std::string getOption();
+	std::string getParametre();
+	std::string getGroupe();
+	std::string getCle();
+	std::string getRequete();
+	std::string getResultat();
+	bool getPourBdd();
+	void setResultat(std::string buffer);
+	int decoupage(std::string& chaine);
 	void construction();
-	int tri(const char * resultat);
+	int tri(std::list<std::string>& resultat);
 };
 
 #endif

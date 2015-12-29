@@ -1,311 +1,232 @@
+#include <openssl/sha.h>
 #include "requete.h"
-#include <stdio.h>
-#include <string.h>
+#include "traitement.h"   
 
 using namespace std;
 
 Requete::Requete()
-{
-	m_affectation[0] = '\0';
-	m_statut[0] = '\0';
-	m_action[0] = '\0';
-	m_option[0] = '\0';
-	m_parametre[0] = '\0';
-	m_groupe[0] = '\0';
-	m_cle[0] = '\0';
+{}
 
-	m_requete[0] = '\0';
-	m_resultat[0] = '\0';
-}
-
-//Getters
-
-char* Requete::getAffectation()
+string Requete::getAffectation()
 {	return m_affectation;}
-char* Requete::getStatut()
+string Requete::getStatut()
 {	return m_statut;}
-char* Requete::getAction()
+string Requete::getAction()
 {       return m_action;}
-char* Requete::getOption()
+string Requete::getOption()
 {       return m_option;}
-char* Requete::getParametre()
+string Requete::getParametre()
 {       return m_parametre;}
-char* Requete::getGroupe()
+string Requete::getGroupe()
 {       return m_groupe;}
-char* Requete::getCle()
+string Requete::getCle()
 {       return m_cle;}
-char* Requete::getRequete()
+string Requete::getRequete()
 {	return m_requete;}
-char* Requete::getResultat()
+string Requete::getResultat()
 {	return m_resultat;}
+bool Requete::getPourBdd()
+{	return pourBdd;}
+
+void Requete::setResultat(string buffer)
+{	m_resultat = buffer;}
 
 //Methods
 
-int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
+/* =======================================================================================================================
+	FONCTION TRI : TRI ET CONSTRUIT LE RESULTAT A ENVOYER AU CLIENT
+=========================================================================================================================*/
+
+
+int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les éléments nécessaire suivant le type de requête => construit la requete à envoyer sur le réseau
 {
-	int cpt_resultat=0;
-	int cpt_element=0;
-	int cpt_name=0;
-	char sep = '*';
-	char hash_recu[512];
-	char hash_test[512] = "yolo";
-	char name[512];
-	char reference[512];
+//CONSIDEREES DU MEME TOKEN
+//PAS BESOIN DUN VECTOR<STRING>, on gère les réponses l'une après l'autre
+	int isError=1;	//1 si aucune réponse n'est valide
+	vector<string> reponseTraitees = vector<string>();	//pareil que pour les reponses clients
+	for (list<string>::iterator it = reponse.begin(); it != reponse.end(); it++){
+		//recup dans l'iss de la reponse
+		istringstream ss(*it);
+		string numero; getline(ss, numero, '*');	//récupération du numéro pour chaque réponse
+		string name;
+		string hash_recu;
+		string hash;
+		string condensate;
+		string reference;
+		string inTheVector;
 
-	if(strcmp(m_action,"search") == 0)
-	{
-		if(strcmp(m_option,"name") == 0)
-		{
-			do //on parcours toute la requete recu
-			{
-				while(resultat[cpt_resultat] != sep) //on récupère le nom
-				{
-					name[cpt_element]=resultat[cpt_resultat];
-					cpt_resultat++;
-					cpt_element++;
+		if (*it == numero+"*ERROR*") continue; //on passe à la reponse suivante
+		else isError = 0;
+
+		if(m_action.compare("search") == 0) {
+		/*****REQUETE 1*****/
+			if(m_option.compare("-n") == 0) {
+		        hash = hashString((char*)m_statut.c_str());
+				while(getline(ss, name, '*') && getline(ss, hash_recu, '*')) {
+					if(hash.compare(hash_recu) == 0)
+						reponseTraitees.push_back(name);	//UN NOM PAR LIGNE DANS LE TABLEAU
 				}
-				name[cpt_element]='\0';
-				cpt_resultat++;
-				cpt_element=0;
 
-				while(resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
-				{
-					hash_recu[cpt_element]=resultat[cpt_resultat];
-					cpt_resultat++;
-					cpt_element++;
-				}
-				hash_recu[cpt_element]='\0';
-				cpt_element=0;
-				cpt_resultat++;
-
-				if(strcmp(hash_test,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
-				{
-					while(name[cpt_element] != '\0')
-					{
-						m_resultat[cpt_name]=name[cpt_element];
-						cpt_name++;
-						cpt_element++;
+			/*ELIMINATION DES DOUBLONS*/
+				for (int i=0; i<reponseTraitees.size(); i++){
+					for (int j=i+1; j<reponseTraitees.size(); j++) {
+						if (reponseTraitees[i] == reponseTraitees[j])
+							reponseTraitees.erase(reponseTraitees.begin() +j);
 					}
-					m_resultat[cpt_name]=sep;
-					cpt_name++;
-					cpt_element=0;
 				}
-			}while(resultat[cpt_resultat] != '\0');
-			m_resultat[cpt_name]='\0';
+			/*REPONSES FINALES*/
+				for (int i=0; i<reponseTraitees.size(); i++){
+					m_resultat += reponseTraitees[i] + "*";
+				}
+			}
+
+		/*****REQUETE 2*****/
+			else if (m_option.compare("-e") ==0) {
+				condensate = m_parametre;
+				condensate += m_statut;
+				hash = hashString((char*)condensate.c_str());
+				m_resultat = "no";
+				//si aucune réponse n'est "vraie", reste à no, sinon, dira yes
+				while(getline(ss, hash_recu, '*')) {
+					//s'il y en a un, on arrête
+					if(hash.compare(hash_recu) ==0){ 
+						m_resultat = "yes";
+						return 1;	//on a trouvé, c'est tout ce qu'on voulait
+					}
+				}
+			}
+
+		/*****REQUETE 3*****/
+			else if (m_option.compare("-p") ==0) {
+				condensate = m_parametre;
+				condensate += m_statut;
+				hash = hashString((char*)condensate.c_str());
+				while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
+					if(hash.compare(hash_recu) ==0){
+						reponseTraitees.push_back(reference + "*" + m_groupe);
+					}
+				}
+			/*ELIMINATION DES DOUBLONS*/
+				for (int i=0; i<reponseTraitees.size(); i++){
+					for (int j=i+1; j<reponseTraitees.size(); j++) {
+						if (reponseTraitees[i] == reponseTraitees[j])
+							reponseTraitees.erase(reponseTraitees.begin() + j);
+					}
+				}
+
+			/*REPONSES FINALES*/
+				for (int i=0; i<reponseTraitees.size(); i++){
+					m_resultat += reponseTraitees[i] + "*";
+				}
+			}
+
+			else {	//1.6 GIGAWAT? (ne peut jamais arriver?)
+				cerr << "Tri : Option inconnu" << endl ;
+				isError = 1;
+				break;
+			}
 		}
 
-		else if (strcmp(m_option,"exist") ==0)
-		{
-			do
-			{
-				while(resultat[cpt_resultat] != sep)
-				{
-					hash_recu[cpt_element]=resultat[cpt_resultat];
-					cpt_element++;
-					cpt_resultat++;
-				}
-				hash_recu[cpt_element]='\0';
-				cpt_element=0;
-				cpt_resultat++;
+		else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'était une interaction bdd, il faut juste retransmettre le message au client
+			m_resultat = *it;
 
-				if(strcmp(hash_recu,hash_test) == 0)
-				{
-					m_resultat[0] = 'y';
-					m_resultat[1] = 'e';
-					m_resultat[2] = 's';
-					m_resultat[3] = '\0';
-					return 1;
-				}
-			}while(resultat[cpt_resultat] != '\0');
-
-			m_resultat[0] = 'n';
-			m_resultat[1] = 'o';
-			m_resultat[2] = '\0';
-		}
-
-		else if (strcmp(m_option,"photo") ==0)
-		{
-			do
-			{
-				while(resultat[cpt_resultat] != sep)
-				{
-					reference[cpt_element]=resultat[cpt_resultat];
-					cpt_resultat++;
-					cpt_element++;
-				}
-				reference[cpt_element]='\0';
-				cpt_resultat++;
-				cpt_element=0;
-
-				while(resultat[cpt_resultat] != sep)
-				{
-					hash_recu[cpt_element]=resultat[cpt_resultat];
-					cpt_resultat++;
-					cpt_element++;
-				}
-				hash_recu[cpt_element]='\0';
-				cpt_element=0;
-				cpt_resultat++;
-
-				if(strcmp(hash_test,hash_recu) == 0)
-				{
-					while(reference[cpt_element] != '\0')
-					{
-						m_resultat[cpt_name]=reference[cpt_element];
-						cpt_element++;
-						cpt_name++;
-					}
-					m_resultat[cpt_name]=sep;
-					cpt_name++;
-					cpt_element=0;
-
-					while(m_groupe[cpt_element] != '\0')
-					{
-						m_resultat[cpt_name]=m_groupe[cpt_element];
-						cpt_name++;
-						cpt_element++;
-					}
-					m_resultat[cpt_name]='\0';
-					return 1;
-				}
-			}while(resultat[cpt_resultat] != '\0');
+		else {
+			cerr << "Tri : Option inconnu" << endl ;
+			isError = 1;
+			break;
 		}
 	}
-	return 1;
+
+	if (isError==1)	{ //Tout est erreur, ou l'option/action est invalide
+		cerr << "Erreur de traitement!" << endl;
+		m_resultat = "ERROR";
+		return 0;
+	}
+	else
+		return 1;
 }
+
+
+/*=========================================================================================
+	FONCTION DE CONSTRUCTION : CONSTRUIT LA REQUETE A ENVOYER (AU RESEAU OU A LA BDD)
+=========================================================================================*/
 
 void Requete::construction() //construit la requete suivant action, option et parametre
 {
-	int i=0;
-	int j=0;
-	char sep = '*';
-
-	if(strcmp(m_action,"search") == 0)
+    string hash; 
+	if(m_action.compare("search") == 0) // Fonction recherche
 	{
-		if(strcmp(m_option,"name") == 0)
-		{
-		while(m_affectation[i] != '\0')
-			{
-				m_requete[i]=m_affectation[i];
-				i++;
-			}
-			m_requete[i]='\0';
-		}
+		pourBdd=false;
+		if(m_option.compare("-n") == 0) // Si on cherche un nom
+			m_requete = m_affectation;
 
-		else if(strcmp(m_option,"exist") == 0)
+		else if(m_option.compare("-e") == 0) // Si on cherche l'existance
+			m_requete = m_affectation;
+	
+		else if(m_option.compare("-p") == 0) // Si on cherche une photo(donnée)
 		{
-			while(m_statut[i] != '\0')
+			/*while(m_option[i] != '\0')
 			{
-				m_requete[i]=m_statut[i];
-				i++;
-			}
-			m_requete[i]='\0';
-		}
-
-		else if(strcmp(m_option,"photo") == 0)
-		{
-			while(m_option[i] != '\0')
-			{
-				m_requete[i]=m_option[i];
+				m_requete[i]=m_option[i]; // Premiere partie de la requete : l'option de la requete
 				i++;
 			}
 			m_requete[i]=sep;
-			i++;
-
-			while(m_statut[j] != '\0')
-			{
-				m_requete[i]=m_statut[j];
-				j++;
-				i++;
-			}
-			m_requete[i]='\0';
+			i++;*/
+			m_requete += "*" + m_affectation;
 		}
 
 		else
-			printf("option inconnue\n");
+			cerr << "Option inconnue" << endl ;
 	}
-	else
-		printf("action inconnue\n");
-}
 
-void Requete::affichage()
-{
-	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_groupe,m_cle);
-}
-
-void Requete::decoupage(const char * chaine)
-{
-	int cpt_chaine = 0;
-	int cpt_element = 0;
-	char sep = '*'; //on considère ici que '*' est le séparateur
-
-	while(chaine[cpt_chaine] != sep)
+	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
 	{
-		m_affectation[cpt_element]=chaine[cpt_chaine]; //on met les caracteres 1 à 1 de la chaine dans l'élément jusqu'au séparateur
-		cpt_chaine ++;
-		cpt_element ++;
+		hash = hashString((char*)m_nom.c_str());
+	    pourBdd=true;
+	    m_requete = "302*";
+	    m_requete += m_statut + "*" + m_affectation + "*" + m_groupe + m_option + "*" + m_parametre +"*"+ hash +"*EOF";
 	}
-	m_affectation[cpt_element] = '\0'; //pour indiquer la fin de l'élément
-	cpt_element = 0;
-	cpt_chaine++;
 
-	while(chaine[cpt_chaine] != sep)
-        {
-                m_statut[cpt_element]=chaine[cpt_chaine];
-                cpt_chaine ++;
-                cpt_element ++;
-        }
-        m_statut[cpt_element] = '\0';
-	cpt_element = 0;
-	cpt_chaine++;
+	else if(m_action.compare("delete") == 0)
+	{
+	    pourBdd=true;
+	    hash = hashString((char*)m_nom.c_str());
+	    m_requete = "303*"+m_parametre+"*"+hash+"*EOF";
+	}
 
-	while(chaine[cpt_chaine] != sep)
-        {
-                m_action[cpt_element]=chaine[cpt_chaine];
-                cpt_chaine ++;
-                cpt_element ++;
-        }
-        m_action[cpt_element] = '\0';
-	cpt_element = 0;
-	cpt_chaine++;
+	else
+		cerr << "Action inconnue" << endl ;
+}
 
-	while(chaine[cpt_chaine] != sep)
-        {
-                m_option[cpt_element]=chaine[cpt_chaine];
-                cpt_chaine ++;
-                cpt_element ++;
-        }
-        m_option[cpt_element] = '\0';
-	cpt_element = 0;
-	cpt_chaine++;
 
-	while(chaine[cpt_chaine] != sep)
-        {
-                m_parametre[cpt_element]=chaine[cpt_chaine];
-                cpt_chaine ++;
-                cpt_element ++;
-        }
-        m_parametre[cpt_element] = '\0';
-	cpt_element = 0;
-	cpt_chaine++;
+/*===========================================================================================
+	FONCTION DE DECOUPAGE : DECOUPE LA REQUETE RECU DU CLIENT (1ere fonction appelée)
+===========================================================================================*/
 
-	while(chaine[cpt_chaine] != sep)
-        {
-                m_groupe[cpt_element]=chaine[cpt_chaine];
-                cpt_chaine ++;
-                cpt_element ++;
-        }
-        m_groupe[cpt_element] = '\0';
-	cpt_element = 0;
-	cpt_chaine++;
-
-	while(chaine[cpt_chaine] != '\0') //ici fin de la chaine (donc pas de séparateur)
-        {
-                m_cle[cpt_element]=chaine[cpt_chaine];
-                cpt_chaine ++;
-                cpt_element ++;
-        }
-	m_cle[cpt_element] = '\0';
+int Requete::decoupage(string& chaine)
+{
+	istringstream ss(chaine);
+	//remplissage + test error!
+	if (!getline(ss, m_affectation, '*') ||
+		!getline(ss, m_statut, '*') ||
+		!getline(ss, m_action, '*') ||
+		!getline(ss, m_option, '*') ||
+		!getline(ss, m_parametre, '*')) 
+		return 0;
+	else {
+	//it's ok
+		if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) {// Si c'est une requête pour la bdd on a un champ en plus : le nom de la personne
+			if (!getline(ss, m_nom, '*')) 
+				return 0;
+		}
+		if(m_action.compare("insert") == 0) {	// Et si la requete est insert => champ supplémentaire : politique de partage
+			if (!getline(ss, m_partage, '*')) 
+				return 0;
+		}
+		if (!getline(ss, m_groupe, '*') || !getline(ss, m_cle, '*')) 
+			return 0;
+		return 1;
+	}
 }
 
 
