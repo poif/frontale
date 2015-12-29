@@ -90,7 +90,7 @@ void network_interface::spawn(){
 
 		boost::asio::io_service io_service;
 		cout << "Noeud mis en place sur le port " << port_rem << endl;
-		noeudthor = new NoeudThor(io_service, port_rem, this);
+		noeudthor = new NoeudThor(io_service, port_rem, "127.0.0.1", 8080, "127.0.0.1", 8081, this);
 		io_service.run();
 
 		break;
@@ -496,7 +496,7 @@ void network_interface::process_received_events(engine_event& e){
 		      engine_event r;
 		      engine_event p;
 		      vector<string> groups;
-		      vector<string> a_traiter;
+		      list<string> a_traiter;
 
 		      string reqFormat;
 
@@ -589,7 +589,7 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event p;
 			string reqFormat;
 			vector<string> groups;
-			vector<string> a_traiter;
+			list<string> a_traiter;
 
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
@@ -680,7 +680,7 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event r;
 			engine_event p;
 			vector<string> groups;
-			vector<string> a_traiter;
+			list<string> a_traiter;
 			string reqFormat;
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
@@ -893,7 +893,7 @@ void network_interface::process_received_events(engine_event& e){
 					string reference = r.s_data["REFERENCE"];
 					string groClient = r.s_data["GRCLIENT"];
 					vector<string> groupeClient;
-					vector<string> a_traiter;
+					list<string> a_traiter;
 					string reqFormat;
 
 					istringstream issGroupe(groClient);

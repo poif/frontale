@@ -203,7 +203,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	FONCTION DE DECOUPAGE : DECOUPE LA REQUETE RECU DU CLIENT (1ere fonction appelée)
 ===========================================================================================*/
 
-int Requete::decoupage(string& chaine)
+int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
 	//remplissage + test error!

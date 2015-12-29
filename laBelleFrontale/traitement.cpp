@@ -16,7 +16,7 @@
 
 using namespace std;
 
-string hashString(char * to_hash){
+string hashString(const char * to_hash){
 	string sHash;
 	char* hash=(char*)malloc(SHA_DIGEST_LENGTH*sizeof(char));
 	SHA_CTX ctx;

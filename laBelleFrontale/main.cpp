@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <ctime>
+#include <list>
 #include <unistd.h>
 #include <reception.h>
 #include <QTextStream>
@@ -74,7 +75,12 @@ int main(int argc, char *argv[])
 				
 				bdd.attendLecture();
 
-    				req.tri(bdd.getMsg().toStdString());							
+				string messBdd = bdd.getMsg().toStdString();
+
+				list<string> listReponseBdd;
+				listReponseBdd.push_back(messBdd);
+
+    				req.tri(listReponseBdd);							
 			}
 			else
 			{
@@ -85,7 +91,7 @@ int main(int argc, char *argv[])
 				cout << option << endl;
 				cout << traitement << endl;
 
-				
+
 				if(option.compare("-n")==0){/* traitement est une affectation */
 					netinf.send_look(traitement);
 					cout << "ici envoi" << endl;
@@ -131,7 +137,10 @@ int main(int argc, char *argv[])
 				  cout << strlen(triq) << endl;
 				  cout.write(triq, triqlength);*/
 
-				req.tri(showRep);
+				list<string> listReponse;
+				listReponse.push_back(showRep);
+
+				req.tri(listReponse);
 
 				}
 				else{

@@ -38,7 +38,7 @@ class Requete
 	std::string getResultat();
 	bool getPourBdd();
 	void setResultat(std::string buffer);
-	int decoupage(std::string& chaine);
+	int decoupage(std::string chaine);
 	void construction();
 	int tri(std::list<std::string>& resultat);
 };
