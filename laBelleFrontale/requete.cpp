@@ -1,6 +1,7 @@
 #include <openssl/sha.h>
 #include "requete.h"
-#include "traitement.h"   
+#include "traitement.h"  
+#include <algorithm> 
 
 using namespace std;
 
@@ -68,14 +69,12 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 				}
 
 			/*ELIMINATION DES DOUBLONS*/
-				for (int i=0; i<reponseTraitees.size(); i++){
-					for (int j=i+1; j<reponseTraitees.size(); j++) {
-						if (reponseTraitees[i] == reponseTraitees[j])
-							reponseTraitees.erase(reponseTraitees.begin() +j);
-					}
-				}
+				/*ON DOIT TRIER LE TABLEAU*/
+				sort(reponseTraitees.begin(), reponseTraitees.end() );
+				reponseTraitees.erase( unique( reponseTraitees.begin(), reponseTraitees.end() ), reponseTraitees.end() );
+
 			/*REPONSES FINALES*/
-				for (int i=0; i<reponseTraitees.size(); i++){
+				for (unsigned int i=0; i<reponseTraitees.size(); i++){
 					m_resultat += reponseTraitees[i] + "*";
 				}
 			}
@@ -107,15 +106,11 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 					}
 				}
 			/*ELIMINATION DES DOUBLONS*/
-				for (int i=0; i<reponseTraitees.size(); i++){
-					for (int j=i+1; j<reponseTraitees.size(); j++) {
-						if (reponseTraitees[i] == reponseTraitees[j])
-							reponseTraitees.erase(reponseTraitees.begin() + j);
-					}
-				}
+				sort(reponseTraitees.begin(), reponseTraitees.end() );
+				reponseTraitees.erase( unique( reponseTraitees.begin(), reponseTraitees.end() ), reponseTraitees.end() );
 
 			/*REPONSES FINALES*/
-				for (int i=0; i<reponseTraitees.size(); i++){
+				for (unsigned int i=0; i<reponseTraitees.size(); i++){
 					m_resultat += reponseTraitees[i] + "*";
 				}
 			}
