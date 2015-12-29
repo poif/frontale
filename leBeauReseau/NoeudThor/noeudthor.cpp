@@ -3,8 +3,12 @@
 #include <boost/serialization/map.hpp>
 #include <stdlib.h>
 
-NoeudThor::NoeudThor(boost::asio::io_service &io_service, int portecoute, network_interface *observeur)
+NoeudThor::NoeudThor(boost::asio::io_service &io_service, int portecoute, std::string ipServeurCentral, int portServeurCentral, std::string ipSecureNodeListProvider, int portSecureNodeListProvider, network_interface* observeur)
 	: portecoute(portecoute),
+	  ipServeurCentral(ipServeurCentral),
+	  portServeurCentral(portServeurCentral),
+	  ipSecureNodeListProvider(ipSecureNodeListProvider),
+	  portSecureNodeListProvider(portSecureNodeListProvider),
 	  m_acceptor(io_service, tcp::endpoint(tcp::v4(), portecoute)),
 	  io_service(io_service),
 	  observeur(observeur)
@@ -23,7 +27,7 @@ NoeudThor::NoeudThor(boost::asio::io_service &io_service, int portecoute, networ
 void NoeudThor::startConnectServeurCentral()
 {
 	noeudServeurCentral = new Client<NoeudThor>(this, io_service);
-	tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8080);
+	tcp::endpoint endpoint(boost::asio::ip::address::from_string(ipServeurCentral), portServeurCentral);
 	cout << "Connection au serveur central" << std::endl;
 	noeudServeurCentral->getSocket().connect(endpoint);
 	noeudServeurCentral->startRead();
@@ -32,7 +36,7 @@ void NoeudThor::startConnectServeurCentral()
 void NoeudThor::startConnectSecureNodeListProvider()
 {
 	noeudSecureNodeListProvider = new Client<NoeudThor>(this, io_service);
-	tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8081);
+	tcp::endpoint endpoint(boost::asio::ip::address::from_string(ipSecureNodeListProvider), portSecureNodeListProvider);
 	cout << "Connection au Secure Node List Provider" << std::endl;
 	noeudSecureNodeListProvider->getSocket().connect(endpoint);
 	noeudSecureNodeListProvider->startRead();

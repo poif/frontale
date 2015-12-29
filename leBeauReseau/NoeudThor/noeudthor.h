@@ -11,6 +11,10 @@ class NoeudThor
 {
 	private:
 		int portecoute;
+		std::string ipServeurCentral;
+		int portServeurCentral;
+		std::string ipSecureNodeListProvider;
+		int portSecureNodeListProvider;
 		std::list<Client<NoeudThor>*> toutlemonde;
 		tcp::acceptor m_acceptor;
 		boost::asio::io_service &io_service;
@@ -22,7 +26,7 @@ class NoeudThor
 		void handle_read(Client<NoeudThor> *noeud, const boost::system::error_code &error);
 		void startConnectServeurCentral();
 	public:
-		NoeudThor(boost::asio::io_service &io_service, int portecoute, network_interface* observeur = NULL);
+		NoeudThor(boost::asio::io_service &io_service, int portecoute, std::string ipServeurCentral="127.0.0.1", int portServeurCentral=8080, std::string ipSecureNodeListProvider="127.0.0.1", int portSecureNodeListProvider=8081, network_interface* observeur = NULL);
 		void startAccept();
 		void traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource);
 		void askNeighborList();
@@ -33,3 +37,4 @@ class NoeudThor
 		void startConnectSecureNodeListProvider();
 };
 #endif //NOEUDTHOR_H
+
