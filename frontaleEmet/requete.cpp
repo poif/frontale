@@ -1,65 +1,61 @@
-#include <openssl/sha.h>
 #include "requete.h"
-#include "traitement.h"
+#include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
 Requete::Requete()
 {
+	m_affectation[0] = '\0';
+	m_statut[0] = '\0';
+	m_action[0] = '\0';
+	m_option[0] = '\0';
+	m_parametre[0] = '\0';
+	m_groupe[0] = '\0';
+	m_cle[0] = '\0';
 
+	m_requete[0] = '\0';
+	m_resultat[0] = '\0';
 }
 
 //Getters
 
-string Requete::getAffectation()
+char* Requete::getAffectation()
 {	return m_affectation;}
-string Requete::getStatut()
+char* Requete::getStatut()
 {	return m_statut;}
-string Requete::getAction()
+char* Requete::getAction()
 {       return m_action;}
-string Requete::getOption()
+char* Requete::getOption()
 {       return m_option;}
-string Requete::getParametre()
+char* Requete::getParametre()
 {       return m_parametre;}
-string Requete::getGroupe()
+char* Requete::getGroupe()
 {       return m_groupe;}
-string Requete::getCle()
+char* Requete::getCle()
 {       return m_cle;}
-string Requete::getRequete()
+char* Requete::getRequete()
 {	return m_requete;}
-string Requete::getResultat()
+char* Requete::getResultat()
 {	return m_resultat;}
-bool Requete::getPourBdd()
-{	return pourBdd;}
-
-void Requete::setResultat(string buffer)
-{	m_resultat = buffer;}
 
 //Methods
 
-/* =======================================================================================================================
-	FONCTION TRI : TRI ET CONSTRUIT LE RESULTAT A ENVOYER AU CLIENT
-=========================================================================================================================*/
-
-int Requete::tri(string resultat) //tri les resultats recu et garde les éléments nécessaire suivant le type de requête => construit la requete à envoyer sur le réseau
+int Requete::tri(const char *resultat) //tri les resultats recu et garde le bon
 {
 	int cpt_resultat=0;
 	int cpt_element=0;
 	int cpt_name=0;
 	char sep = '*';
-	string hash_recu;
-	string condensate;
-	string name;
-	string reference;
+	char hash_recu[512];
+	char hash_test[512] = "yolo";
+	char name[512];
+	char reference[512];
 
-        	string hash;
-
-	if(m_action.compare("search") == 0)
+	if(strcmp(m_action,"search") == 0)
 	{
-		if(m_option.compare("-n") == 0) //Si on recherche le nom de qqn
+		if(strcmp(m_option,"name") == 0)
 		{
-		        	hash = hashString(m_statut);
-
 			do //on parcours toute la requete recu
 			{
 				while(resultat[cpt_resultat] != sep) //on récupère le nom
@@ -72,7 +68,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 				cpt_resultat++;
 				cpt_element=0;
 
-				while(cpt_element < SHA_DIGEST_LENGTH && resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom recu depuis la requete
+				while(resultat[cpt_resultat] != sep) //on récupère le hash du statut correspondant au nom
 				{
 					hash_recu[cpt_element]=resultat[cpt_resultat];
 					cpt_resultat++;
@@ -82,9 +78,8 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 				cpt_element=0;
 				cpt_resultat++;
 
-				if(hash.compare(hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
+				if(strcmp(hash_test,hash_recu) == 0) //si les hashs sont égaux alors on rajoute le nom à la liste
 				{
-
 					while(name[cpt_element] != '\0')
 					{
 						m_resultat[cpt_name]=name[cpt_element];
@@ -99,12 +94,8 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 			m_resultat[cpt_name]='\0';
 		}
 
-		else if (m_option.compare("-e") ==0)
+		else if (strcmp(m_option,"exist") ==0)
 		{
-			condensate = m_parametre;
-			condensate += m_statut;
-			hash = hashString(condensate);
-
 			do
 			{
 				while(resultat[cpt_resultat] != sep)
@@ -117,7 +108,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 				cpt_element=0;
 				cpt_resultat++;
 
-				if(hash.compare(hash_recu) ==0)
+				if(strcmp(hash_recu,hash_test) == 0)
 				{
 					m_resultat[0] = 'y';
 					m_resultat[1] = 'e';
@@ -132,12 +123,8 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 			m_resultat[2] = '\0';
 		}
 
-		else if (m_option.compare("-p") ==0)
+		else if (strcmp(m_option,"photo") ==0)
 		{
-			condensate = m_parametre;
-			condensate += m_statut;
-			hash = hashString(condensate);
-
 			do
 			{
 				while(resultat[cpt_resultat] != sep)
@@ -160,7 +147,7 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 				cpt_element=0;
 				cpt_resultat++;
 
-				if(hash.compare(hash_recu) ==0)
+				if(strcmp(hash_test,hash_recu) == 0)
 				{
 					while(reference[cpt_element] != '\0')
 					{
@@ -183,266 +170,77 @@ int Requete::tri(string resultat) //tri les resultats recu et garde les élémen
 				}
 			}while(resultat[cpt_resultat] != '\0');
 		}
-		else
-		{
-			cerr << "Tri : Option inconnu" << endl ;
-			return 0;
-		}
-	}
-
-	else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'était une interaction bdd, il faut juste retransmettre le message au client
-	{
-		while(resultat[cpt_resultat] != '\0')
-		{
-			m_resultat[cpt_resultat] = resultat[cpt_resultat]; // Copie du resultat
-			cpt_resultat ++;
-		}
-		m_resultat[cpt_resultat] = '\0';
-	}
-
-	else
-	{
-		cerr << "Tri : Action inconnue" << endl ;
-		return 0;
 	}
 	return 1;
 }
-
-/*=========================================================================================
-	FONCTION DE CONSTRUCTION : CONSTRUIT LA REQUETE A ENVOYER (AU RESEAU OU A LA BDD)
-=========================================================================================*/
 
 void Requete::construction() //construit la requete suivant action, option et parametre
 {
 	int i=0;
 	int j=0;
 	char sep = '*';
-        	string hash; 
 
-	if(m_action.compare("search") == 0) // Fonction recherche
+	if(strcmp(m_action,"search") == 0)
 	{
-		pourBdd=false;
-		if(m_option.compare("-n") == 0) // Si on cherche un nom
+		if(strcmp(m_option,"name") == 0)
 		{
 		while(m_affectation[i] != '\0')
 			{
-				m_requete[i]=m_affectation[i];  //La requete à envoyer est composé uniquement de l'affectation
+				m_requete[i]=m_affectation[i];
 				i++;
 			}
 			m_requete[i]='\0';
 		}
 
-		else if(m_option.compare("-e") == 0) // Si on cherche l'existance
+		else if(strcmp(m_option,"exist") == 0)
 		{
-			while(m_affectation[i] != '\0')
+			while(m_statut[i] != '\0')
 			{
-				m_requete[i]=m_affectation[i]; // La requete à envoyer est composé uniquement de l'affectation
+				m_requete[i]=m_statut[i];
 				i++;
 			}
 			m_requete[i]='\0';
 		}
 
-		else if(m_option.compare("-p") == 0) // Si on cherche une photo(donnée)
+		else if(strcmp(m_option,"photo") == 0)
 		{
-			/*while(m_option[i] != '\0')
+			while(m_option[i] != '\0')
 			{
-				m_requete[i]=m_option[i]; // Premiere partie de la requete : l'option de la requete
+				m_requete[i]=m_option[i];
 				i++;
 			}
 			m_requete[i]=sep;
-			i++;*/
+			i++;
 
-			while(m_affectation[i] != '\0')
+			while(m_statut[j] != '\0')
 			{
-				m_requete[i]=m_affectation[i]; // Deuxieme partie : le statut
-				//j++;
+				m_requete[i]=m_statut[j];
+				j++;
 				i++;
 			}
 			m_requete[i]='\0';
 		}
 
 		else
-			cerr << "Action inconnue" << endl ;
+			printf("option inconnue\n");
 	}
-	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
-	{
-		hash = hashString(m_nom);
-
-	    	pourBdd=true;
-		m_requete[0] = '3';  // Premiere partie : l'action (insert : 302)
-		m_requete[1] = '0';
-		m_requete[2] = '2';
-		m_requete[3] = '*';
-		i=4;
-
-		while(m_statut[j] != '\0')
-		{
-			m_requete[i] = m_statut[j]; // Deuxieme partie : statut
-			i++;
-			j++;
-		}
-		m_requete[i] = sep; // On met un séparateur
-		i++;
-		j=0;
-
-		while(m_affectation[j] != '\0')
-		{
-			m_requete[i] = m_affectation[j]; // 3e partie : l'affectation
-			i++;
-			j++;
-		}
-		m_requete[i] = sep; // On met un séparateur
-		i++;
-		j=0;
-
-		while(m_groupe[j] != '\0')
-		{
-			m_requete[i] = m_groupe[j]; // 4e partie : le groupe
-			i++;
-			j++;
-		}
-		m_requete[i] = sep; // On met un séparateur
-		i++;
-		j=0;
-
-		while(m_option[j] != '\0')
-		{
-			m_requete[i] = m_option[j]; // 5e partie : l'option (le type de la donnée)
-			i++;
-			j++;
-		}
-		m_requete[i] = sep; // On met un séparateur
-		i++;
-		j=0;
-
-		while(m_parametre[j] != '\0')
-		{
-			m_requete[i] = m_parametre[j]; // 6e partie : la donnée en question
-			i++;
-			j++;
-		}
-		m_requete[i] = sep; // On met un séparateur
-		i++;
-		j=0;
-
-		while(hash[j] != '\0')
-		{
-			m_requete[i] = hash[j]; // 7e partie : le hash du nom
-			i++;
-			j++;
-		}
-		m_requete[i] = sep;
-		i++;
-		j=0;
-
-		m_requete[i] = 'E';
-		m_requete[i+1] = 'O';	// 8e et dernière partie : EOF
-		m_requete[i+2] = 'F';
-		m_requete[i+3] = '\0'; // Fin de la requete
-	}
-
-	else if(m_action.compare("delete") == 0)
-	{
-	    pourBdd=true;
-                m_requete[0] = '3';  // Premiere partie : l'action (delete : 303)
-                m_requete[1] = '0';
-                m_requete[2] = '3';
-                m_requete[3] = '*';
-		i=4;
-
-		while(m_parametre[j] != '\0')
-		{
-			m_requete[i] = m_parametre[j];	//2e partie : la référence (stocker dans m_parametre)
-			i++;
-			j++;
-		}
-		m_requete[i] = sep;
-		i++;
-		j=0;
-
-		hash = hashString(m_nom);
-
-		while(hash[j] != '\0')
-		{
-			m_requete[i] = hash[j]; // 3e partie : le hash du nom.
-			i++;
-			j++;
-		}
-		m_requete[i] = sep;
-		i++;
-		j=0;
-
-		m_requete[i] = 'E';
-		m_requete[i+1] = 'O';
-		m_requete[i+2] = 'F';
-		m_requete[i+3] = '\0'; //3e partie : EOF
-	}
-
 	else
-		cerr << "Action inconnue" << endl ;
+		printf("action inconnue\n");
 }
 
-/*============================================================================================
-	FONCTION AFFICHAGE : INUTILE DANS LE PROJET (utilisée pour des tests)
-============================================================================================*/
-/*
-void Requete::affichage() //Fonction inutile dans la frontale (je l'utilise pour mes tests)
+void Requete::affichage()
 {
-	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n nom : %s\n politique : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_nom,m_partage,m_groupe,m_cle);
-}
-*/
-/*===========================================================================================
-	FONCTION DE TEST DES CARACTERES
-===========================================================================================*/
-
-int Requete::test_char(char caractere) //test si le caractère est bien une lettre minuscule
-{
-	if(caractere < 127 && caractere > 31)
-		return 1;
-	else
-		return 0;
+	printf(" statut : %s\n affectation : %s\n action : %s\n option : %s\n parametre : %s\n groupe : %s\n cle : %s\n",m_statut,m_affectation,m_action,m_option,m_parametre,m_groupe,m_cle);
 }
 
-/*==========================================================================================
-	FONCTION DE REMISE À ZERO DES VARIABLES
-===========================================================================================*/
-
-void Requete::raz()
+void Requete::decoupage(const char * chaine)
 {
-        m_affectation = "";
-        m_statut = "";
-        m_action = "";
-        m_option = "";
-        m_parametre = "";
-        m_nom = "";
-        m_partage = "";
-        m_groupe = "";
-        m_cle = "";
-
-        m_requete = "";
-        m_resultat = "";
-}
-
-/*===========================================================================================
-	FONCTION DE DECOUPAGE : DECOUPE LA REQUETE RECU DU CLIENT (1ere fonction appelée)
-===========================================================================================*/
-
-int Requete::decoupage(string chaine)
-{
-	int test;
 	int cpt_chaine = 0;
 	int cpt_element = 0;
 	char sep = '*'; //on considère ici que '*' est le séparateur
 
 	while(chaine[cpt_chaine] != sep)
 	{
-		test = test_char(chaine[cpt_chaine]);
-		if(test == 0)
-		{
-			cerr << "Requete malformée" << endl ;
-			return 0;
-		}
-
 		m_affectation[cpt_element]=chaine[cpt_chaine]; //on met les caracteres 1 à 1 de la chaine dans l'élément jusqu'au séparateur
 		cpt_chaine ++;
 		cpt_element ++;
@@ -452,145 +250,62 @@ int Requete::decoupage(string chaine)
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-	{
-                test = test_char(chaine[cpt_chaine]);
-                if(test == 0)
-                {
-                        cerr << "Requete malformée" << endl ;
-                        return 0;
-                }
-
-		m_statut[cpt_element]=chaine[cpt_chaine];
+        {
+                m_statut[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-	}
-	m_statut[cpt_element] = '\0';
+        }
+        m_statut[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-	{
-                test = test_char(chaine[cpt_chaine]);
-                if(test == 0)
-                {
-                        cerr << "Requete malformée" << endl ;
-                        return 0;
-                }
-
-	    m_action[cpt_element]=chaine[cpt_chaine];
+        {
+                m_action[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-	}
-	m_action[cpt_element] = '\0';
+        }
+        m_action[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-	{
-	    test = test_char(chaine[cpt_chaine]);
-                if(test == 0)
-                {
-                        cerr << "Requete malformée" << endl ;
-                        return 0;
-                }
-
+        {
                 m_option[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-	}
-	m_option[cpt_element] = '\0';
+        }
+        m_option[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != sep)
-	{
-                test = test_char(chaine[cpt_chaine]);
-                if(test == 0)
-                {
-                        cerr << "Requete malformée" << endl ;
-                        return 0;
-                }
-
-	    m_parametre[cpt_element]=chaine[cpt_chaine];
+        {
+                m_parametre[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-	}
-	m_parametre[cpt_element] = '\0';
+        }
+        m_parametre[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
-	if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) // Si c'est une requête pour la bdd on a un champ en plus : le nom de la personne
-	{
-		while(chaine[cpt_chaine] != sep)
-		{
-			test = test_char(chaine[cpt_chaine]);
-			if(test == 0)
-			{
-				cerr << "Requete malformée" << endl ;
-				return 0;
-			}
-
-			m_nom[cpt_element] = chaine[cpt_chaine];
-			cpt_chaine ++;
-			cpt_element ++;
-		}
-		m_nom[cpt_element] = '\0';
-		cpt_element = 0;
-		cpt_chaine++;
-
-		if(m_action.compare("insert") == 0)	// Et si la requete est insert => champ supplémentaire : politique de partage
-		{
-			while(chaine[cpt_chaine] != sep)
-			{
-				test = test_char(chaine[cpt_chaine]);
-	                        	if(test == 0)
-	                        	{
-	                                		cerr << "Requete malformée" << endl ;
-	                                		return 0;
-	                        	}
-
-				m_partage[cpt_element] = chaine[cpt_chaine];
-				cpt_chaine++;
-				cpt_element++;
-			}
-			m_partage[cpt_element] = '\0';
-			cpt_element = 0;
-			cpt_chaine ++;
-		}
-	}
-
 	while(chaine[cpt_chaine] != sep)
-	{
-                test = test_char(chaine[cpt_chaine]);
-                if(test == 0)
-                {
-                        cerr << "Requete malformée" << endl ;
-                        return 0;
-                }
-
-	    m_groupe[cpt_element]=chaine[cpt_chaine];
+        {
+                m_groupe[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-	}
-	m_groupe[cpt_element] = '\0';
+        }
+        m_groupe[cpt_element] = '\0';
 	cpt_element = 0;
 	cpt_chaine++;
 
 	while(chaine[cpt_chaine] != '\0') //ici fin de la chaine (donc pas de séparateur)
-	{
-                test = test_char(chaine[cpt_chaine]);
-                if(test == 0)
-                {
-                        cerr << "Requete malformée" << endl ;
-                        return 0;
-                }
-
-	    m_cle[cpt_element]=chaine[cpt_chaine];
+        {
+                m_cle[cpt_element]=chaine[cpt_chaine];
                 cpt_chaine ++;
                 cpt_element ++;
-	}
+        }
 	m_cle[cpt_element] = '\0';
-	return 1;
 }
 
 
