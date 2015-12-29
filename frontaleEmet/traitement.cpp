@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <list>
 #include <string>
 #include <iostream>
 #include "traitement.h"
@@ -428,7 +429,7 @@ string traitement_rep_client(string a_traiter){
 
 
 //VERSION AVEC TOKEN EN PARAM ET RECUPERATION DES REQUETES 
-string traitement_rep_client(vector<string> a_traiter){
+string traitement_rep_client(list<string>& a_traiter){
 //	vector<string> a_traiter = vector<string>();
 	//fonction pour recuperer les requetes depuis le réseau
 	/*BLOC DE TEST EN ATTENDANT*/
@@ -455,56 +456,44 @@ string traitement_rep_client(vector<string> a_traiter){
 	string to_send;
 	int firstRep = 0;		//c'est votre premiere bafouille?
 
-
-/***********************************************************/
-
-	for (unsigned int i = 0; i < a_traiter.size(); i++) {
+//	for (unsigned int i = 0; i < a_traiter.size(); i++) {
+  for (list<string>::iterator it = a_traiter.begin(); it != a_traiter.end(); it++){
 		//chaque réponse est dans une case du tableau
 		//on renvoie toutes les réponses concaténées
-		char *ca_traiter = (char*)a_traiter[i].c_str();
+    istringstream ss(*it);
+		string numero; getline(ss, numero, '*');
 
-		string numero = string(strtok(ca_traiter,"*"));
 		if (firstRep==0){
-			to_send += numero + "*";
-			firstRep=1;
+			 to_send += numero + "*";
+			 firstRep=1;
 		}
+		string action; getline(ss, action, '*');
 
-		string action= strtok(NULL,"*");
-		int iterator=0;		 		    //teste le numéro de champ et les sorties de boucle
-		int parity=1;				    //permet de repérer les références et les noms, tester : considérer à 1 car action l'incrémente implicitement
-		char * token;
-		int breaker=0;					//indique qu'il faut passer a la boucle suivante en cas d'erreur
 		string stringInTheVector;		//chaine qu'on va push dans le vector
-
+    string nom;
+    string statut;
+    string reference;
+    string token;   
+    string document;
+    string tokenEOF;        //hey are you EOF?
+    int testEOF = 0;        //avez-vous déjà croisé EOF?
 	
 	/*LE NUMERO NE SERA RENVOYEE QU'UNE SEULE FOIS*/
 
 	/*Le numero empêche les problèmes avec des actions différentes*/
 
-	/****************************************/
 
 		if (action=="1") {
 		//RECHERCHE UTILISATEUR : RECUPERATION DU NOM ET DU HASH STATUT
-			while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0 && breaker==0) {
-			breaker=0;
-			/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
-				if (strcmp(token,"none") == 0 || iterator == 2){
-				//ie 3e champ qui n'est pas EOF
+			if (!getline(ss, nom, '*') || !getline(ss, statut, '*') || !getline(ss,tokenEOF,'*') ||
+          nom == "none" || statut == "none" ||
+          nom == "EOF"  || statut == "EOF" || tokenEOF != "EOF") {
+
 					stringInTheVector ="ERROR*";
-					breaker=1;
-				}
-			/***************************************************************/
-				//nom de l'utilisateur -> premiere boucle
-				if (breaker==0){
-					if (iterator==0){
-						stringInTheVector += string(token) + "*" ;
-					} 
-			   		if (iterator==1){
-						//c'est un statut : il faut hasher le statut
-						stringInTheVector += hashString(token) + "*";
-					}
-					iterator++;	//indique le champ
-				}
+			}
+
+			else {
+			   stringInTheVector += nom + "*" + hashString((char*)statut.c_str())+"*";
 			}
 		}
 
@@ -512,104 +501,120 @@ string traitement_rep_client(vector<string> a_traiter){
 
 		else if (action=="2"){
 		//RECHERCHE EXISTENCE DUNE PERSONNE : RECUPERATION DU NOM ET DU STATUT
-			while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0 && breaker==0) {
-			/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
-				breaker=0;
-				if (strcmp(token,"none") == 0 || iterator >= 2){
+			if (!getline(ss, nom, '*') || !getline(ss, statut, '*') || !getline(ss, tokenEOF, '*')|| 
+          nom == "EOF"  || statut == "EOF" ||
+          nom == "none" || statut == "none"||
+          tokenEOF != "EOF") {
+
 					stringInTheVector = "ERROR*";
-					breaker=1;
-				}
-			/***************************************************************/
-				if (breaker==0){		//EVITE DOUBLONS *ERROR*
-					if (iterator==0)	{ //nom
-						string username = string(token);
-						string status = string(strtok(NULL,"*")); //récupération statut
-						if (status == "none" || status == "EOF"){
-							stringInTheVector = "ERROR*";
-							breaker=1;
-						}
-						string to_hash = username + status;
-						char *hash = (char*)to_hash.c_str();
-						iterator++;
-						stringInTheVector += hashString(hash) + "*";
-					}
-				}
 			}
+
+			/***************************************************************/
+			else { //valide -> renvoi hash(nom+statut)
+         string to_hash = nom + statut;
+         char *hash = (char*)to_hash.c_str();
+				 stringInTheVector += hashString(hash) + "*";
+      }
 		}
-
-
-	/****************************************/
 
 	/****************************************/
  
 		else if (action == "3"){
-		//RECHERCHE REFERENCE +HASH USERNAME
-			while ((token = strtok(NULL,"*;")) && strcmp(token, "EOF") != 0 && breaker==0) {
-				//token contient une reference ou un nom du couple ref;nom
-			/*TEST D'ERREUR DE LA REPONSE : REPONSE ERREUR OU TROP DE CHAMP*/
-				if (strcmp(token,"none") == 0 || iterator == CLIENT_MAX_CHAMP){
-					stringInTheVector = "ERROR*";
-					breaker=1;
-				}
-			/***************************************************************/	
+	     //RECHERCHE REFERENCE;HASH USERNAME
+       while (getline(ss , token , '*')){
+          if (token == "none"){
+             stringInTheVector = "ERROR*";
+             break;
+          }
 
-		    	if (breaker==0){
-	/*A PRIORI IMPOSSIBLE QU'UN NOM OU UNE REFERENCE SOIT SEUL -> testé avec parity*/
-					if (parity%2==1)
-						stringInTheVector += string(token);
-					else {
-					//on est sur un couple nom +statut : il faut le hasher
-                                    string username = string(token);
-                                    string status = string(strtok(NULL,"*")); //récupération statut
-                                    if (status == "none" || status == "EOF"){
-                                      stringInTheVector = "ERROR*";
-                                      breaker=1;
-                                    }
-                                    string to_hash = username + status;
-                                    char *hash = (char*)to_hash.c_str();
-                                    stringInTheVector += ";" + hashString(hash) + "*";
-					}
-					iterator++;	//empêche requête du type "1,*;;;;;;;;;;;;;;;;;" trololo
-					parity++;	//teste si une ref est associée obligatoirement a un nom
-				}
-			}		//SORTIE WHILE
+          else if (token =="EOF" || testEOF == 1){
+    /*ON NE PEUT RENTRER QUUNE FOIS SAUF SI LA REPONSE EST INVALIDE*/
+             if (testEOF == 0)
+                testEOF=1;
+             else  
+                stringInTheVector = "ERROR*";
+          }
 
-		/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDE*/
-			if (parity%2==0) {		//IE ON A PAS FINI SUR UNE REFERENCE
-			//EOF NE COMPTE PAS
-				stringInTheVector = "ERROR*";
-				breaker = 1;
-			}
-
-		/*********************************************************/
-		}
+          else {
+             istringstream ssToken(token);
+             if (!getline(ssToken, reference, ';') || !getline(ssToken, nom, ';') ||
+                reference == "EOF" || reference == "none" || nom == "EOF" || nom == "none"){
+                stringInTheVector = "ERROR*";
+                continue;
+             }
+             else {
+                char *hash = (char*)nom.c_str();
+                stringInTheVector += reference + "*" + hashString(hash) + "*";
+             }
+          }
+       }
+    }
 
 	/*************************************************/
 
-		else if (action == "4"){
+	  else if (action == "4"){
 		//RECUPERATION DOCUMENT
-			while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0 && breaker==0){
-			//si pas d'erreur, on récupère juste le document en un token
-				if (strcmp(token,"none") == 0){
-					stringInTheVector = "ERROR*";
-					breaker = 1;
-				}
+       if (!getline(ss, document, '*') || !getline(ss, tokenEOF, '*')|| 
+          document == "EOF" || document == "none" || tokenEOF != "EOF"){
 
-		/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDES*/
-				if (iterator==1 || breaker!=0){ //ie 2e champ different de EOF
-					stringInTheVector = "ERROR*";
-				}
+          stringInTheVector = "ERROR*";
+       }
+
+       else {
+          stringInTheVector = document + "*";
+       }
+    }
+
 
 		/**********************************************************/
 
-				iterator++;
-				stringInTheVector += string(token)+"*";
-			}
-		}
+    else if (action == "300"){
+    //déja hashé!
+       while (getline(ss , token , '*')){
+          if (token == "NULL"){
+             stringInTheVector = "ERROR*";
+             break;
+          }
+
+          else if (token =="EOF" || testEOF == 1){
+    /*ON NE PEUT RENTRER QUUNE FOIS SAUF SI LA REPONSE EST INVALIDE*/
+             if (testEOF == 0)
+                testEOF=1;
+             else 
+                stringInTheVector = "ERROR*";
+          }
+
+          else {
+             istringstream ssToken(token);
+             if (!getline(ssToken, reference, ';') || !getline(ssToken, nom, ';') ||
+                reference == "EOF" || reference == "NULL" || nom == "EOF" || nom == "NULL"){
+                stringInTheVector = "ERROR*";
+                continue;
+             }
+             else {
+             //BDD : pas besoin de hasher
+                stringInTheVector += reference + "*" + nom + "*";
+             }
+          }
+       }
+    }
+
+    else if (action == "301"){
+      //RECUPERATION DOCUMENT
+       if (!getline(ss, document, '*') || !getline(ss, tokenEOF, '*')|| 
+          document == "EOF" || document == "none" || tokenEOF != "EOF"){
+
+          stringInTheVector = "ERROR*";
+       }
+
+       else {
+          stringInTheVector = document + "*";
+       }
+    }
 
 		/*TEST D'ERREUR DE LA REPONSE : CHAMP ACTION INVALIDE*/
 		else {
-			stringInTheVector ="ERROR*";
+			stringInTheVector = "ERROR*";
 		}
 
 		/*****************************************************/
@@ -624,8 +629,8 @@ string traitement_rep_client(vector<string> a_traiter){
 	int valid_existence=0;
 	unsigned int i=0;
 	while (i<vectToSend.size() && valid_existence==0){
-		if (vectToSend[i] !="ERROR*"){
-			valid_existence = 1;
+		 if (vectToSend[i] !="ERROR*"){
+		 	 valid_existence = 1;
 		 }
 		 i++;
 	}
@@ -678,8 +683,8 @@ string traitement_req_bdd(string numero,
       	to_send += groupes_client[i];
       else 
       	to_send += groupes_client[i] + ";";
-    to_send += "*";
-	}
+      to_send += "*";
+	  }
   }
 
   if (typeData == "none")
@@ -706,6 +711,7 @@ string traitement_req_bdd(string numero,
 
 
 /***********************************/
+/*
 //retransmission bdd -> frontale 1
 string traitement_rep_bdd(string a_traiter){
 
@@ -714,9 +720,9 @@ string traitement_rep_bdd(string a_traiter){
 	string to_send;
 	int iterator=0;  //juste pour vérifier que la requete document est valide
 	char * token;
-
+*/
 	/****************************/
-
+/*
 	if (action == "300"){
 	//RECHERCHE REFERENCE +HASH
 	//pas besoin de parity ni de hash ici, les noms étant déjà hashés par la BDD
@@ -731,9 +737,9 @@ string traitement_rep_bdd(string a_traiter){
 			iterator++;
 		}
 	}
-
+*/
 	/****************************/
-
+/*
 	else if (action == "301"){
 	//RECUPERATION DOCUMENT
 		while ((token = strtok(NULL,"*")) && strcmp(token, "EOF") != 0){
@@ -743,26 +749,25 @@ string traitement_rep_bdd(string a_traiter){
 				to_send = "ERROR*";
 				return to_send;
 			}
-
+*/
 	/*TEST D'ERREUR DE LA REPONSE : NOMBRE DE CHAMPS INVALIDE */
-			if (iterator==0){ //ie on a déja bouclé
+/*			if (iterator==0){ //ie on a déja bouclé
 				to_send = "ERROR*";
 				return to_send;
-			}
+			}*/
 	/**********************************************************/
-
+/*
 			iterator++;
 			to_send += string(token);
 		}
 	}
-
+*/
 	/*TEST D'ERREUR DE LA REPONSE : L'ACTION EST INVALIDE*/
-	else {
-		to_send = "ERROR*";
-	}
+/*		to_send = "ERROR*";
+	}*/
 	/*****************************************************/
-
+/*
 	to_send += "EOF";
 	return to_send;
 }
-
+*/
