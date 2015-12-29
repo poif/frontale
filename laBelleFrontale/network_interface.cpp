@@ -504,15 +504,17 @@ void network_interface::process_received_events(engine_event& e){
 		      string &affectationReq = e.s_data["AFFECTATION"];
 
 		      groups.push_back("none");
-		      reqFormat = traitement_req_client("15"/*num de token temporaire*/,"1", "none", affectationReq, groups,"none","none", "none");
-
+		      reqFormat = traitement_req_client("8"/*num de token temporaire*/,"1", "none", affectationReq, groups,"none","none", "none");
+		      cout << "msg2: " << reqFormat<< endl;
 		      QString qreqFormat = QString("%1").arg(reqFormat.data());
 
-		      Message msg2(qreqFormat,'1','*');
-		      msg2.entete();
+		      Message msg2(qreqFormat,'0','*');
+		      //msg2.entete();
 		      msg2.chiffrement(key);
 
-		      //string toto = msg2.getChiffre().toStdString();
+		      string toto = msg2.getChiffre().toStdString();
+
+		      
 
 		      clientFront cli;
 
@@ -529,6 +531,8 @@ void network_interface::process_received_events(engine_event& e){
 
 		      string rep = msg.getMsg().toStdString();
 
+		      cout << "rep: " << rep << endl;
+
 		      a_traiter.push_back(rep);
 
 		      string repFormat = traitement_rep_client(a_traiter);
@@ -537,6 +541,8 @@ void network_interface::process_received_events(engine_event& e){
 		      {
 			        r.type = engine_event::SHOW;
 			        r.s_data["REPONSE"] = repFormat;
+
+			        cout << "repFormat : " << repFormat << endl;
 
 			        boost::archive::text_oarchive archive(archive_stream);
 			        archive << r;

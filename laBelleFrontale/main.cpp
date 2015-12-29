@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 
 			clientFront cli;
 			cli.socBind();
-			cli.emission(msg2.getChiffre(), hoteCourant, portCourant);
+			cli.emission(msg2.getChiffre());
 
 		}
 

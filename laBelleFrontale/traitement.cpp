@@ -245,7 +245,8 @@ string traitement_req_client(	string numero,
 								string ref, 
 								string user){
   string to_send = numero + "*";	
-  to_send = action + "*";
+  //string to_send = action + "*";
+  to_send += action + "*";
   if (statut == "none")
     to_send +="none*";
   else 
