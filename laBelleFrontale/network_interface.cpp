@@ -607,7 +607,6 @@ void network_interface::process_received_events(engine_event& e){
 			QString qreqFormat = QString("%1").arg(reqFormat.data());
 
 			Message msg2(qreqFormat,'2','*');
-			msg2.entete();
 			msg2.chiffrement(key);
 
 			//string toto = msg2.getChiffre().toStdString();
@@ -698,7 +697,6 @@ void network_interface::process_received_events(engine_event& e){
 			QString qreqFormat = QString("%1").arg(reqFormat.data());
 
 			Message msg2(qreqFormat,'2','*');
-			msg2.entete();
 			msg2.chiffrement(key);
 
 			//string toto = msg2.getChiffre().toStdString();
@@ -916,7 +914,6 @@ void network_interface::process_received_events(engine_event& e){
 					QString qreqFormat = QString("%1").arg(reqFormat.data());
 
 					Message msg2(qreqFormat,'2','*');
-					msg2.entete();
 					msg2.chiffrement(key);
 
 					//string toto = msg2.getChiffre().toStdString();
