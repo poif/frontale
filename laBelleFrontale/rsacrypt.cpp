@@ -2,7 +2,9 @@
 #include <iostream>
 #include <openssl/bio.h>
 #include <openssl/pem.h>
-
+#include <string>
+#include <sstream>
+#include <QTextStream>
 
 using namespace std;
 
@@ -73,11 +75,11 @@ QString rsaCrypt::dechiffrement(QString chif){
     return QString((const char*)clair);
 }
 
-QString rsaCrypt::clePub(){
+QString rsaCrypt::sendKeyPub(int id){
     int flen = 0 ;
     unsigned char* key = NULL ;
     BIO *keybio = NULL ;
-
+    QString msg;
     int succ;
 
 
@@ -98,5 +100,41 @@ QString rsaCrypt::clePub(){
      if ( BIO_read ( keybio, key, flen ) != flen )
         cout << "erreur bio read" << endl;
 
-     return QString((const char *)key);
+     cout << key << endl;
+
+     msg = QString("%1%2%3%4%5").arg(id).arg("*").arg("304*").arg((char *)key).arg("*EOF");
+
+     return msg;
+}
+
+bool rsaCrypt::recupKeyPub(QString key, int id){
+    istringstream iss;
+    string bddKey;
+    ostringstream oss;
+    BIO *keybio = NULL ;
+    oss << id;
+    iss.str(key.toStdString());
+
+    getline(iss,bddKey,'*');
+
+    if(!bddKey.compare(oss.str())){
+        getline(iss,bddKey,'*');
+
+        if(!bddKey.compare("304")){
+            getline(iss,bddKey,'*');
+            cout << bddKey << endl;
+
+            keybio = BIO_new_mem_buf ((unsigned char *)bddKey.c_str() , -1 );
+
+            forgeignKey=PEM_read_bio_RSAPublicKey ( keybio, &forgeignKey, NULL, NULL );
+
+            return true;
+        }else {
+           return false;
+           }
+    }else {
+            return false;
+        }
+
+
 }

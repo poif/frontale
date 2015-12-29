@@ -11,7 +11,8 @@ public:
     rsaCrypt(int keylen);
     QString chiffrement(QString clair);
     QString dechiffrement(QString chif);
-    QString clePub();
+    QString sendKeyPub(int id);
+    bool recupKeyPub(QString key, int id);
     void keyGen();
 
 private:
