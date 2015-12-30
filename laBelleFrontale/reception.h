@@ -4,6 +4,11 @@
 #include <QtNetwork>
 #include <list>
 #include <string>
+#include "network_interface.h"
+#include "bdd_tcp.h"
+#include "Tslot.h"
+#include "clientFront.h"
+#include "requete.h"
 
 using namespace std;
 
@@ -11,6 +16,8 @@ class reception : public QObject
 {
     Q_OBJECT
 private :
+    network_interface * m_netinf;
+    Tslot * m_ts;
     QUdpSocket *soc;
     QString msg;
     bool expiration;
@@ -18,9 +25,9 @@ private :
     quint16 hostPort;
     list<string> fileMsg;
 public:
-    reception();
-    void ecoute(int timeout);
-    list<string> getFileMsg();
+    reception(Tslot * ts, network_interface * netinf = NULL);
+    void ecoute(quint16 port);
+    string getFileMsg();
     QString getMsg();
     bool getExpiration();
     QHostAddress getHostAddr();

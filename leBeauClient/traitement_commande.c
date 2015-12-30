@@ -97,7 +97,7 @@ int traiter_commande(char *a_traiter)
 			crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 			printf("%s\n", a_envoyer_crypt);
 			puts("AFTER");
-			envoi_requete(a_envoyer_crypt);
+			envoi_requete(a_envoyer_crypt, WANT);
 			decrypt(a_envoyer_crypt, a_decrypt, strlen(a_envoyer_crypt));
 			printf("DECRYPT -> %s\n", a_decrypt);
 		}
@@ -133,7 +133,7 @@ void group_traitement(char *op, char *name)
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		unsigned char a_decrypt[sizeof(a_envoyer)];
 		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		envoi_requete(a_envoyer_crypt);
+		envoi_requete(a_envoyer_crypt, WANT);
 		//traiter retour frontale gestionnaire signal ?
 		create_group(name);
 	}
@@ -151,7 +151,7 @@ void share_traitement(char *op, char *name, char *path, char *group_name)
 		//unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		//unsigned char a_decrypt[sizeof(a_envoyer)];
 		//crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		//envoi_requete(a_envoyer_crypt);
+		//envoi_requete(a_envoyer_crypt, WANT);
 		partage_create(name, path, 0, group_name);
 	}
 	if (memcmp(op, "-bdd", 4))
@@ -160,7 +160,7 @@ void share_traitement(char *op, char *name, char *path, char *group_name)
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		unsigned char a_decrypt[sizeof(a_envoyer)];
 		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		envoi_requete(a_envoyer_crypt);
+		envoi_requete(a_envoyer_crypt, WANT);
 		//traiter retour frontale gestionnaire signal ?
 		partage_create(name, path, 1, group_name);
 	}
@@ -177,7 +177,7 @@ void delete_traitement(char *op, char *name, char *path)
 		//unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		//unsigned char a_decrypt[sizeof(a_envoyer)];
 		//crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		//envoi_requete(a_envoyer_crypt);
+		//envoi_requete(a_envoyer_crypt, WANT);
 		partage_delete(name, path);
 	}
 
@@ -187,7 +187,7 @@ void delete_traitement(char *op, char *name, char *path)
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		unsigned char a_decrypt[sizeof(a_envoyer)];
 		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		envoi_requete(a_envoyer_crypt);
+		envoi_requete(a_envoyer_crypt, WANT);
 		//traiter retour frontale gestionnaire signal ?
 		partage_delete(name, path);
 	}

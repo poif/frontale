@@ -36,7 +36,7 @@ using namespace CryptoPP;
 /**
  * constructeur
  */
-network_interface::network_interface(bdd_tcp * outbdd): bdd(outbdd){
+network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, reception * outres): bdd(outbdd), ts(ourts), res(outres) {
 	running = true;
 	host_rem = "127.0.0.1";
     	port_rem = 8082;
@@ -501,10 +501,11 @@ void network_interface::process_received_events(engine_event& e){
 		      string reqFormat;
 
 		      string pubStringRemote = e.s_data["PUB"];
-		      string &affectationReq = e.s_data["AFFECTATION"];
+		      string affectationReq = e.s_data["AFFECTATION"];
+		      string token = e.s_data["TOKEN"];
 
 		      groups.push_back("none");
-		      reqFormat = traitement_req_client("8"/*num de token temporaire*/,"1", "none", affectationReq, groups,"none","none", "none");
+		      reqFormat = traitement_req_client(token,"1", "none", affectationReq, groups,"none","none", "none");
 		      cout << "msg2: " << reqFormat<< endl;
 		      QString qreqFormat = QString("%1").arg(reqFormat.data());
 
@@ -514,17 +515,14 @@ void network_interface::process_received_events(engine_event& e){
 
 		      string toto = msg2.getChiffre().toStdString();
 
-		      
-
 		      clientFront cli;
-
-		      reception ser;
 
 		      cli.socBind();
 		      cli.emission(msg2.getChiffre());
-		      ser.ecoute(-1); // timeout= -1 == pas de timeout
+		      //TODO : start timer dans procReception_s + gestion
+		      string messageStr = res.getFileMsg();
 
-		      QString message = ser.getMsg();
+		      QString message = QString("%1").arg(messageStr.data());
 
 		      Message msg(message,'*');
 		      msg.dechiffrement(key);
@@ -541,6 +539,7 @@ void network_interface::process_received_events(engine_event& e){
 		      {
 			        r.type = engine_event::SHOW;
 			        r.s_data["REPONSE"] = repFormat;
+			        r.s_data["TOKEN"] = token;
 
 			        cout << "repFormat : " << repFormat << endl;
 
@@ -599,10 +598,11 @@ void network_interface::process_received_events(engine_event& e){
 
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
+			string token = e.s_data["TOKEN"];
 			/*Traitement de la requete */
 
 			groups.push_back("none");
-			reqFormat = traitement_req_client("15"/*num de token temporaire*/,"2", "none", affectationReq, groups,"none","none", "none");
+			reqFormat = traitement_req_client(token,"2", "none", affectationReq, groups,"none","none", "none");
 
 			QString qreqFormat = QString("%1").arg(reqFormat.data());
 
@@ -613,13 +613,12 @@ void network_interface::process_received_events(engine_event& e){
 
 			clientFront cli;
 
-			reception ser;
-
 			cli.socBind();
 			cli.emission(msg2.getChiffre());
-			ser.ecoute(-1); // timeout= -1 == pas de timeout
 
-			QString message = ser.getMsg();
+			string messageStr = res.getFileMsg();
+
+			QString message = QString("%1").arg(messageStr.data());
 
 			Message msg(message,'*');
 			msg.dechiffrement(key);
@@ -634,6 +633,7 @@ void network_interface::process_received_events(engine_event& e){
 			{
 			       r.type = engine_event::ANSWER;
 			       r.s_data["HASH"] = repFormat;
+			       r.s_data["TOKEN"] = token;
 
 			       boost::archive::text_oarchive archive(archive_stream);
 			       archive << r;
@@ -682,6 +682,7 @@ void network_interface::process_received_events(engine_event& e){
 			break;
 		}
 		case engine_event::LOOKREC:{
+
 			engine_event r;
 			engine_event p;
 			vector<string> groups;
@@ -690,9 +691,10 @@ void network_interface::process_received_events(engine_event& e){
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
 			string affectationReq = e.s_data["AFFECTATION"];
+			string token = e.s_data["TOKEN"];
 
 			groups.push_back("none");
-			reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", affectationReq, groups,dataType,"none", "none");
+			reqFormat = traitement_req_client(token,"3", "none", affectationReq, groups,dataType,"none", "none");
 
 			QString qreqFormat = QString("%1").arg(reqFormat.data());
 
@@ -703,13 +705,12 @@ void network_interface::process_received_events(engine_event& e){
 
 			clientFront cli;
 
-			reception ser;
-
 			cli.socBind();
 			cli.emission(msg2.getChiffre());
-			ser.ecoute(-1); // timeout= -1 == pas de timeout
 
-			QString message = ser.getMsg();
+			string messageStr = res.getFileMsg();
+
+			QString message = QString("%1").arg(messageStr.data());
 
 			Message msg(message,'*');
 			msg.dechiffrement(key);
@@ -725,6 +726,7 @@ void network_interface::process_received_events(engine_event& e){
 				r.type = engine_event::SHOWREC;
 
 				r.s_data["REPONSE"] = repFormat;
+				r.s_data["TOKEN"] = token;
 
 				string pubEncoded = Pub_toB64string();
 				r.s_data["PUBKEY"] = pubEncoded;
@@ -830,19 +832,37 @@ void network_interface::process_received_events(engine_event& e){
 	
 						//showRep[0] = r.s_data["NOM"];
 						//showRep[1] = r.s_data["HSTATUT"];
-						responseRec = r.s_data["REPONSE"];
-						recBool = true;
+						//responseRec = 
+						string repShow = r.s_data["REPONSE"];
+						string token = r.s_data["TOKEN"];
+
+						boost::mutex * mustStopMutex = ts->getMutex(token);
+						bool mustStop = ts->getBool(token);
+
+						mustStopMutex->lock();
+						if (mustStop = false)
+							addMessageToList(token, repShow);
+						mustStopMutex->unlock();
+						
 					}
 				}
 				case engine_event::ANSWER:{
 			
 					if(!r.s_data["HASH"].empty() && r.s_data["HASH"] != ""){
 						string hash = r.s_data["HASH"];
+						string token = r.s_data["TOKEN"];
 						//hnom.erase(hnom.size() - 1, 1);
-						cout << "hash : " << hash << endl;
+						//cout << "hash : " << hash << endl;
+						//responseRec = hash;	
+						//recBool = true;
 
-						responseRec = hash;	
-						recBool = true;
+						boost::mutex * mustStopMutex = ts->getMutex(token);
+						bool mustStop = ts->getBool(token);
+
+						mustStopMutex->lock();
+						if (mustStop = false)
+							addMessageToList(token, hash);
+						mustStopMutex->unlock();
 					
 					}
 				}
@@ -851,6 +871,8 @@ void network_interface::process_received_events(engine_event& e){
 					if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
 						if(!r.s_data["PUBKEY"].empty() && r.s_data["PUBKEY"] != "" ){
 							string encKey = r.s_data["PUBKEY"];
+							string token = r.s_data["TOKEN"];
+							string repShowrec = r.s_data["REPONSE"];
 							string pubRemote;
 							StringSource ss(encKey, true,
 							    new Base64Decoder(
@@ -862,8 +884,18 @@ void network_interface::process_received_events(engine_event& e){
 							RSA::PublicKey publicKeyRemote;
 							publicKeyRemote.Load(ss2);
 
-							responseRec = r.s_data["REPONSE"] + "*" + Pub_toB64string(publicKeyRemote);
-							recBool = true;
+							repShowrec += "*" + Pub_toB64string(publicKeyRemote);
+
+							cout << "RepShowRec : %s" << repShowrec << endl;
+
+							boost::mutex * mustStopMutex = ts->getMutex(token);
+							bool mustStop = ts->getBool(token);
+
+							mustStopMutex->lock();
+							if (mustStop = false)
+								addMessageToList(token, repShowrec);
+							mustStopMutex->unlock();
+							
 							
 						}
 					}
@@ -872,6 +904,7 @@ void network_interface::process_received_events(engine_event& e){
 				case engine_event::PUSH:{
 					if(!r.s_data["DOCUMENT"].empty() && r.s_data["DOCUMENT"] != ""){
 						string encDocument = r.s_data["DOCUMENT"];
+						string token = r.s_data["TOKEN"];
 						string document;
 
 						StringSource ss(encDocument, true,
@@ -883,8 +916,13 @@ void network_interface::process_received_events(engine_event& e){
 
 						cout << "document : " << document << endl;
 
-						responseRec = document;	
-						recBool = true;
+						boost::mutex * mustStopMutex = ts->getMutex(token);
+						bool mustStop = ts->getBool(token);
+
+						mustStopMutex->lock();
+						if (mustStop = false)
+							addMessageToList(token, document);
+						mustStopMutex->unlock();
 					
 					}
 				}
@@ -896,6 +934,7 @@ void network_interface::process_received_events(engine_event& e){
 					string aesIv = r.s_data["IV"];
 					string reference = r.s_data["REFERENCE"];
 					string groClient = r.s_data["GRCLIENT"];
+					string token = r.s_data["TOKEN"];
 					vector<string> groupeClient;
 					list<string> a_traiter;
 					string reqFormat;
@@ -909,7 +948,7 @@ void network_interface::process_received_events(engine_event& e){
 
 					/*Traitement de la requete */
 					
-					reqFormat = traitement_req_client("15"/*num de token temporaire*/,"3", "none", "none", groupeClient,"none",reference, "none");
+					reqFormat = traitement_req_client(token,"3", "none", "none", groupeClient,"none",reference, "none");
 
 					QString qreqFormat = QString("%1").arg(reqFormat.data());
 
@@ -920,13 +959,12 @@ void network_interface::process_received_events(engine_event& e){
 
 					clientFront cli;
 
-					reception ser;
-
 					cli.socBind();
 					cli.emission(msg2.getChiffre());
-					ser.ecoute(-1); // timeout= -1 == pas de timeout
 
-					QString message = ser.getMsg();
+					string messageStr = res.getFileMsg();
+
+					QString message = QString("%1").arg(messageStr.data());
 
 					Message msg(message,'*');
 					msg.dechiffrement(key);
@@ -941,6 +979,7 @@ void network_interface::process_received_events(engine_event& e){
 					{
 						p.type = engine_event::PUSH;
 						p.s_data["DOCUMENT"] = document;
+						r.s_data["TOKEN"] = token;
 
 						boost::archive::text_oarchive archive(archive_stream);
 						archive << p;
@@ -1008,7 +1047,7 @@ string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
 
 }
 
-void network_interface::send_look(string& affectation){
+void network_interface::send_look(string& affectation, string& token){
 	engine_event e;
 	//boost::asio::buffer network_buffer;
 	ostringstream archive_stream;
@@ -1021,6 +1060,7 @@ void network_interface::send_look(string& affectation){
 	
 	e.s_data["PUB"]=pubEncoded;
 	e.s_data["AFFECTATION"]=affectation;
+	e.s_data["TOKEN"]=token;
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
@@ -1030,7 +1070,7 @@ void network_interface::send_look(string& affectation){
 
 }
 
-void network_interface::send_exist(string& affectation){
+void network_interface::send_exist(string& affectation, string& token){
 	engine_event e;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::EXIST;
@@ -1041,6 +1081,7 @@ void network_interface::send_exist(string& affectation){
 
 	e.s_data["PUB"]=pubEncoded;
 	e.s_data["AFFECTATION"]=affectation;
+	e.s_data["TOKEN"]=token;
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
@@ -1050,7 +1091,7 @@ void network_interface::send_exist(string& affectation){
 
 }
 
-void network_interface::send_lookrec(string& dataType, string& affectation){
+void network_interface::send_lookrec(string& dataType, string& affectation, string& token){
 	engine_event e;
 
 	e.type = engine_event::LOOKREC;
@@ -1064,6 +1105,7 @@ void network_interface::send_lookrec(string& dataType, string& affectation){
 
 	e.s_data["TYPE"]=dataType;
 	e.s_data["AFFECTATION"]=affectation;
+	e.s_data["TOKEN"]=token;
 
 	boost::archive::text_oarchive archive(archive_stream);
     	archive << e;
@@ -1075,7 +1117,7 @@ void network_interface::send_lookrec(string& dataType, string& affectation){
 
 }
 
-void network_interface::send_pull(string& reference, string& groupeClient, string& encKey){
+void network_interface::send_pull(string& reference, string& groupeClient, string& encKey, string& token){
 	engine_event e;
 	engine_event p;
 
@@ -1113,6 +1155,7 @@ void network_interface::send_pull(string& reference, string& groupeClient, strin
 
 	e.s_data["REFERENCE"]=reference;
 	e.s_data["GRCLIENT"]=groupeClient;
+	e.s_data["TOKEN"]=token;
 
 	aesKeyTampon = aesKey_1[0];
 	aesIvTampon = aesKey_1[1];

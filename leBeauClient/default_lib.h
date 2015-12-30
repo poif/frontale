@@ -14,4 +14,7 @@
 
 #include "recup_config.h"
 
+#define WANT 1
+#define GIVE 0
+
 #endif

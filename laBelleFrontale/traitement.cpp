@@ -458,7 +458,7 @@ string traitement_rep_client(list<string>& a_traiter){
 	int firstRep = 0;		//c'est votre premiere bafouille?
 
 //	for (unsigned int i = 0; i < a_traiter.size(); i++) {
-  for (list<string>::iterator it = a_traiter.begin(); it != a_traiter.end(); it++){
+  for (list<string>::iterator it = a_traiter.begin(); it != a_traiter.end(); it++) { 
 		//chaque réponse est dans une case du tableau
 		//on renvoie toutes les réponses concaténées
     istringstream ss(*it);

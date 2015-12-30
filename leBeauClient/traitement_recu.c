@@ -68,6 +68,8 @@ int traiter_recu (char * requete_recu)
 				printf("STATUS -> %s\n", status_requete);
 				printf("AFFECTATION -> %s\n", affectation_requete);
 
+				usleep(100);
+
 				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0)
 				{
 					puts("Correspond");
@@ -75,7 +77,7 @@ int traiter_recu (char * requete_recu)
 					sprintf(a_envoyer, "%s*1*%s*%s*EOF", numero_requete, nom, recup_valeur("status"));
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);
+					envoi_requete(a_envoyer_crypt, GIVE);
 				}
 				else
 				{
@@ -86,7 +88,7 @@ int traiter_recu (char * requete_recu)
 					//sprintf(a_envoyer, "1*none");
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);	
+					envoi_requete(a_envoyer_crypt, GIVE);	
 				}
 		break;
 		}
@@ -113,7 +115,7 @@ int traiter_recu (char * requete_recu)
 					sprintf(a_envoyer, "2*%s*%s", nom, recup_valeur("status"));
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);
+					envoi_requete(a_envoyer_crypt, GIVE);
 				}
 				else
 				{
@@ -122,7 +124,7 @@ int traiter_recu (char * requete_recu)
 					sprintf(a_envoyer, "2*none");
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);	
+					envoi_requete(a_envoyer_crypt, GIVE);	
 				}
 		break;
 

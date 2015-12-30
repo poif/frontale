@@ -10,6 +10,7 @@ class Requete
 {
 	private:
 
+	std::string m_token;
 	std::string m_affectation;
 	std::string m_statut;
 	std::string  m_action;
@@ -27,6 +28,7 @@ class Requete
 	public:
 
 	Requete();
+	std::string getToken();
 	std::string getAffectation();
 	std::string getStatut();
 	std::string getAction();

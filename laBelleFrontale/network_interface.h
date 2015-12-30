@@ -19,6 +19,7 @@
 #include "engine_event.h"
 #include "noeudthor.h"
 #include "bdd_tcp.h"
+#include "Tslot.h"
 
 #define BUFFER_SIZE 2048
 
@@ -28,7 +29,7 @@ class NoeudThor;
 
 class network_interface{
 public:
-	network_interface(bdd_tcp *outbdd);
+	network_interface(bdd_tcp *outbdd, Tslot *ourts, reception * outres);
 	~network_interface();
 
 	void spawn();
@@ -52,10 +53,10 @@ public:
 	void setResp(string reResp);
 
 	// observer functions
-	void send_look(std::string& affectation);
-	void send_exist(std::string& affectation);
-	void send_lookrec(std::string& dataType, std::string& affectation);
-	void send_pull(std::string& reference, std::string& groupeClient, std::string& encKey);
+	void send_look(std::string& affectation, std::string& token);
+	void send_exist(std::string& affectation, std::string& token);
+	void send_lookrec(std::string& dataType, std::string& affectation, std::string& token);
+	void send_pull(std::string& reference, std::string& groupeClient, std::string& encKey, std::string& token);
 
 	std::string encrypto_rsa(std::string& plain);
 	std::string encrypto_rsa(std::string& plain, RSA::PublicKey pubRemote);
@@ -101,6 +102,8 @@ private:
 	RSA::PublicKey publicKey;
 
 	bdd_tcp * bdd;
+	Tslot * ts;
+	reception * res;
 	
 	int type;
 	bool running;

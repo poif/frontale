@@ -8,6 +8,8 @@ using namespace std;
 Requete::Requete()
 {}
 
+string Requete::getToken()
+{	return m_token;}
 string Requete::getAffectation()
 {	return m_affectation;}
 string Requete::getStatut()
@@ -62,7 +64,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 		if(m_action.compare("search") == 0) {
 		/*****REQUETE 1*****/
 			if(m_option.compare("-n") == 0) {
-		        hash = hashString((char*)m_statut.c_str());
+		        hash = hashString(m_statut.c_str());
 				while(getline(ss, name, '*') && getline(ss, hash_recu, '*')) {
 					if(hash.compare(hash_recu) == 0)
 						reponseTraitees.push_back(name);	//UN NOM PAR LIGNE DANS LE TABLEAU
@@ -83,7 +85,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 			else if (m_option.compare("-e") ==0) {
 				condensate = m_parametre;
 				condensate += m_statut;
-				hash = hashString((char*)condensate.c_str());
+				hash = hashString(condensate.c_str());
 				m_resultat = "no";
 				//si aucune réponse n'est "vraie", reste à no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
@@ -99,7 +101,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 			else if (m_option.compare("-p") ==0) {
 				condensate = m_parametre;
 				condensate += m_statut;
-				hash = hashString((char*)condensate.c_str());
+				hash = hashString(condensate.c_str());
 				while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
 					if(hash.compare(hash_recu) ==0){
 						reponseTraitees.push_back(reference + "*" + m_groupe);
@@ -148,7 +150,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 
 void Requete::construction() //construit la requete suivant action, option et parametre
 {
-    string hash; 
+    	string hash; 
 	if(m_action.compare("search") == 0) // Fonction recherche
 	{
 		pourBdd=false;
@@ -176,7 +178,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
 	{
-		hash = hashString((char*)m_nom.c_str());
+		hash = hashString(m_nom.c_str());
 	    pourBdd=true;
 	    m_requete = "302*";
 	    m_requete += m_statut + "*" + m_affectation + "*" + m_groupe + m_option + "*" + m_parametre +"*"+ hash +"*EOF";
@@ -185,7 +187,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	else if(m_action.compare("delete") == 0)
 	{
 	    pourBdd=true;
-	    hash = hashString((char*)m_nom.c_str());
+	    hash = hashString(m_nom.c_str());
 	    m_requete = "303*"+m_parametre+"*"+hash+"*EOF";
 	}
 
@@ -202,7 +204,8 @@ int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
 	//remplissage + test error!
-	if (!getline(ss, m_affectation, '*') ||
+	if (!getline(ss, m_token, '*') ||
+		!getline(ss, m_affectation, '*') ||
 		!getline(ss, m_statut, '*') ||
 		!getline(ss, m_action, '*') ||
 		!getline(ss, m_option, '*') ||
@@ -223,7 +226,3 @@ int Requete::decoupage(string chaine)
 		return 1;
 	}
 }
-
-
-
-
