@@ -2,6 +2,7 @@
 #include <QtNetwork>
 #include <iostream>
 #include <QCoreApplication>
+#include <sstream>
 
 reception::reception()
 {
@@ -11,17 +12,17 @@ reception::reception()
 void reception::ecoute(int timeout){
     soc = new QUdpSocket(this);
     soc->bind(12345,QUdpSocket::ShareAddress);
-    expiration=soc->waitForReadyRead(timeout);
-    procReception();
+    QObject::connect(&soc,SIGNAL(readyRead()), this,SLOT(procReception());
 
 }
 
 void reception::procReception(){
     QByteArray datagram;
+    ostringstream oss;
     datagram.resize(soc->pendingDatagramSize());
     soc->readDatagram(datagram.data(),datagram.size(), &hostAddr, &hostPort);
-    msg=QString("%1").arg(datagram.data());
-
+    oss << datagram.data;
+    fileMsg.push_back(oss.str());
 
 }
 QString reception::getMsg(){
@@ -38,4 +39,9 @@ QHostAddress reception::getHostAddr(){
 
 quint16 reception::getHostPort(){
        return this->hostPort;
+}
+
+list<string> reception::getFileMsg(){
+    return fileMsg.pop_front();
+
 }
