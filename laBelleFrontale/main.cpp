@@ -30,9 +30,9 @@ int main(int argc, char *argv[])
  
 	reception ser(&ts, &netinf);
 
-	ser.ecoute(12345);
+	ser.ecoute();
 
-	res.ecoute(54321);
+	res.ecoute_s();
 
 	return a.exec();
 }
