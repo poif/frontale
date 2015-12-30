@@ -138,3 +138,46 @@ bool rsaCrypt::recupKeyPub(QString key, int id){
 
 
 }
+
+bool rsaCrypt::recupAesKey(QString key, int id){
+
+    istringstream iss;
+    string bddKey;
+    ostringstream oss;
+
+    oss << id;
+    iss.str(key.toStdString());
+
+    getline(iss,bddKey,'*');
+
+    if(!bddKey.compare(oss.str())){
+        getline(iss,bddKey,'*');
+
+        if(!bddKey.compare("304")){
+            getline(iss,bddKey,'*');
+            cout << bddKey << endl;
+
+            istringstream issAes;
+            string bddaAes;
+            getline(issAes,bddaAes,';');
+            aesKey = (char *)bddaAes.c_str();
+
+            getline(issAes,bddaAes,';');
+            aesIv = (char *)bddaAes.c_str();
+
+            return true;
+        }else {
+            return false;
+        }
+    }else {
+        return false;
+    }
+}
+
+char * rsaCrypt::getAesKey(){
+    return aesKey;
+}
+
+char * rsaCrypt::getAesIv(){
+    return aesIv;
+}
