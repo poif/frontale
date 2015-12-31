@@ -8,8 +8,6 @@
 #include <vector>
 #include <iostream>
 
-#include <string>
-
 #include <QCoreApplication>
 
 #include <cryptopp/rsa.h>
@@ -22,12 +20,10 @@
 #include <cryptopp/hex.h>
 
 #include "clientFront.h"
-#include "reception.h"
 #include "network_interface.h"
 #include "engine_event.h"
 #include "utils.h"
 #include "traitement.h"
-#include "noeudthor.h"
 #include "message.h"
 
 using namespace std;
@@ -36,7 +32,7 @@ using namespace CryptoPP;
 /**
  * constructeur
  */
-network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, reception * outres): bdd(outbdd), ts(ourts), res(outres) {
+network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres) {
 	running = true;
 	host_rem = "127.0.0.1";
     	port_rem = 8082;
@@ -481,11 +477,58 @@ void network_interface::process_received_events_queue(){
 	}	
 }
 
+string network_interface::treat_resource(string& request, string& token){
+
+	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
+
+	list<string> * a_traiter;
+	list<string> a_traiter_clair;
+
+	QString qreqFormat = QString("%1").arg(request.data());
+
+	Message msg2(qreqFormat,'2','*');
+	msg2.chiffrement(key);
+
+	//string toto = msg2.getChiffre().toStdString();
+
+	clientFront cli;
+
+	cli.socBind();
+	cli.emission(msg2.getChiffre());
+
+	if(ts_s->TriggerToken(token) == false) return "";
+
+	srand (time(NULL));
+	int ms = rand() % 200 + 200;
+
+	a_traiter = ts_s->startTimer(token,ms);
+
+	if (!a_traiter->empty())
+	{
+		for (auto it : *a_traiter) {
+
+			string messageStr = it;
+			QString message = QString("%1").arg(messageStr.data());
+			Message msg(message,'*');
+			msg.dechiffrement(key);
+
+			string rep = msg.getMsg().toStdString();
+
+			a_traiter_clair.push_back(rep);
+
+		}
+	}
+
+	string repFormat = traitement_rep_client(a_traiter_clair);
+
+	return repFormat;
+}
+
 void network_interface::process_received_events(engine_event& e){
 
 	// we just have received e from the network
 
-	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
+	//const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
 
 	ostringstream archive_stream;
 	ostringstream archive_streamOut;
@@ -493,100 +536,73 @@ void network_interface::process_received_events(engine_event& e){
 	switch(e.type){
 		case engine_event::LOOK:{
 
-		      engine_event r;
-		      engine_event p;
-		      vector<string> groups;
-		      list<string> a_traiter;
+		 	engine_event r;
+			engine_event p;
+			vector<string> groups;
 
-		      string reqFormat;
+			string reqFormat;
 
-		      string pubStringRemote = e.s_data["PUB"];
-		      string affectationReq = e.s_data["AFFECTATION"];
-		      string token = e.s_data["TOKEN"];
+			string pubStringRemote = e.s_data["PUB"];
+			string affectationReq = e.s_data["AFFECTATION"];
+			string token = e.s_data["TOKEN"];
 
-		      groups.push_back("none");
-		      reqFormat = traitement_req_client(token,"1", "none", affectationReq, groups,"none","none", "none");
-		      cout << "msg2: " << reqFormat<< endl;
-		      QString qreqFormat = QString("%1").arg(reqFormat.data());
+			groups.push_back("none");
+			reqFormat = traitement_req_client(token,"1", "none", affectationReq, groups,"none","none", "none");
 
-		      Message msg2(qreqFormat,'0','*');
-		      //msg2.entete();
-		      msg2.chiffrement(key);
+			string repFormat = treat_resource(reqFormat, token);
 
-		      string toto = msg2.getChiffre().toStdString();
+			if (!repFormat.empty() || repFormat != "")
+			{
+				r.type = engine_event::SHOW;
+				r.s_data["REPONSE"] = repFormat;
+				r.s_data["TOKEN"] = token;
 
-		      clientFront cli;
+				cout << "repFormat : " << repFormat << endl;
 
-		      cli.socBind();
-		      cli.emission(msg2.getChiffre());
-		      //TODO : start timer dans procReception_s + gestion
-		      string messageStr = res.getFileMsg();
+				boost::archive::text_oarchive archive(archive_stream);
+				archive << r;
+				string outbound_data = archive_stream.str();
 
-		      QString message = QString("%1").arg(messageStr.data());
+				string pubRemote;
+				StringSource ss(pubStringRemote, true,
+					new Base64Decoder(
+						new StringSink(pubRemote)
+					) // Base64Decoder
+				); // StringSource
+				StringSource ss2(pubRemote, true /*pumpAll*/);
 
-		      Message msg(message,'*');
-		      msg.dechiffrement(key);
+				RSA::PublicKey publicRemoteKey;
+				publicRemoteKey.Load(ss2);
+				AutoSeededRandomPool prng;
 
-		      string rep = msg.getMsg().toStdString();
+				SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+				prng.GenerateBlock( key, key.size() );
 
-		      cout << "rep: " << rep << endl;
+				byte iv[ AES::BLOCKSIZE ];
+				prng.GenerateBlock( iv, sizeof(iv) );
 
-		      a_traiter.push_back(rep);
+				string cipher_data = encrypto_aes(key, iv, outbound_data);
 
-		      string repFormat = traitement_rep_client(a_traiter);
+				p.type = engine_event::SECRET;
+				p.s_data["CIPHER"] = cipher_data;
 
-		      if (!repFormat.empty() || repFormat != "")
-		      {
-			        r.type = engine_event::SHOW;
-			        r.s_data["REPONSE"] = repFormat;
-			        r.s_data["TOKEN"] = token;
+				string * aesKey = new string[2];
+				aesKey = aesKeyToS(key, iv);
 
-			        cout << "repFormat : " << repFormat << endl;
+				string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
+				string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
 
-			        boost::archive::text_oarchive archive(archive_stream);
-			        archive << r;
-			        string outbound_data = archive_stream.str();
+				p.s_data["KEY"] = aesKey_encoded;
+				p.s_data["IV"] = aesIv_encoded;
 
-			        string pubRemote;
-			        StringSource ss(pubStringRemote, true,
-			           new Base64Decoder(
-			             new StringSink(pubRemote)
-			           ) // Base64Decoder
-			        ); // StringSource
-			        StringSource ss2(pubRemote, true /*pumpAll*/);
+				boost::archive::text_oarchive archiveOut(archive_streamOut);
+				archiveOut << p;
+				const string &data_encoded = archive_streamOut.str();
 
-			        RSA::PublicKey publicRemoteKey;
-			        publicRemoteKey.Load(ss2);
-			        AutoSeededRandomPool prng;
+				noeudthor->send(data_encoded);
 
-			        SecByteBlock key(AES::DEFAULT_KEYLENGTH);
-			        prng.GenerateBlock( key, key.size() );
+			}
 
-			        byte iv[ AES::BLOCKSIZE ];
-			        prng.GenerateBlock( iv, sizeof(iv) );
-
-			        string cipher_data = encrypto_aes(key, iv, outbound_data);
-
-			        p.type = engine_event::SECRET;
-			        p.s_data["CIPHER"] = cipher_data;
-
-			        string * aesKey = new string[2];
-			        aesKey = aesKeyToS(key, iv);
-
-			        string aesKey_encoded = encrypto_rsa(aesKey[0], publicRemoteKey);
-			        string aesIv_encoded = encrypto_rsa(aesKey[1], publicRemoteKey);
-
-			        p.s_data["KEY"] = aesKey_encoded;
-			        p.s_data["IV"] = aesIv_encoded;
-
-			        boost::archive::text_oarchive archiveOut(archive_streamOut);
-			        archiveOut << p;
-			        const string &data_encoded = archive_streamOut.str();
-
-			        noeudthor->send(data_encoded);
-
-		        	}
-		        
 			break;
 		}
 		case engine_event::EXIST:{
@@ -594,7 +610,6 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event p;
 			string reqFormat;
 			vector<string> groups;
-			list<string> a_traiter;
 
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
@@ -604,30 +619,7 @@ void network_interface::process_received_events(engine_event& e){
 			groups.push_back("none");
 			reqFormat = traitement_req_client(token,"2", "none", affectationReq, groups,"none","none", "none");
 
-			QString qreqFormat = QString("%1").arg(reqFormat.data());
-
-			Message msg2(qreqFormat,'2','*');
-			msg2.chiffrement(key);
-
-			//string toto = msg2.getChiffre().toStdString();
-
-			clientFront cli;
-
-			cli.socBind();
-			cli.emission(msg2.getChiffre());
-
-			string messageStr = res.getFileMsg();
-
-			QString message = QString("%1").arg(messageStr.data());
-
-			Message msg(message,'*');
-			msg.dechiffrement(key);
-
-			string rep = msg.getMsg().toStdString();
-
-			a_traiter.push_back(rep);
-
-			string repFormat = traitement_rep_client(a_traiter);
+			string repFormat = treat_resource(reqFormat, token);
 
 			if (!repFormat.empty() || repFormat != "")
 			{
@@ -686,7 +678,7 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event r;
 			engine_event p;
 			vector<string> groups;
-			list<string> a_traiter;
+
 			string reqFormat;
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
@@ -696,30 +688,7 @@ void network_interface::process_received_events(engine_event& e){
 			groups.push_back("none");
 			reqFormat = traitement_req_client(token,"3", "none", affectationReq, groups,dataType,"none", "none");
 
-			QString qreqFormat = QString("%1").arg(reqFormat.data());
-
-			Message msg2(qreqFormat,'2','*');
-			msg2.chiffrement(key);
-
-			//string toto = msg2.getChiffre().toStdString();
-
-			clientFront cli;
-
-			cli.socBind();
-			cli.emission(msg2.getChiffre());
-
-			string messageStr = res.getFileMsg();
-
-			QString message = QString("%1").arg(messageStr.data());
-
-			Message msg(message,'*');
-			msg.dechiffrement(key);
-
-			string rep = msg.getMsg().toStdString();
-
-			a_traiter.push_back(rep);
-
-			string repFormat = traitement_rep_client(a_traiter);
+			string repFormat = treat_resource(reqFormat, token);
 
 			if (!repFormat.empty() || repFormat != "")
 			{
@@ -837,11 +806,10 @@ void network_interface::process_received_events(engine_event& e){
 						string token = r.s_data["TOKEN"];
 
 						boost::mutex * mustStopMutex = ts->getMutex(token);
-						bool mustStop = ts->getBool(token);
-
 						mustStopMutex->lock();
-						if (mustStop = false)
-							addMessageToList(token, repShow);
+						bool mustStop = ts->getBool(token);
+						if (mustStop == false)
+							ts->addMessageToList(token, repShow);
 						mustStopMutex->unlock();
 						
 					}
@@ -857,11 +825,10 @@ void network_interface::process_received_events(engine_event& e){
 						//recBool = true;
 
 						boost::mutex * mustStopMutex = ts->getMutex(token);
-						bool mustStop = ts->getBool(token);
-
 						mustStopMutex->lock();
-						if (mustStop = false)
-							addMessageToList(token, hash);
+						bool mustStop = ts->getBool(token);
+						if (mustStop == false)
+							ts->addMessageToList(token, hash);
 						mustStopMutex->unlock();
 					
 					}
@@ -889,11 +856,10 @@ void network_interface::process_received_events(engine_event& e){
 							cout << "RepShowRec : %s" << repShowrec << endl;
 
 							boost::mutex * mustStopMutex = ts->getMutex(token);
-							bool mustStop = ts->getBool(token);
-
 							mustStopMutex->lock();
-							if (mustStop = false)
-								addMessageToList(token, repShowrec);
+							bool mustStop = ts->getBool(token);
+							if (mustStop == false)
+								ts->addMessageToList(token, repShowrec);
 							mustStopMutex->unlock();
 							
 							
@@ -917,11 +883,10 @@ void network_interface::process_received_events(engine_event& e){
 						cout << "document : " << document << endl;
 
 						boost::mutex * mustStopMutex = ts->getMutex(token);
-						bool mustStop = ts->getBool(token);
-
 						mustStopMutex->lock();
-						if (mustStop = false)
-							addMessageToList(token, document);
+						bool mustStop = ts->getBool(token);
+						if (mustStop == false)
+							ts->addMessageToList(token, document);
 						mustStopMutex->unlock();
 					
 					}
@@ -936,7 +901,7 @@ void network_interface::process_received_events(engine_event& e){
 					string groClient = r.s_data["GRCLIENT"];
 					string token = r.s_data["TOKEN"];
 					vector<string> groupeClient;
-					list<string> a_traiter;
+
 					string reqFormat;
 
 					istringstream issGroupe(groClient);
@@ -950,30 +915,7 @@ void network_interface::process_received_events(engine_event& e){
 					
 					reqFormat = traitement_req_client(token,"3", "none", "none", groupeClient,"none",reference, "none");
 
-					QString qreqFormat = QString("%1").arg(reqFormat.data());
-
-					Message msg2(qreqFormat,'2','*');
-					msg2.chiffrement(key);
-
-					//string toto = msg2.getChiffre().toStdString();
-
-					clientFront cli;
-
-					cli.socBind();
-					cli.emission(msg2.getChiffre());
-
-					string messageStr = res.getFileMsg();
-
-					QString message = QString("%1").arg(messageStr.data());
-
-					Message msg(message,'*');
-					msg.dechiffrement(key);
-
-					string rep = msg.getMsg().toStdString();
-
-					a_traiter.push_back(rep);
-
-					string document = traitement_rep_client(a_traiter);			
+					string document = treat_resource(reqFormat, token);			
 
 					if (!document.empty() || document != "")
 					{

@@ -10,7 +10,7 @@ Tslot::Tslot()
 {
 	m_thread=NULL;
 	m_mustStop=false;
-	m_token="";
+	m_lastToken="";
 	t0=time(NULL);
 	srand(t0);
 }
@@ -91,8 +91,52 @@ string Tslot::GenToken(QHostAddress addr, quint16 port)
 		cerr << "Erreur : tokenToClient n'est pas censé avoir un TimerToken à cet emplacement avant d'avoir recu ce token" << endl;
 		return "";
 	}
-	m_token = token;
+	m_lastToken = token;
 	return token;
+}
+
+bool Tslot::TriggerToken(string& token)
+{
+
+	cout << "Declenchement du token : " << token << endl;
+	/*if (tokenToTimer.find(token) == tokenToTimer.cend()){
+		tokenToTimer.emplace(token, new TimerToken(token));
+		tokenToTimer[token]->setInterval(2000);
+		tokenToTimer[token]->setSingleShot(true);
+		cout << "Resultat du connect" << connect(tokenToTimer[token], SIGNAL(timeOutMyToken(std::string)), this, SLOT(timeoutCallback(std::string))) << endl;
+	}
+	else {
+		cerr << "Erreur : tokenToTimer n'est pas censé avoir un TimerToken à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
+	}*/
+	if (tokenToMsgList.find(token) == tokenToMsgList.cend()){
+		tokenToMsgList.emplace(token, new list<string>());
+	}
+	else {
+		// Ne devrait jamais s'afficher
+		cerr << "Erreur : tokenToMsgList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
+		return false;
+	}
+	if (tokenToBool.find(token) == tokenToBool.cend()){
+		tokenToBool.emplace(token, false);
+	}
+	else {
+		// Ne devrait jamais s'afficher
+		cerr << "Erreur : tokenToBool n'est pas censé avoir un boolean à cet emplacement avant d'avoir recu ce token" << endl;
+		return false;
+	}
+	if (tokenToMutex.find(token) == tokenToMutex.cend()){
+		tokenToMutex.emplace(token, new boost::mutex);
+	}
+	else {
+		// Ne devrait jamais s'afficher
+		cerr << "Erreur : tokenToBool n'est pas censé avoir un boolean à cet emplacement avant d'avoir recu ce token" << endl;
+		return false;
+	}
+
+	cout << "Token déclenché avec succès." << endl; 
+	m_lastToken = token;
+	return true;
 }
 
 void Tslot::addMessageToList(string token, string msg)
@@ -139,9 +183,9 @@ void Tslot::timeoutCallback(string token)
 	cout << "Le slot à été appelé correctement avec le token" << token << endl;
 }
 
-string Tslot::getToken()
+string Tslot::getLastToken()
 {
-	return m_token;
+	return m_lastToken;
 }
 
 boost::mutex* Tslot::getMutex(string token)
@@ -184,7 +228,7 @@ void Tslot::operator () ()
 		 
 	do
 	{
-		addMessageToList(m_token, "sloubi "+to_string(ite));
+		addMessageToList(m_lastToken, "sloubi "+to_string(ite));
 		ite++;
 			 
 		// Sleep for 40ms (25 frames/second).
@@ -235,7 +279,7 @@ std::list<string>* Tslot::startTimer(string token){
 
 }
 
-void Tslot::startTimer(string token, int ms){
+std::list<string>* Tslot::startTimer(string token, int ms){
 
 	//cout << "Armement du thread..." << endl;
 	//Start();
@@ -264,5 +308,7 @@ void Tslot::startTimer(string token, int ms){
 	}
 
 	timeoutCallback(token);
+
+	return tokenToMsgList[token];
 
 }

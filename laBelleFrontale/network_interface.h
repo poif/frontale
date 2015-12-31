@@ -20,16 +20,18 @@
 #include "noeudthor.h"
 #include "bdd_tcp.h"
 #include "Tslot.h"
+#include "reception.h"
 
 #define BUFFER_SIZE 2048
 
 using namespace CryptoPP;
 
 class NoeudThor;
+class reception;
 
 class network_interface{
 public:
-	network_interface(bdd_tcp *outbdd, Tslot *ourts, reception * outres);
+	network_interface(bdd_tcp *outbdd, Tslot *ourts, Tslot * ourts_s, reception * outres);
 	~network_interface();
 
 	void spawn();
@@ -85,6 +87,8 @@ private:
 	void process_event(engine_event&);
 	std::queue<engine_event> received_events;
 	void process_received_events_queue();
+
+	std::string treat_resource(std::string& request, std::string& token);
 	void process_received_events(engine_event&);
 
 	//void get_config_data();
@@ -103,6 +107,7 @@ private:
 
 	bdd_tcp * bdd;
 	Tslot * ts;
+	Tslot * ts_s;
 	reception * res;
 	
 	int type;

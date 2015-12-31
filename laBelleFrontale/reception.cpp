@@ -4,7 +4,7 @@
 #include <QCoreApplication>
 #include <sstream>
 
-reception::reception(Tslot * ts, network_interface * netinf): m_ts(ts), m_netinf(netinf)
+reception::reception(Tslot * ts, bdd_tcp * bdd, network_interface * netinf): m_ts(ts), m_bdd(bdd), m_netinf(netinf)
 {
 }
 
@@ -41,26 +41,33 @@ void reception::procReception_s(){
     soc->readDatagram(datagram.data(),datagram.size());
     oss << datagram.data();
     //TODO: verification mutex 
-    fileMsg.push_back(oss.str());
+    //fileMsg.push_back(oss.str());
+
+    string token = m_ts->getLastToken();
+    boost::mutex * mustStopMutex = m_ts->getMutex(token);
+    mustStopMutex->lock();
+    bool mustStop = m_ts->getBool(token);
+    if (mustStop == false)
+        m_ts->addMessageToList(token, oss.str());
+    mustStopMutex->unlock();
 
 }
 
-void traitement(string messageStr){
+void reception::traitement(string messageStr){
 
         QHostAddress hoteCourant;
         quint16 portCourant;
 
-        bool respBool = false;
         QString message;
         QString versBdd;
 
         const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
         
-        hoteCourant = ser.getHostAddr();
-        portCourant = ser.getHostPort();
+        hoteCourant = getHostAddr();
+        portCourant = getHostPort();
 
         cout << "Génération du token..." << endl;
-        token = ts.GenToken(hoteCourant,portCourant);
+        string token = m_ts->GenToken(hoteCourant,portCourant);
         cout << "Token généré." << endl;
 
         message = QString("%1").arg(messageStr.data());
@@ -88,11 +95,11 @@ void traitement(string messageStr){
             if(req.getPourBdd()){
                 versBdd = QString("%1").arg(req.getRequete().c_str());
 
-                bdd.emission(versBdd);
+                m_bdd->emission(versBdd);
                 
-                bdd.attendLecture();
+                m_bdd->attendLecture();
 
-                string messBdd = bdd.getMsg().toStdString();
+                string messBdd = m_bdd->getMsg().toStdString();
 
                 list<string> listReponseBdd;
                 listReponseBdd.push_back(messBdd);
@@ -106,18 +113,18 @@ void traitement(string messageStr){
                 string option = req.getOption();
 
                 if(option.compare("-n")==0){/* traitement est une affectation */
-                    netinf.send_look(traitement, token);
+                    m_netinf->send_look(traitement, token);
                     cout << "ici envoi" << endl;
                 }
                 else if(option.compare("-e")==0){/* traitement est un statut */
-                    netinf.send_exist(traitement, token);
+                    m_netinf->send_exist(traitement, token);
                 }
                 if(option.compare("-p")==0){
                     string type = "picture";
-                    netinf.send_lookrec(type,traitement, token);
+                    m_netinf->send_lookrec(type,traitement, token);
                 }
 
-                list<string> listReponse = m_ts->startTimer(token, 500);
+                list<string> * listReponse = m_ts->startTimer(token, 500);
 
                 if(!listReponse->empty()){
 
@@ -151,7 +158,7 @@ void traitement(string messageStr){
 }
 
 QString reception::getMsg(){
-    return this->msg;
+    return this->m_msg;
 }
 
 bool reception::getExpiration(){

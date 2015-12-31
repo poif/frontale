@@ -12,6 +12,7 @@
 #include <sstream>
 #include <openssl/sha.h>
 #include <QtNetwork>
+#include <ctime>
 
 #include <map>
 #include <list>
@@ -27,12 +28,12 @@ class Tslot
 	private:
 	boost::thread* m_thread; // The thread runs this object
 	time_t t0;
-	std::string m_token;
 	 
 	// Variable that indicates to stop and the mutex to
 	// synchronise "must stop" on (mutex explained later)
 	bool m_mustStop;
 	boost::mutex m_mustStopMutex;
+	std::string m_lastToken;
 
 	std::map<std::string, IpPort> tokenToClient;
 	std::map<std::string, std::list<std::string>* > tokenToMsgList;
@@ -50,13 +51,15 @@ class Tslot
 
 	std::string GenToken(QHostAddress addr, quint16 port);
 
+	bool TriggerToken(std::string& token);
+
 	void addMessageToList(std::string token, std::string msg);
 
 	void printMessageToList(std::string token);
 
 	void timeoutCallback(std::string token);
 
-	std::string getToken();
+	std::string getLastToken();
 	boost::mutex * getMutex(std::string token);
 	bool getBool(std::string token);
 	 
@@ -69,9 +72,9 @@ class Tslot
 	// Thread function
 	void operator () ();
 
-	void startTimer(std::string token);
+	std::list<std::string>* startTimer(std::string token);
 
-	void startTimer(std::string token, int ms);
+	std::list<std::string>* startTimer(std::string token, int ms);
 };
 
 #endif

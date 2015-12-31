@@ -20,15 +20,17 @@ int main(int argc, char *argv[])
 
 	
 	Tslot ts;
-	reception res(&ts);
+	Tslot ts_s;
 
 	bdd_tcp bdd;
 	bdd.connection_tcp("127.0.0.1",2211);
 
-	network_interface netinf(&bdd, &ts, &res);
+	reception res(&ts_s, &bdd);
+
+	network_interface netinf(&bdd, &ts, &ts_s, &res);
     	std::thread tspawn = netinf.spawnThread();
  
-	reception ser(&ts, &netinf);
+	reception ser(&ts, &bdd, &netinf);
 
 	ser.ecoute();
 
