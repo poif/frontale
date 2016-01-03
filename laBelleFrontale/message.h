@@ -21,6 +21,8 @@ public:
     void entete();
     void challenge(int N);
     void dechiffrement(const unsigned char *key);
+    std::string decrypt(unsigned char* dec_in, int size_aes_input);
+    std::string crypt(unsigned char* aes_input, int size_aes_input);
 
 
 };

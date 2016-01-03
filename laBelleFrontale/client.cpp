@@ -15,19 +15,19 @@ void clientFront::socBind(){
 
 }
 
-void clientFront::emission(QString message,QHostAddress hostaddr, quint16 hostPort){
+void clientFront::emission(string message,QHostAddress hostaddr, quint16 hostPort){
 
-    QByteArray datagram = message.toLatin1().data();
+    QByteArray datagram = message.data();
 
     soc->writeDatagram(datagram, hostaddr, hostPort);
 
 }
 
-void clientFront::emission(QString message){
+void clientFront::emission(string message){
 
     QHostAddress addr = QHostAddress::LocalHost;
 
-    QByteArray datagram = message.toLatin1().data();
+    QByteArray datagram = message.data();
 
     soc->writeDatagram(datagram, addr,1234);
 

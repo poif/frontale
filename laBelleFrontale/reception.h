@@ -38,6 +38,7 @@ public:
     QString getMsg();
     bool getExpiration();
     void traitement(std::string messageStr);
+
     QHostAddress getHostAddr();
     quint16 getHostPort();
 public slots:

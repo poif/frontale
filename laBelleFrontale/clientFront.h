@@ -4,14 +4,15 @@
 #include <QUdpSocket>
 
 #include <QString>
+#include <string>
 
 class clientFront: public QObject
 {
 public:
     clientFront();
     void socBind();
-    void emission(QString message, QHostAddress hostAddr, quint16 hostPort);
-    void emission(QString message);
+    void emission(std::string message, QHostAddress hostAddr, quint16 hostPort);
+    void emission(std::string message);
 
 private:
         QUdpSocket *soc;

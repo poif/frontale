@@ -91,6 +91,7 @@ string Tslot::GenToken(QHostAddress addr, quint16 port)
 		cerr << "Erreur : tokenToClient n'est pas censé avoir un TimerToken à cet emplacement avant d'avoir recu ce token" << endl;
 		return "";
 	}
+	cout << __FUNCTION__ << " appelée avec le token: " << token << " en argument" << std::endl;
 	m_lastToken = token;
 	return token;
 }
@@ -130,10 +131,10 @@ bool Tslot::TriggerToken(string& token)
 	}
 	else {
 		// Ne devrait jamais s'afficher
-		cerr << "Erreur : tokenToBool n'est pas censé avoir un boolean à cet emplacement avant d'avoir recu ce token" << endl;
+		cerr << "Erreur : tokenToMutex n'est pas censé avoir un mutex à cet emplacement avant d'avoir recu ce token" << endl;
 		return false;
 	}
-
+	cout << __FUNCTION__ << " appelée avec le token: " << token << " en argument" << std::endl;
 	cout << "Token déclenché avec succès." << endl; 
 	m_lastToken = token;
 	return true;

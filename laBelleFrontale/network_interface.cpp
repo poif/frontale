@@ -487,19 +487,20 @@ string network_interface::treat_resource(string& request, string& token){
 	QString qreqFormat = QString("%1").arg(request.data());
 
 	Message msg2(qreqFormat,'2','*');
-	msg2.chiffrement(key);
+	//msg2.chiffrement(key);
+	string chiffrer = msg2.crypt((unsigned char*) request.data(), request.size());
 
 	//string toto = msg2.getChiffre().toStdString();
 
 	clientFront cli;
 
 	cli.socBind();
-	cli.emission(msg2.getChiffre());
+	cli.emission(chiffrer);
 
 	if(ts_s->TriggerToken(token) == false) return "";
 
 	srand (time(NULL));
-	int ms = rand() % 200 + 200;
+	int ms = rand() % 200 + 2000;
 
 	a_traiter = ts_s->startTimer(token,ms);
 
@@ -510,9 +511,10 @@ string network_interface::treat_resource(string& request, string& token){
 			string messageStr = it;
 			QString message = QString("%1").arg(messageStr.data());
 			Message msg(message,'*');
-			msg.dechiffrement(key);
+			//msg.dechiffrement(key);
 
-			string rep = msg.getMsg().toStdString();
+			//string rep = msg.getMsg().toStdString();
+			string rep = msg.decrypt((unsigned char*) messageStr.data(), messageStr.size());
 
 			a_traiter_clair.push_back(rep);
 
@@ -808,6 +810,7 @@ void network_interface::process_received_events(engine_event& e){
 						boost::mutex * mustStopMutex = ts->getMutex(token);
 						mustStopMutex->lock();
 						bool mustStop = ts->getBool(token);
+						cout << "repshow : " << repShow << endl;
 						if (mustStop == false)
 							ts->addMessageToList(token, repShow);
 						mustStopMutex->unlock();

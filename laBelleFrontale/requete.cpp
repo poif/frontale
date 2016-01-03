@@ -58,6 +58,8 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 		string reference;
 		string inTheVector;
 
+		cout << "it : " << *it << endl;
+
 		if (*it == numero+"*ERROR*") continue; //on passe à la reponse suivante
 		else isError = 0;
 

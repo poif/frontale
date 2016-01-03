@@ -76,6 +76,7 @@ int traiter_recu (char * requete_recu)
 					unsigned char a_envoyer[sizeof (char *) * 1024];
 					sprintf(a_envoyer, "%s*1*%s*%s*EOF", numero_requete, nom, recup_valeur("status"));
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					printf("a envoyer -> %s\n", a_envoyer);
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 					envoi_requete(a_envoyer_crypt, GIVE);
 				}
