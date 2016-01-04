@@ -12,7 +12,7 @@ public:
     bdd_tcp();
     void connection_tcp(QString IP, int port);
     void emission(QString texte);
-    void attendLecture();
+    void attendLecture(int timeout);
     void lecture();
     QString getMsg();
     bool getYLecture();

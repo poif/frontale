@@ -21,9 +21,9 @@ void bdd_tcp::emission(QString texte){
 
 }
 
-void bdd_tcp::attendLecture(){
+void bdd_tcp::attendLecture(int timeout){
 
-   yLecture=soc.waitForReadyRead(-1);  // attend que le paquet soit pret a etre lut
+   yLecture=soc.waitForReadyRead(timeout);  // attend que le paquet soit pret a etre lut
 
    QTextStream(stdout) << "it's ok" << endl;
 

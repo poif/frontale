@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <string>
 #include <QtNetwork>
+#include "rsacrypt.h"
 
 #include "network_interface.h"
 #include "reception.h"
@@ -24,6 +25,18 @@ int main(int argc, char *argv[])
 
 	bdd_tcp bdd;
 	bdd.connection_tcp("127.0.0.1",2211);
+
+    rsaCrypt rsabdd = new rsaCrypt(2048);
+    rsabdd.keyGen();
+
+    do{
+    bdd.emission(rsabdd.sendKeyPub(0));
+    bdd.attendLecture(30000);
+
+    }while(!bdd.getYLecture());
+
+    rsabdd.recupAesKey(bdd.getMsg(), 0);
+
 
 	reception res(&ts_s, &bdd);
 
