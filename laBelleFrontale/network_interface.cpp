@@ -993,6 +993,18 @@ string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
 }
 
 void network_interface::send_look(string& affectation, string& token){
+
+	///////////////////////////////////////
+	// Generate Parameters
+	AutoSeededRandomPool rng;
+	InvertibleRSAFunction params;
+	params.GenerateRandomWithKeySize(rng, 1024);
+
+	///////////////////////////////////////
+	// Create Keys
+	privateKey = RSA::PrivateKey(params);
+	publicKey = RSA::PublicKey(params);
+
 	engine_event e;
 	//boost::asio::buffer network_buffer;
 	ostringstream archive_stream;
@@ -1016,6 +1028,19 @@ void network_interface::send_look(string& affectation, string& token){
 }
 
 void network_interface::send_exist(string& affectation, string& token){
+
+
+	///////////////////////////////////////
+	// Generate Parameters
+	AutoSeededRandomPool rng;
+	InvertibleRSAFunction params;
+	params.GenerateRandomWithKeySize(rng, 1024);
+
+	///////////////////////////////////////
+	// Create Keys
+	privateKey = RSA::PrivateKey(params);
+	publicKey = RSA::PublicKey(params);
+
 	engine_event e;
 	//boost::asio::buffer network_buffer;
 	e.type = engine_event::EXIST;
@@ -1037,6 +1062,18 @@ void network_interface::send_exist(string& affectation, string& token){
 }
 
 void network_interface::send_lookrec(string& dataType, string& affectation, string& token){
+
+	///////////////////////////////////////
+	// Generate Parameters
+	AutoSeededRandomPool rng;
+	InvertibleRSAFunction params;
+	params.GenerateRandomWithKeySize(rng, 1024);
+
+	///////////////////////////////////////
+	// Create Keys
+	privateKey = RSA::PrivateKey(params);
+	publicKey = RSA::PublicKey(params);
+	
 	engine_event e;
 
 	e.type = engine_event::LOOKREC;
