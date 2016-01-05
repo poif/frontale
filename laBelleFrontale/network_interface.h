@@ -21,6 +21,7 @@
 #include "bdd_tcp.h"
 #include "Tslot.h"
 #include "reception.h"
+#include "rsacrypt.h"
 
 #define BUFFER_SIZE 2048
 
@@ -31,7 +32,7 @@ class reception;
 
 class network_interface{
 public:
-	network_interface(bdd_tcp *outbdd, Tslot *ourts, Tslot * ourts_s, reception * outres);
+	network_interface(bdd_tcp *outbdd, rsaCrypt * outrsabdd,  Tslot *ourts, Tslot * ourts_s, reception * outres);
 	~network_interface();
 
 	void spawn();
@@ -61,10 +62,10 @@ public:
 	void send_pull(std::string& reference, std::string& groupeClient, std::string& encKey, std::string& token);
 
 	std::string encrypto_rsa(std::string& plain);
-	std::string encrypto_rsa(std::string& plain, RSA::PublicKey pubRemote);
+	std::string encrypto_rsa(std::string& plain, CryptoPP::RSA::PublicKey pubRemote);
 	std::string decrypto_rsa(std::string& cipher);
 	std::string Pub_toB64string();
-	std::string Pub_toB64string(RSA::PublicKey publicRemoteKey);
+	std::string Pub_toB64string(CryptoPP::RSA::PublicKey publicRemoteKey);
 
 	std::string encrypto_aes(SecByteBlock key, byte* iv, std::string& plain);
 	std::string decrypto_aes(SecByteBlock key, byte* iv, std::string& cipher);
@@ -88,7 +89,7 @@ private:
 	std::queue<engine_event> received_events;
 	void process_received_events_queue();
 
-	std::string treat_resource(std::string& request, std::string& token);
+	std::string treat_resource(std::string& request, std::string& token, int type=0, std::string requetebdd="");
 	void process_received_events(engine_event&);
 
 	//void get_config_data();
@@ -102,13 +103,14 @@ private:
 	// buffer to receive data
 	boost::array<char, BUFFER_SIZE> network_buffer;
 
-	RSA::PrivateKey privateKey;
-	RSA::PublicKey publicKey;
+	CryptoPP::RSA::PrivateKey privateKey;
+	CryptoPP::RSA::PublicKey publicKey;
 
 	bdd_tcp * bdd;
 	Tslot * ts;
 	Tslot * ts_s;
 	reception * res;
+	rsaCrypt * rsabdd;
 	
 	int type;
 	bool running;

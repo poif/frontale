@@ -26,13 +26,14 @@
 #include "traitement.h"
 #include "message.h"
 
+
 using namespace std;
 using namespace CryptoPP;
 
 /**
  * constructeur
  */
-network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres) {
+network_interface::network_interface(bdd_tcp * outbdd, rsaCrypt * outrsabdd, Tslot * ourts, Tslot * ourts_s , reception * outres): bdd(outbdd),rsabdd(outrsabdd), ts(ourts), ts_s(ourts_s), res(outres) {
 	running = true;
 	host_rem = "127.0.0.1";
     	port_rem = 8082;
@@ -48,8 +49,8 @@ network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ou
 
 	///////////////////////////////////////
 	// Create Keys
-	privateKey = RSA::PrivateKey(params);
-	publicKey = RSA::PublicKey(params);
+	privateKey = CryptoPP::RSA::PrivateKey(params);
+	publicKey = CryptoPP::RSA::PublicKey(params);
 
 	// With the current version of Crypto++, MessageEnd() needs to be called
 	// explicitly because Base64Encoder doesn't flush its buffer on destruction.
@@ -154,7 +155,7 @@ string network_interface::encrypto_rsa(string& plain){
 
 }
 
-string network_interface::encrypto_rsa(string& plain, RSA::PublicKey pubRemote){
+string network_interface::encrypto_rsa(string& plain, CryptoPP::RSA::PublicKey pubRemote){
 
 	AutoSeededRandomPool rng;
 	string cipher;
@@ -477,7 +478,7 @@ void network_interface::process_received_events_queue(){
 	}	
 }
 
-string network_interface::treat_resource(string& request, string& token){
+string network_interface::treat_resource(string& request, string& token, int action, string requetebdd){
 
 	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
 
@@ -492,6 +493,7 @@ string network_interface::treat_resource(string& request, string& token){
 
 	//string toto = msg2.getChiffre().toStdString();
 
+	/* --- On interroge le client --- */
 	clientFront cli;
 
 	cli.socBind();
@@ -503,6 +505,7 @@ string network_interface::treat_resource(string& request, string& token){
 	int ms = rand() % 200 + 2000;
 
 	a_traiter = ts_s->startTimer(token,ms);
+
 
 	if (!a_traiter->empty())
 	{
@@ -520,6 +523,27 @@ string network_interface::treat_resource(string& request, string& token){
 
 		}
 	}
+	/* ------------------------------------- */
+
+	if(type > 2){
+
+		QString versBdd = QString("%1").arg(requetebdd.c_str());
+
+		QString versBddcrypt = rsabdd->chiffrement(versBdd);
+
+	            bdd->emission(versBddcrypt);
+	                
+	            bdd->attendLecture();
+
+	            QString rep = rsabdd->dechiffrement(bdd->getMsg());
+
+	            string clair = rep.toStdString();
+
+	            if(!clair.empty())
+	            	a_traiter_clair.push_back(clair);
+
+	}
+
 
 	string repFormat = traitement_rep_client(a_traiter_clair);
 
@@ -573,7 +597,7 @@ void network_interface::process_received_events(engine_event& e){
 				); // StringSource
 				StringSource ss2(pubRemote, true /*pumpAll*/);
 
-				RSA::PublicKey publicRemoteKey;
+				CryptoPP::RSA::PublicKey publicRemoteKey;
 				publicRemoteKey.Load(ss2);
 				AutoSeededRandomPool prng;
 
@@ -641,7 +665,7 @@ void network_interface::process_received_events(engine_event& e){
 			        ); // StringSource
 			        StringSource ss2(pubRemote, true /*pumpAll*/);
 
-			        RSA::PublicKey publicRemoteKey;
+			        CryptoPP::RSA::PublicKey publicRemoteKey;
 			        publicRemoteKey.Load(ss2);
 			        AutoSeededRandomPool prng;
 
@@ -682,6 +706,7 @@ void network_interface::process_received_events(engine_event& e){
 			vector<string> groups;
 
 			string reqFormat;
+			string reqFormatBdd;
 			string pubStringRemote = e.s_data["PUB"];
 			string dataType = e.s_data["TYPE"];
 			string affectationReq = e.s_data["AFFECTATION"];
@@ -689,8 +714,9 @@ void network_interface::process_received_events(engine_event& e){
 
 			groups.push_back("none");
 			reqFormat = traitement_req_client(token,"3", "none", affectationReq, groups,dataType,"none", "none");
+			reqFormatBdd = traitement_req_bdd(token,"300", "none", affectationReq, groups,dataType,"none", "none");
 
-			string repFormat = treat_resource(reqFormat, token);
+			string repFormat = treat_resource(reqFormat, token, 3, reqFormatBdd);
 
 			if (!repFormat.empty() || repFormat != "")
 			{
@@ -714,7 +740,7 @@ void network_interface::process_received_events(engine_event& e){
 				); // StringSource
 				StringSource ss2(pubRemote, true /*pumpAll*/);
 
-				RSA::PublicKey publicRemoteKey;
+				CryptoPP::RSA::PublicKey publicRemoteKey;
 				publicRemoteKey.Load(ss2);
 
 			           AutoSeededRandomPool prng;
@@ -851,7 +877,7 @@ void network_interface::process_received_events(engine_event& e){
 							); // StringSource
 							StringSource ss2(pubRemote, true /*pumpAll*/);
 
-							RSA::PublicKey publicKeyRemote;
+							CryptoPP::RSA::PublicKey publicKeyRemote;
 							publicKeyRemote.Load(ss2);
 
 							repShowrec += "*" + Pub_toB64string(publicKeyRemote);
@@ -916,9 +942,10 @@ void network_interface::process_received_events(engine_event& e){
 
 					/*Traitement de la requete */
 					
-					reqFormat = traitement_req_client(token,"3", "none", "none", groupeClient,"none",reference, "none");
+					reqFormat = traitement_req_client(token,"4", "none", "none", groupeClient,"none",reference, "none");
+					reqFormatBdd = traitement_req_bdd(token,"301", "none", "none", groupeClient,"none",reference, "none");
 
-					string document = treat_resource(reqFormat, token);			
+					string document = treat_resource(reqFormat, token, 4, reqFormatBdd);			
 
 					if (!document.empty() || document != "")
 					{
@@ -975,7 +1002,7 @@ string network_interface::Pub_toB64string(){
 
 }
 
-string network_interface::Pub_toB64string(RSA::PublicKey publicRemoteKey){
+string network_interface::Pub_toB64string(CryptoPP::RSA::PublicKey publicRemoteKey){
 
 	string spki, encoded;
 
@@ -1002,8 +1029,8 @@ void network_interface::send_look(string& affectation, string& token){
 
 	///////////////////////////////////////
 	// Create Keys
-	privateKey = RSA::PrivateKey(params);
-	publicKey = RSA::PublicKey(params);
+	privateKey = CryptoPP::RSA::PrivateKey(params);
+	publicKey = CryptoPP::RSA::PublicKey(params);
 
 	engine_event e;
 	//boost::asio::buffer network_buffer;
@@ -1038,8 +1065,8 @@ void network_interface::send_exist(string& affectation, string& token){
 
 	///////////////////////////////////////
 	// Create Keys
-	privateKey = RSA::PrivateKey(params);
-	publicKey = RSA::PublicKey(params);
+	privateKey = CryptoPP::RSA::PrivateKey(params);
+	publicKey = CryptoPP::RSA::PublicKey(params);
 
 	engine_event e;
 	//boost::asio::buffer network_buffer;
@@ -1071,9 +1098,9 @@ void network_interface::send_lookrec(string& dataType, string& affectation, stri
 
 	///////////////////////////////////////
 	// Create Keys
-	privateKey = RSA::PrivateKey(params);
-	publicKey = RSA::PublicKey(params);
-	
+	privateKey = CryptoPP::RSA::PrivateKey(params);
+	publicKey = CryptoPP::RSA::PublicKey(params);
+
 	engine_event e;
 
 	e.type = engine_event::LOOKREC;
@@ -1118,7 +1145,7 @@ void network_interface::send_pull(string& reference, string& groupeClient, strin
 	); // StringSource
 	StringSource ss2(pubRemote, true /*pumpAll*/);
 
-	RSA::PublicKey publicKeyRemote;
+	CryptoPP::RSA::PublicKey publicKeyRemote;
 	publicKeyRemote.Load(ss2);
 
 	AutoSeededRandomPool prng;
