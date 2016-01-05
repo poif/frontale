@@ -11,9 +11,6 @@
 #include <iostream>
 #include "traitement.h"
 
-#define CLIENT_MAX_CHAMP 20 	//nombre de champ max qu'un client peut envoyer dans une réponse de récupération de références
-#define BDD_MAX_CHAMP    100    //pareil pour la bdd
-
 using namespace std;
 
 string hashString(const char * to_hash){
@@ -538,13 +535,15 @@ string traitement_rep_client(list<string>& a_traiter){
 
           else {
              istringstream ssToken(token);
-             if (!getline(ssToken, reference, ';') || !getline(ssToken, nom, ';') ||
-                reference == "EOF" || reference == "none" || nom == "EOF" || nom == "none"){
+             if ( !getline(ssToken,statut,';') || !getline(ssToken, reference, ';') || !getline(ssToken, nom, ';') ||
+                reference == "EOF" || reference == "none" || nom == "EOF" || nom == "none" || 
+                statut == "none"||statut == "EOF"){
                 stringInTheVector = "ERROR*";
                 continue;
              }
              else {
-                char *hash = (char*)nom.c_str();
+                string to_hash = nom + statut;
+                char *hash = (char*)to_hash.c_str();
                 stringInTheVector += reference + "*" + hashString(hash) + "*";
              }
           }
@@ -577,7 +576,7 @@ string traitement_rep_client(list<string>& a_traiter){
              break;
           }
 
-          else if (token =="EOF" || testEOF == 1){
+          else if (token.substr(0,3) =="EOF" || testEOF == 1){
     /*ON NE PEUT RENTRER QUUNE FOIS SAUF SI LA REPONSE EST INVALIDE*/
              if (testEOF == 0)
                 testEOF=1;
@@ -703,7 +702,7 @@ string traitement_req_bdd(string numero,
   else
     to_send += user + "*";
 
-  to_send += "EOF";
+  to_send += "EOF*:";
 
   return to_send;
 
