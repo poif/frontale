@@ -284,7 +284,13 @@ void res_receive ()
             else
             {
                 // Debug
-                printf ( "Trame recu -> %s de la part de %s \n\n", trame, inet_ntoa ( addr_client.sin_addr ) ) ;
+                //printf ( "Trame recu -> %s de la part de %s \n\n", trame, inet_ntoa ( addr_client.sin_addr ) ) ;
+
+                int m ;
+                printf ( "Trame recu -> " ) ;
+                for ( m = 0; m < TAILLE_MAX_TRAME; m++ )
+                    printf ( "%c", trame[m] ) ;
+                printf ( "\n\n" ) ;
 
                 // On envoie le traitement dans un thread
                 stop = FALSE ;
@@ -296,7 +302,7 @@ void res_receive ()
                         {
                             // On prépare arg
                             memset ( &tab_req[i][0], '\0', TAILLE_MAX_TRAME ) ;
-                            sprintf ( tab_req[i], "%s", trame ) ;
+                            memcpy ( &tab_req[i][0], trame, TAILLE_MAX_TRAME ) ;
 
                             // On thread
                             if ( ( return_value = pthread_create ( &thread_traitement[i], NULL, fct_thread_do_req, (void*) tab_req[i] ) ) == 0 )
@@ -370,7 +376,7 @@ void* fct_thread_do_req ( void* p_data )
 
         // On transmet la trame pour le traitement
         if ( bdd_parser ( trame ) == ERRNO )
-           fprintf ( stderr, " ID trame non traité : %s \n", trame ) ;
+           fprintf ( stderr, "Trame non traité, len = %s \n", trame ) ;
 
         // On quitte
         terminer = TRUE ;
@@ -384,11 +390,11 @@ void* fct_thread_do_req ( void* p_data )
 }
 
 //----------------------------------------------------------
-// void res_send ( char *trame )
+// void res_send ( char *trame, int len )
 //----------------------------------------------------------
 // Permet d'envoyer des trames sur le réseau vers le client
 
-void res_send ( char *trame )
+void res_send ( char *trame, int len )
 {
     // Initialisation
     int nc ;
@@ -400,7 +406,7 @@ void res_send ( char *trame )
     errno = 0 ;
 
     // envoi de trames (bloquant)
-    nc = send ( socket_client, trame, strlen ( trame ), 0 ) ;
+    nc = send ( socket_client, trame, len, 0 ) ;
     if ( errno != 0 )   // Traitement errno
     {
         perror ( "Erreur_res_send : send " ) ;
@@ -411,5 +417,11 @@ void res_send ( char *trame )
         puts ( "NC = -1 !!!!!!!" ) ;
 
     // Debug
-    printf ( "Trame envoyé -> %s vers %s \n\n", trame, inet_ntoa ( addr_client.sin_addr ) ) ;
+    //printf ( "Trame envoyé -> %s vers %s \n\n", trame, inet_ntoa ( addr_client.sin_addr ) ) ;
+
+    int i ;
+    printf ( "Trame envoyé -> " ) ;
+    for ( i = 0; i < len; i++ )
+        printf ( "%c", trame[i] ) ;
+    printf ( "\n\n" ) ;
 }

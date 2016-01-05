@@ -392,7 +392,8 @@ void bdd_send_msg ( int id, int flag, char* texte, int chiffre )
     memset ( trame, '\0', TAILLE_MAX_TRAME ) ;
 
     // On créé le message
-    sprintf ( trame, "%d*%d*%s*EOF", id, flag, texte ) ;
+    sprintf ( trame, "%d*%d*%s*EOF*", id, flag, texte ) ;
+    int ilen = strlen ( trame ) ;
 
     // Chiffré ou non ?
     if ( chiffre == TRUE )
@@ -401,7 +402,7 @@ void bdd_send_msg ( int id, int flag, char* texte, int chiffre )
         int olen = strlen ( trame ) * 2  ;
         char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
         memset ( out, '\0', olen ) ;
-        if ( AES_chiffrement ( trame, out, olen, CHIFFREMENT ) != TRUE )
+        if ( AES_chiffrement ( trame, out, olen, &ilen, CHIFFREMENT ) != TRUE )
         {
             perror ( "Erreur_bdd_send_msg : AES_chiffrement " ) ;
             free ( out ) ;
@@ -409,8 +410,33 @@ void bdd_send_msg ( int id, int flag, char* texte, int chiffre )
         }
         else
         {
-            // On envoi le message
-            res_send ( out ) ;
+            // On calcul la nouvelle taille
+            int taille = ilen ;
+            if ( ilen < 10 )
+                taille += 3 ;
+            else if ( ilen < 100 )
+                taille += 4 ;
+            else if ( ilen < 1000 )
+                taille += 5 ;
+            else
+                taille += 6 ;
+
+            // Finalisation de la réponse
+            free ( trame ) ;
+            trame = (char*) malloc ( taille * sizeof ( char ) ) ;
+            memset ( trame, '\0', taille ) ;
+            sprintf ( trame, "%d*", ilen ) ;
+            if ( ilen < 10 )
+                memcpy ( &trame[2], out, ilen ) ;
+            else if ( ilen < 100 )
+                memcpy ( &trame[3], out, ilen ) ;
+            else if ( ilen < 1000 )
+                memcpy ( &trame[4], out, ilen ) ;
+            else
+                memcpy ( &trame[5], out, ilen ) ;
+
+            // On envoie la réponse
+            res_send ( trame, taille ) ;
 
             // Free
             free ( trame ) ;
@@ -420,9 +446,72 @@ void bdd_send_msg ( int id, int flag, char* texte, int chiffre )
     else if ( chiffre == FALSE )
     {
         // On envoi le message
-        res_send ( trame ) ;
+        res_send ( trame, ilen ) ;
 
         // Free
         free ( trame ) ;
     }
+}
+
+
+//----------------------------------------------------------
+// int bdd_send_reponse ( char *texte, int id, int code )
+//----------------------------------------------------------
+// Permet d'envoyer une réponse à la frontale
+
+int bdd_send_reponse ( char *texte, int id, int code )
+{
+    // On prépare la réponse
+    int taille = strlen ( texte ) + 20 ;
+    char* reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
+    memset ( reponse, '\0', taille ) ;
+    sprintf ( reponse, "%d*%d*%s*EOF*", id, code, texte ) ;
+
+    // On chiffre la réponse
+    int ilen = strlen ( reponse ) ;
+    int olen = taille * 2  ;
+    char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
+    memset ( out, '\0', olen ) ;
+    if ( AES_chiffrement ( reponse, out, olen, &ilen, CHIFFREMENT ) != TRUE )
+    {
+        perror ( "Erreur_bdd_send_reponse : AES_chiffrement " ) ;
+        free ( reponse ) ;
+        free ( out ) ;
+        return ERRNO ;
+    }
+
+    // On calcul la nouvelle taille
+    taille = ilen ;
+    if ( ilen < 10 )
+        taille += 3 ;
+    else if ( ilen < 100 )
+        taille += 4 ;
+    else if ( ilen < 1000 )
+        taille += 5 ;
+    else
+        taille += 6 ;
+
+    // Finalisation de la réponse
+    free ( reponse ) ;
+    reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
+    memset ( reponse, '\0', taille ) ;
+    sprintf ( reponse, "%d*", ilen ) ;
+    if ( ilen < 10 )
+        memcpy ( &reponse[2], out, ilen ) ;
+    else if ( ilen < 100 )
+        memcpy ( &reponse[3], out, ilen ) ;
+    else if ( ilen < 1000 )
+        memcpy ( &reponse[4], out, ilen ) ;
+    else
+        memcpy ( &reponse[5], out, ilen ) ;
+
+    // On envoie la réponse
+    res_send ( reponse, taille ) ;
+
+    // Free
+    free ( reponse ) ;
+    free ( out ) ;
+
+    // On indique que tout s'est bien déroulé
+    return TRUE ;
 }

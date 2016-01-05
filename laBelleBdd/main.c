@@ -22,6 +22,10 @@ int main ( int argc, char **argv )
     // Initialisation de rand()
     srand ( time ( NULL ) ) ;
 
+    // Initialisation librairie OpenSSL
+    OpenSSL_add_all_algorithms () ;
+    OPENSSL_config ( NULL ) ;
+
     // Connexion à la BDD
     mysql_bdd = bdd_start_connection () ;   // On se connecte à la BDD
 
@@ -73,27 +77,34 @@ int main ( int argc, char **argv )
                     res_close() ;                           // On se déconnecte du réseau
                     RSA_free ( bdd_key ) ;                  // On free nos clés RSA & AES
                     free ( exg_key ) ;
+                    EVP_cleanup () ;                        // Finalisation OpenSSL
                     printf ( "\nFermeture done \n" ) ;
                     return EXIT_SUCCESS ;
                 }
                 else
                 {
+                    EVP_cleanup () ;    // Finalisation OpenSSL
                     perror ( "Erreur BDD : impossible de vider la BDD => Pensez à exécuter bdd.sql " ) ;
                     return EXIT_FAILURE ;
                 }
             }
             else
             {
+                EVP_cleanup () ;    // Finalisation OpenSSL
                 perror ( "Erreur BDD : impossible de générer clé RSA " ) ;
                 return EXIT_FAILURE ;
             }
         }
         else
         {
+            EVP_cleanup () ;    // Finalisation OpenSSL
             perror ( "Erreur BDD : impossible de générer clé AES " ) ;
             return EXIT_FAILURE ;
         }
     }
     else
+    {
+        EVP_cleanup () ;    // Finalisation OpenSSL
         return EXIT_FAILURE ;
+    }
 }

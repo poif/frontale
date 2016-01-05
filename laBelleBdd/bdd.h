@@ -43,6 +43,7 @@
 #define APOSTROPHE              34
 #define ZERO_TERMINAL           0
 #define BACK_SLASH              92
+#define ETOILE                  42
 
 
 //----------------------------------------------------------
@@ -75,6 +76,7 @@ int ref_split ( char* reference_input, Ref* reference ) ;
 int ref_cmp ( Ref* reference, Ref* modele ) ;
 int bdd_verification_partage ( char* politiques, char* atester ) ;
 void bdd_send_msg ( int id, int flag, char* texte, int chiffre ) ;
+int bdd_send_reponse ( char *texte, int id, int code ) ;
 
 
 //----------------------------------------------------------

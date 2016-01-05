@@ -265,14 +265,15 @@ int AES_generate_key ()
     exg_key = (AES_duo*) malloc ( sizeof ( AES_duo ) ) ;
 
     // On initialise notre structure
-    memset ( exg_key->ckey, '\0', AES_KEY_LENGTH ) ;
-    memset ( exg_key->ivec, '\0', AES_KEY_LENGTH ) ;
+    memset ( exg_key->ckey, '\0', AES_CKEY_LENGTH ) ;
+    memset ( exg_key->ivec, '\0', AES_IVEC_LENGTH ) ;
 
     // On génère les clés et IV avec des caractères aléatoires
-    for ( i = 0; i < AES_KEY_LENGTH - 1; i++ )
+    for ( i = 0; i < AES_CKEY_LENGTH - 1; i++ )
     {
         exg_key->ckey[i] = rand() % ( 122 - 97 ) + 97 ;
-        exg_key->ivec[i] = rand() % ( 122 - 97 ) + 97 ;
+        if ( i <= AES_IVEC_LENGTH - 1 )
+            exg_key->ivec[i] = rand() % ( 122 - 97 ) + 97 ;
     }
 
     // On indique que tout s'est bien déroulé
@@ -281,11 +282,11 @@ int AES_generate_key ()
 
 
 //----------------------------------------------------------
-// int AES_chiffrement ( char* input, char* output, int len, int mode )
+// int AES_chiffrement ( char* input, char* output, int len, int* ilen, int mode )
 //----------------------------------------------------------
 // Permet de chiffrer / déchiffrer en utilisant une clé / iv de type AES_256
 
-int AES_chiffrement ( char* input, char* output, int len, int mode )
+int AES_chiffrement ( char* input, char* output, int len, int* ilen, int mode )
 {
     // Déclaration variables
     EVP_CIPHER_CTX ctx ;
@@ -301,10 +302,10 @@ int AES_chiffrement ( char* input, char* output, int len, int mode )
     // Paramétrage du contexte
     if ( EVP_CipherInit_ex ( &ctx, EVP_aes_256_cbc(), NULL, exg_key->ckey, exg_key->ivec, mode ) == 0 )
     {
-        EVP_CIPHER_CTX_cleanup ( &ctx ) ;
         free ( out ) ;
         perror ( "Erreur_AES_chiffrement : EVP_CipherInit_ex() " ) ;
         fprintf ( stderr, "Code erreur OpenSSL : %lu \n ", ERR_get_error () ) ;
+        EVP_CIPHER_CTX_cleanup ( &ctx ) ;
         return ERRNO ;
     }
 
@@ -313,27 +314,28 @@ int AES_chiffrement ( char* input, char* output, int len, int mode )
         EVP_CIPHER_CTX_set_padding ( &ctx, 0 ) ;
 
     // On chiffre / déchiffre en utilisant la clé passée en paramètre
-    if ( EVP_CipherUpdate ( &ctx, (unsigned char*) out, &olen1, (unsigned char*) input, strlen ( input ) ) == 0 )
+    if ( EVP_CipherUpdate ( &ctx, (unsigned char*) out, &olen1, (unsigned char*) input, *ilen ) == 0 )
     {
-        EVP_CIPHER_CTX_cleanup ( &ctx ) ;
         free ( out ) ;
         perror ( "Erreur_AES_chiffrement : EVP_CipherUpdate() " ) ;
         fprintf ( stderr, "Code erreur OpenSSL : %lu \n ", ERR_get_error () ) ;
+        EVP_CIPHER_CTX_cleanup ( &ctx ) ;
         return ERRNO ;
     }
 
     // On finalise
     if ( EVP_CipherFinal_ex ( &ctx, (unsigned char*) out + olen1, &olen2) == 0 )
     {
-        EVP_CIPHER_CTX_cleanup ( &ctx ) ;
         free ( out ) ;
         perror ( "Erreur_AES_chiffrement : EVP_CipherFinal_ex() " ) ;
         fprintf ( stderr, "Code erreur OpenSSL : %lu \n ", ERR_get_error () ) ;
+        EVP_CIPHER_CTX_cleanup ( &ctx ) ;
         return ERRNO ;
     }
 
     // On écrit sur la sortie
-    strncpy ( output, &out[0], olen1 + olen2 ) ;
+    memcpy ( &output[0], out, olen1 + olen2 ) ;
+    *ilen = olen1 + olen2 ;
 
     // On nettoie
     free ( out ) ;
@@ -361,7 +363,7 @@ int AES_envoi_key_aes ( int id )
     memset ( chiffre, '\0', RSA_size ( frt_key ) ) ;
 
     // On prépare la clé AES
-    int taille = AES_KEY_LENGTH * 2 + 2 ;
+    int taille = AES_CKEY_LENGTH + AES_IVEC_LENGTH + 2 ;
     char* cle_aes = (char*) malloc ( taille * sizeof ( char ) ) ;
     memset ( cle_aes, '\0', taille) ;
     sprintf ( cle_aes, "%s;%s", exg_key->ckey, exg_key->ivec ) ;
@@ -391,7 +393,7 @@ int AES_envoi_key_aes ( int id )
         // On vérifie la non présence du caractère ", \ et \0
         for ( i = 0; i < RSA_size ( frt_key ); i ++ )
         {
-            if ( ( (int) chiffre[i] == APOSTROPHE ) || ( (int) chiffre[i] == BACK_SLASH ) || ( (int) chiffre[i] == ZERO_TERMINAL ) )
+            if ( ( (int) chiffre[i] == APOSTROPHE ) || ( (int) chiffre[i] == BACK_SLASH ) || ( (int) chiffre[i] == ZERO_TERMINAL ) || ( (int) chiffre[i] == ETOILE ) )
                 good = FALSE ;
         }
     }
@@ -400,8 +402,8 @@ int AES_envoi_key_aes ( int id )
     int longueur = strlen ( chiffre ) + 20 ;
     char* reponse = (char*) malloc ( longueur * sizeof ( char ) ) ;
     memset ( reponse, '\0', longueur ) ;
-    sprintf ( reponse, "%d*%d*%s*EOF", id, INIT, chiffre ) ;
-    res_send ( reponse ) ;
+    sprintf ( reponse, "%d*%d*%s*EOF*", id, INIT, chiffre ) ;
+    res_send ( reponse, strlen ( reponse ) ) ;
 
     // Free
     free ( chiffre ) ;

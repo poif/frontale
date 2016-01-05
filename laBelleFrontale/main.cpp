@@ -28,13 +28,14 @@ int main(int argc, char *argv[])
 
     rsaCrypt rsabdd = rsaCrypt(2048);
     rsabdd.keyGen();
-
+    
     do{
-    bdd.emission(rsabdd.sendKeyPub(0));
-    bdd.attendLecture(30000);
+    bdd.emission(rsabdd.sendKeyPub(0), 1);
+
+    bdd.attendLecture(30000, 1);
 
     }while(!bdd.getYLecture());
-
+    
     rsabdd.recupAesKey(bdd.getMsg(), 0);
 
     bdd.setKeyIv(rsabdd.getAesKey(),rsabdd.getAesIv());

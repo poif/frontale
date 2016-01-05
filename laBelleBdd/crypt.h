@@ -8,9 +8,9 @@
 #include "default.h"
 #include <openssl/sha.h>
 #include <openssl/rsa.h>
+#include <openssl/conf.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
-#include <openssl/aes.h>
 #include <openssl/evp.h>
 
 
@@ -21,7 +21,8 @@
 #define DECHIFFREMENT       0
 #define KEY_LENGTH          2048
 #define PADDING_FLEN        11
-#define AES_KEY_LENGTH      31
+#define AES_CKEY_LENGTH     33
+#define AES_IVEC_LENGTH     17
 
 
 //----------------------------------------------------------
@@ -29,8 +30,8 @@
 //----------------------------------------------------------
 typedef struct AES_duo
 {
-    unsigned char ckey[AES_KEY_LENGTH] ;
-    unsigned char ivec[AES_KEY_LENGTH] ;
+    unsigned char ckey[AES_CKEY_LENGTH] ;
+    unsigned char ivec[AES_IVEC_LENGTH] ;
 } AES_duo ;
 
 
@@ -52,7 +53,7 @@ int RSA_chiffrement ( unsigned char* input, unsigned char* output, int mode ) ;
 int RSA_chiffrement_aes ( unsigned char* input, unsigned char* output ) ;
 int RSA_recup_key_pub ( unsigned char* key ) ;
 int AES_generate_key () ;
-int AES_chiffrement ( char* input, char* output, int len, int mode ) ;
+int AES_chiffrement ( char* input, char* output, int len, int* ilen, int mode ) ;
 int AES_envoi_key_aes ( int id ) ;
 
 

@@ -19,35 +19,50 @@
 
 int bdd_parser ( char *trame )
 {
-    // Ini
-    char* clair = NULL ;
-    int do_free = FALSE ;
-
-    // Déchiffrement !!
-    if ( traitement == TRUE )
-    {
-        // On déchiffre le tuple
-        do_free = TRUE ;
-        int olen = strlen ( trame ) * 2  ;
-        clair = (char*) malloc ( olen * sizeof ( char ) ) ;
-        memset ( clair, '\0', olen ) ;
-        if ( AES_chiffrement ( trame, clair, olen,  DECHIFFREMENT ) != TRUE )
-        {
-            perror ( "Erreur_bdd_parser : AES_dechiffrement " ) ;
-            free ( clair ) ;
-            bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
-            return ERRNO ;
-        }
-    }
-    else
-        clair = trame ;
-
     // Déclaration variable
     int id = 0 ;                // Premier entire de la trame qui l'identifie de manière unique
     int flag = 0 ;              // Premier entier de la trame qui détermine ce qu'on doit faire
     char* morceau = NULL ;      // Variable contenant chaque morceau de la trame (strtok_r)
     char* safe_trame ;          // Permet d'appeler strtok_r sur le bon contenu.
     int i ;
+    char* clair = NULL ;
+    int do_free = FALSE ;
+
+    // Déchiffrement !!
+    if ( traitement == TRUE )
+    {
+        // Ini
+        int ilen = 0 ;
+        char* chiffre = NULL ;
+
+        // On sépare les informations
+        // On découpe la trame en morceaux repérés via un "*"
+        if ( ( morceau = strtok_r ( trame, "*", &safe_trame ) ) == NULL )
+        {
+            perror ( "Erreur_bdd_parser : information manquante " ) ;
+            bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
+            return ERRNO ;
+        }
+        ilen = atoi ( morceau ) ;
+        chiffre = safe_trame ;
+
+        // On déchiffre le tuple
+        do_free = TRUE ;
+        int olen = ilen * 2  ;
+        clair = (char*) malloc ( olen * sizeof ( char ) ) ;
+        memset ( clair, '\0', olen ) ;
+        if ( AES_chiffrement ( chiffre, clair, olen, &ilen, DECHIFFREMENT ) != TRUE )
+        {
+            perror ( "Erreur_bdd_parser : AES_dechiffrement " ) ;
+            free ( clair ) ;
+            bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
+            return ERRNO ;
+        }
+
+        printf ( "Dechiffre -> %s \n\n", clair ) ;
+    }
+    else
+        clair = trame ;
 
     // Pré-traitement
     for ( i = 0; i < 2; i++ )
@@ -253,7 +268,7 @@ int bdd_do_init ( int id, char *safe_trame )
     }
 
     // On vérifie que l'information est présente
-    if ( strcmp ( key_pub, "EOF") == 0 )
+    if ( strcmp ( key_pub, "EOF" ) == 0 )
     {
         perror ( "Erreur_bdd_do_init : information manquante II " ) ;
         bdd_send_msg ( id, INIT, "ERROR", FALSE ) ;
@@ -318,7 +333,7 @@ int bdd_do_insert ( int id, char *safe_trame )
         }
 
         // On vérifie que l'information est présente
-        if ( strcmp ( morceau, "EOF") == 0 )
+        if ( strcmp ( morceau, "EOF" ) == 0 )
         {
             perror ( "Erreur_bdd_do_insert : information manquante II " ) ;
             if ( politiques_free == TRUE )
@@ -425,7 +440,6 @@ int bdd_do_insert ( int id, char *safe_trame )
     // Déclaration variables
     char* reference_str = NULL ;
     char* valeur_finale = NULL ;
-    char* reponse = NULL ;
     char* temporaire = NULL ;
     int first = TRUE ;
     unsigned long taille = 0 ;
@@ -502,23 +516,10 @@ int bdd_do_insert ( int id, char *safe_trame )
         }
     } while ( morceau != NULL ) ;
 
-    printf ( "\n\n HEYHEYHEYHEY \n\n" ) ;
-
-    // On prépare la réponse
-    taille = strlen ( temporaire ) + 20 ;
-    reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
-    memset ( reponse, '\0', taille ) ;
-    sprintf ( reponse, "%d*%d*%s*EOF", id, INSERT, temporaire ) ;
-
-    // On chiffre la réponse
-    int olen = taille * 2  ;
-    char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
-    memset ( out, '\0', olen ) ;
-    if ( AES_chiffrement ( reponse, out, olen, CHIFFREMENT ) != TRUE )
+    // On envoie la réponse
+    if ( bdd_send_reponse ( temporaire, id, INSERT ) != TRUE )
     {
-        perror ( "Erreur_do_insert : AES_chiffrement " ) ;
-        free ( out ) ;
-        free ( reponse ) ;
+        perror ( "Erreur_do_insert : bdd_send_reponse() " ) ;
         free ( politiques ) ;
         free ( reference_str ) ;
         free ( valeur_finale ) ;
@@ -528,17 +529,12 @@ int bdd_do_insert ( int id, char *safe_trame )
         return ERRNO ;
     }
 
-    // On envoie la réponse
-    res_send ( out ) ;
-
     // Free
     free ( politiques ) ;
     free ( reference_str ) ;
     free ( valeur_finale ) ;
     free ( groupes ) ;
     free ( temporaire ) ;
-    free ( reponse ) ;
-    free ( out ) ;
 
     // On indique que tout s'est bien déroulé
     return TRUE ;
@@ -571,7 +567,7 @@ int bdd_do_delete ( int id, char *safe_trame )
         }
 
         // On vérifie que l'information est présente
-        if ( strcmp ( morceau, "EOF") == 0 )
+        if ( strcmp ( morceau, "EOF" ) == 0 )
         {
             perror ( "Erreur_bdd_do_delete : information manquante II" ) ;
             bdd_send_msg ( id, DELETE, "ERROR", TRUE ) ;
@@ -753,7 +749,7 @@ int bdd_do_select ( int id, char *safe_trame )
         }
 
         // On vérifie que l'information est présente
-        if ( strcmp ( morceau, "EOF") == 0 )
+        if ( strcmp ( morceau, "EOF" ) == 0 )
         {
             perror ( "Erreur_bdd_do_select : information manquante II" ) ;
             bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
@@ -938,35 +934,19 @@ int bdd_do_select ( int id, char *safe_trame )
     }
 
     // Si on arrive ici c'est que la poltique de partage est respectée : on retourne la valeur
-    // On prépare la réponse
-    int taille = strlen ( valeur ) + 20 ;
-    char* reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
-    memset ( reponse, '\0', taille ) ;
-    sprintf ( reponse, "%d*%d*%s*EOF", id, SELECT, valeur ) ;
-
-    // On chiffre la réponse
-    int olen = taille * 2  ;
-    char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
-    memset ( out, '\0', olen ) ;
-    if ( AES_chiffrement ( reponse, out, olen, CHIFFREMENT ) != TRUE )
+    // On envoie la réponse
+    if ( bdd_send_reponse ( valeur, id, SELECT ) != TRUE )
     {
-        perror ( "Erreur_do_select : AES_chiffrement " ) ;
-        free ( out ) ;
+        perror ( "Erreur_do_select : bdd_send_reponse() " ) ;
         free ( output ) ;
         mysql_free_result ( resultat_req ) ;
-        free ( reponse ) ;
         bdd_send_msg ( id, SELECT, "ERROR", TRUE ) ;
         return ERRNO ;
     }
 
-    // On envoie la réponse
-    res_send ( out ) ;
-
     // On free l'espace de résultat
     free ( output ) ;
     mysql_free_result ( resultat_req ) ;
-    free ( reponse ) ;
-    free ( out ) ;
 
     // On indique que tout s'est bien déroulé
     return TRUE ;
@@ -1073,7 +1053,6 @@ int bdd_search_modele ( int id, MYSQL_RES* resultat_req, Ref* modele )
     MYSQL_ROW tuple ;
     char* user = NULL ;
     char* safe_tuple = NULL ;              // Permet d'appeler strtok_r sur le bon contenu.
-    char* reponse = NULL ;
     int first = TRUE ;
     int i = 0 ;
 
@@ -1161,34 +1140,15 @@ int bdd_search_modele ( int id, MYSQL_RES* resultat_req, Ref* modele )
     // On envoie la réponse
     if ( suite != ERRNO )
     {
-        // On prépare la réponse
-        int taille = strlen ( temporaire ) + 20 ;
-        reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
-        memset ( reponse, '\0', taille ) ;
-        sprintf ( reponse, "%d*%d*%s*EOF", id, SEEK, temporaire ) ;
-
-        // On chiffre la réponse
-        int olen = taille * 2  ;
-        char* out = (char*) malloc ( olen * sizeof ( char ) ) ;
-        memset ( out, '\0', olen ) ;
-        if ( AES_chiffrement ( reponse, out, olen, CHIFFREMENT ) != TRUE )
+        if ( bdd_send_reponse ( temporaire, id, SEEK ) != TRUE )
         {
-            perror ( "Erreur_do_seek : AES_chiffrement " ) ;
-            free ( out ) ;
-            free ( reponse ) ;
+            perror ( "Erreur_do_seek : bdd_send_reponse() " ) ;
             free ( user ) ;
             free ( output ) ;
             free ( temporaire ) ;
             bdd_send_msg ( id, SEEK, "ERROR", TRUE ) ;
             return ERRNO ;
         }
-
-        // On envoie la réponse
-        res_send ( out ) ;
-
-        // Free
-        free ( reponse ) ;
-        free ( out ) ;
     }
     else
     {

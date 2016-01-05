@@ -13,8 +13,8 @@ class bdd_tcp : public QObject
 public:
     bdd_tcp();
     void connection_tcp(QString IP, int port);
-    void emission(QString texte);
-    void attendLecture(int timeout);
+    void emission(QString texte, int type=0);
+    void attendLecture(int timeout, int type=0);
     void lecture();
     QString getMsg();
     bool getYLecture();

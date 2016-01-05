@@ -19,7 +19,7 @@
 //----------------------------------------------------------
 #define PORT                2211
 #define TAILLE_MAX_TRAME    500
-#define NB_MAX_REQ          20
+#define NB_MAX_REQ          25
 
 
 //----------------------------------------------------------
@@ -44,7 +44,7 @@ void res_close () ;
 void res_receive () ;
 void* fct_thread_res_receive () ;
 void* fct_thread_do_req ( void* p_data ) ;
-void res_send ( char *trame ) ;
+void res_send ( char *trame, int len ) ;
 
 
 #endif // RES_H

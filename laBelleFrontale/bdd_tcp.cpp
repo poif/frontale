@@ -18,14 +18,16 @@ void bdd_tcp::connection_tcp(QString IP, int port){
 
 }
 
-void bdd_tcp::emission(QString texte){
-    QString msg = this->chiffrement(texte.toStdString());
+void bdd_tcp::emission(QString texte, int type){
+    
+    if(type == 0) texte = this->chiffrement(texte.toStdString());
+
     QTextStream t(&soc); //création d'un flux d'ecriture dnas la socket
     t << texte << endl; // envoie du message en ecrivant dans le flux de la socket
 
 }
 
-void bdd_tcp::attendLecture(int timeout){
+void bdd_tcp::attendLecture(int timeout, int type){
 
     QString chif;
 
@@ -37,7 +39,8 @@ void bdd_tcp::attendLecture(int timeout){
 
       chif = soc.readLine(); //lecture du flux
 
-      msg = QString(this->dechiffrement(chif).c_str());
+      if(type == 0) msg = QString(this->dechiffrement(chif).c_str());
+      else msg = chif;
 
 
 }
@@ -62,7 +65,7 @@ QString bdd_tcp::chiffrement(std::string clair){
     EVP_CIPHER_CTX ctx;
     int succ;
     int outlen, tmplen;
-
+    
     char* out = (char*) malloc ( 2048 * sizeof ( char ) ) ;
 
     EVP_CIPHER_CTX_init ( &ctx ) ;

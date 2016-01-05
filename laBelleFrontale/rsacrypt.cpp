@@ -69,7 +69,7 @@ QString rsaCrypt::dechiffrement(QString chif){
 
     succ = RSA_private_decrypt(kLen,(const unsigned char *)chif.toStdString().c_str(),clair,rsaKey,RSA_PKCS1_PADDING);
 
-    if (succ <= 0)
+    if (succ < 0)
         cout << "erreur dechiffrement rsa" << endl;
 
     return QString((const char*)clair);
