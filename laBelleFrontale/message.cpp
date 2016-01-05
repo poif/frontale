@@ -101,6 +101,7 @@ do{
     i++;
  }while(chaineTest != "CHALL" && i<nbKey);
 
+    numClient=i-1;
 
     return iss.str();
  }
@@ -152,7 +153,7 @@ int Message::genAESKey(){
 
     nbKey++;
 
-    return nbKey;
+    return nbKey-1;
 
 }
 
@@ -162,4 +163,8 @@ string Message::getAESKey(int numKey){
 
 string Message::getAESIv(int numKey){
     return tabKeyIv[numKey][1];
+}
+
+int Message::getNumClient(){
+    return numClient;
 }
