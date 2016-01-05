@@ -525,7 +525,7 @@ string network_interface::treat_resource(string& request, string& token, int act
 	}
 	/* ------------------------------------- */
 
-	if(type > 2){
+	/*if(type > 2){
 
 		QString versBdd = QString("%1").arg(requetebdd.c_str());
 
@@ -538,7 +538,7 @@ string network_interface::treat_resource(string& request, string& token, int act
 	            if(!clair.empty())
 	            	a_traiter_clair.push_back(clair);
 
-	}
+	}*/
 
 
 	string repFormat = traitement_rep_client(a_traiter_clair);
@@ -710,7 +710,7 @@ void network_interface::process_received_events(engine_event& e){
 
 			groups.push_back("none");
 			reqFormat = traitement_req_client(token,"3", "none", affectationReq, groups,dataType,"none", "none");
-			reqFormatBdd = traitement_req_bdd(token,"300", "none", affectationReq, groups,dataType,"none", "none");
+			//reqFormatBdd = traitement_req_bdd(token,"300", "none", affectationReq, groups,dataType,"none", "none");
 
 			string repFormat = treat_resource(reqFormat, token, 3, reqFormatBdd);
 
@@ -838,6 +838,7 @@ void network_interface::process_received_events(engine_event& e){
 						mustStopMutex->unlock();
 						
 					}
+					break;
 				}
 				case engine_event::ANSWER:{
 			
@@ -857,6 +858,7 @@ void network_interface::process_received_events(engine_event& e){
 						mustStopMutex->unlock();
 					
 					}
+					break;
 				}
 				case engine_event::SHOWREC:{
 
@@ -876,9 +878,9 @@ void network_interface::process_received_events(engine_event& e){
 							CryptoPP::RSA::PublicKey publicKeyRemote;
 							publicKeyRemote.Load(ss2);
 
-							repShowrec += "*" + Pub_toB64string(publicKeyRemote);
+							repShowrec += Pub_toB64string(publicKeyRemote);
 
-							cout << "RepShowRec : %s" << repShowrec << endl;
+							cout << "RepShowRec : " << repShowrec << endl;
 
 							boost::mutex * mustStopMutex = ts->getMutex(token);
 							mustStopMutex->lock();
@@ -890,6 +892,7 @@ void network_interface::process_received_events(engine_event& e){
 							
 						}
 					}
+					break;
 
 				}
 				case engine_event::PUSH:{
@@ -915,6 +918,7 @@ void network_interface::process_received_events(engine_event& e){
 						mustStopMutex->unlock();
 					
 					}
+					break;
 				}
 				case engine_event::PULL:{
 					engine_event p;
@@ -940,7 +944,7 @@ void network_interface::process_received_events(engine_event& e){
 					/*Traitement de la requete */
 					
 					reqFormat = traitement_req_client(token,"4", "none", "none", groupeClient,"none",reference, "none");
-					reqFormatBdd = traitement_req_bdd(token,"301", "none", "none", groupeClient,"none",reference, "none");
+					//reqFormatBdd = traitement_req_bdd(token,"301", "none", "none", groupeClient,"none",reference, "none");
 
 					string document = treat_resource(reqFormat, token, 4, reqFormatBdd);			
 

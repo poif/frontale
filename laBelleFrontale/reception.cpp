@@ -169,7 +169,7 @@ void reception::traitement(string messageStr){
 
             cout << "resultat : " << req.getResultat() << endl;
 
-            string repo = "R*" + req.getResultat();
+            string repo = "1*R*" + req.getResultat();
 
             string chiffrer = msg2.crypt((unsigned char*) repo.data(), repo.size());
 
