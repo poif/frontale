@@ -19,8 +19,14 @@ void bdd_tcp::connection_tcp(QString IP, int port){
 }
 
 void bdd_tcp::emission(QString texte, int type){
+
+
     
-    if(type == 0) texte = this->chiffrement(texte.toStdString());
+    if(type == 0){
+        texte +="*";
+        texte = this->chiffrement(texte.toStdString());
+        texte = QString::number(texte.length()) + texte;
+     }
 
     QTextStream t(&soc); //création d'un flux d'ecriture dnas la socket
     t << texte << endl; // envoie du message en ecrivant dans le flux de la socket
