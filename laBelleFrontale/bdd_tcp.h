@@ -16,11 +16,16 @@ public:
     void lecture();
     QString getMsg();
     bool getYLecture();
+    QString chiffrement(string clair);
+    string dechiffrement(QString chif);
+    void setKeyIv(char *key, char *iv);
 
 private:
     QTcpSocket soc;
     QString msg;
     bool yLecture;
+    char *key;
+    char *iv;
 
 };
 

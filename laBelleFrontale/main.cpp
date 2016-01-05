@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
 
     rsabdd.recupAesKey(bdd.getMsg(), 0);
 
+    bdd.setKeyIv(rsabdd.getAesKey(),rsabdd.getAesIv());
 
 	reception res(&ts_s, &bdd);
 
