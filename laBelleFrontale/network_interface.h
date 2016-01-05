@@ -21,7 +21,6 @@
 #include "bdd_tcp.h"
 #include "Tslot.h"
 #include "reception.h"
-#include "rsacrypt.h"
 
 #define BUFFER_SIZE 2048
 
@@ -32,7 +31,7 @@ class reception;
 
 class network_interface{
 public:
-	network_interface(bdd_tcp *outbdd, rsaCrypt * outrsabdd,  Tslot *ourts, Tslot * ourts_s, reception * outres);
+	network_interface(bdd_tcp *outbdd,  Tslot *ourts, Tslot * ourts_s, reception * outres);
 	~network_interface();
 
 	void spawn();
@@ -110,7 +109,7 @@ private:
 	Tslot * ts;
 	Tslot * ts_s;
 	reception * res;
-	rsaCrypt * rsabdd;
+	
 	
 	int type;
 	bool running;

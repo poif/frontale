@@ -116,7 +116,7 @@ void reception::traitement(string messageStr){
 
                 m_bdd->emission(versBdd);
                 
-                m_bdd->attendLecture();
+                m_bdd->attendLecture(300);
 
                 string messBdd = m_bdd->getMsg().toStdString();
 

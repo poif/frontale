@@ -3,6 +3,8 @@
 #include <QTcpSocket>
 #include <QCoreApplication>
 #include <QTcpServer>
+#include <openssl/aes.h>
+#include <QCoreApplication>
 
 class bdd_tcp : public QObject
 {
@@ -16,8 +18,8 @@ public:
     void lecture();
     QString getMsg();
     bool getYLecture();
-    QString chiffrement(string clair);
-    string dechiffrement(QString chif);
+    QString chiffrement(std::string clair);
+    std::string dechiffrement(QString chif);
     void setKeyIv(char *key, char *iv);
 
 private:

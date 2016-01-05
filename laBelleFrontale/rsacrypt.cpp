@@ -160,7 +160,7 @@ bool rsaCrypt::recupAesKey(QString key, int id){
             istringstream issAes;
             string bddaAes;
 
-            issAes.str(this->dechiffrement(QString(bddkey)).toStdString());
+            issAes.str(this->dechiffrement(QString(bddKey.c_str())).toStdString());
 
             getline(issAes,bddaAes,';');
             aesKey = (char *)bddaAes.c_str();

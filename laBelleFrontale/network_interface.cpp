@@ -33,7 +33,7 @@ using namespace CryptoPP;
 /**
  * constructeur
  */
-network_interface::network_interface(bdd_tcp * outbdd, rsaCrypt * outrsabdd, Tslot * ourts, Tslot * ourts_s , reception * outres): bdd(outbdd),rsabdd(outrsabdd), ts(ourts), ts_s(ourts_s), res(outres) {
+network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres) {
 	running = true;
 	host_rem = "127.0.0.1";
     	port_rem = 8082;
@@ -529,15 +529,11 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 		QString versBdd = QString("%1").arg(requetebdd.c_str());
 
-		QString versBddcrypt = rsabdd->chiffrement(versBdd);
-
-	            bdd->emission(versBddcrypt);
+	            bdd->emission(versBdd);
 	                
-	            bdd->attendLecture();
+	            bdd->attendLecture(200);
 
-	            QString rep = rsabdd->dechiffrement(bdd->getMsg());
-
-	            string clair = rep.toStdString();
+	            string clair = bdd->getMsg().toStdString();
 
 	            if(!clair.empty())
 	            	a_traiter_clair.push_back(clair);
@@ -932,6 +928,7 @@ void network_interface::process_received_events(engine_event& e){
 					vector<string> groupeClient;
 
 					string reqFormat;
+					string reqFormatBdd;
 
 					istringstream issGroupe(groClient);
 					string groupeUnique;

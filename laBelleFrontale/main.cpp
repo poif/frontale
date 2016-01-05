@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	bdd_tcp bdd;
 	bdd.connection_tcp("127.0.0.1",2211);
 
-    rsaCrypt rsabdd = new rsaCrypt(2048);
+    rsaCrypt rsabdd = rsaCrypt(2048);
     rsabdd.keyGen();
 
     do{

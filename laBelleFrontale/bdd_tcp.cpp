@@ -2,6 +2,9 @@
 #include <iostream>
 #include <QTcpSocket>
 #include <QTcpServer>
+#include <openssl/evp.h>
+#include <string>
+
 bdd_tcp::bdd_tcp()
 {
 }
@@ -34,7 +37,7 @@ void bdd_tcp::attendLecture(int timeout){
 
       chif = soc.readLine(); //lecture du flux
 
-      msg = QString(this->dechiffrement(chif));
+      msg = QString(this->dechiffrement(chif).c_str());
 
 
 }
@@ -55,7 +58,7 @@ bool bdd_tcp::getYLecture(){
     return yLecture;
 }
 
-QString bdd_tcp::chiffrement(string clair){
+QString bdd_tcp::chiffrement(std::string clair){
     EVP_CIPHER_CTX ctx;
     int succ;
     int outlen, tmplen;
@@ -67,22 +70,22 @@ QString bdd_tcp::chiffrement(string clair){
     succ = EVP_CipherInit_ex ( &ctx, EVP_aes_256_cbc(), NULL,(const unsigned char *) key,(const unsigned char *) iv, 1 );
 
     if(!succ)
-        cout << "erreur cipher init" << endl;
+        std::cout << "erreur cipher init" << std::endl;
 
     succ = EVP_CipherUpdate(&ctx,(unsigned char *)out  ,&outlen, (const unsigned char *)clair.c_str(), clair.length());
 
     if(!succ)
-        cout << "erreur aes cipher update" << endl;
+        std::cout << "erreur aes cipher update" << std::endl;
 
     succ = EVP_CipherFinal_ex(&ctx,(unsigned char *) out + outlen,&tmplen);
 
     if(!succ)
-        cout << "erreur aes cipher final" << endl;
+        std::cout << "erreur aes cipher final" << std::endl;
 
     succ = EVP_CIPHER_CTX_cleanup(&ctx);
 
     if(!succ)
-        cout << "erreur aes cleanup" << endl;
+        std::cout << "erreur aes cleanup" << std::endl;
 
     free(out);
 
@@ -90,7 +93,7 @@ QString bdd_tcp::chiffrement(string clair){
 
 }
 
-string bdd_tcp::dechiffrement(QString chif){
+std::string bdd_tcp::dechiffrement(QString chif){
 
     EVP_CIPHER_CTX ctx;
     int succ;
@@ -104,26 +107,26 @@ string bdd_tcp::dechiffrement(QString chif){
     succ = EVP_CipherInit_ex ( &ctx, EVP_aes_256_cbc(), NULL,(const unsigned char *) key,(const unsigned char *) iv, 0 );
 
     if(!succ)
-        cout << "erreur cipher init" << endl;
+        std::cout << "erreur cipher init" << std::endl;
 
     EVP_CIPHER_CTX_set_padding ( &ctx, 0 ) ;
 
     succ = EVP_CipherUpdate(&ctx,(unsigned char *)out  ,&outlen, (const unsigned char *)chif.toStdString().c_str(), chif.toStdString().length());
 
     if(!succ)
-        cout << "erreur aes cipher update" << endl;
+        std::cout << "erreur aes cipher update" << std::endl;
 
     succ = EVP_CipherFinal_ex(&ctx,(unsigned char *) out + outlen,&tmplen);
 
     if(!succ)
-        cout << "erreur aes cipher final" << endl;
+        std::cout << "erreur aes cipher final" << std::endl;
 
     succ = EVP_CIPHER_CTX_cleanup(&ctx);
 
     if(!succ)
-        cout << "erreur aes cleanup" << endl;
+        std::cout << "erreur aes cleanup" << std::endl;
 
-    string clair(out);
+    std::string clair(out);
 
     free(out);
 

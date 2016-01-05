@@ -11,7 +11,6 @@
 #include "clientFront.h"
 #include "requete.h"
 #include "message.h"
-#include "rsacrypt.h"
 
 using namespace std;
 
