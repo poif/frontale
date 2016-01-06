@@ -4,6 +4,9 @@
 #include <QTcpServer>
 #include <openssl/evp.h>
 #include <string>
+#include <sstream>
+
+using namespace std;
 
 bdd_tcp::bdd_tcp()
 {
@@ -18,18 +21,20 @@ void bdd_tcp::connection_tcp(QString IP, int port){
 
 }
 
-void bdd_tcp::emission(QString texte, int type){
-
-
-    
+void bdd_tcp::emission(string texte, int type){
+        ostringstream oss;
     if(type == 0){
         texte +="*";
-        texte = this->chiffrement(texte.toStdString());
-        texte = QString::number(texte.length()) + texte;
-     }
+        texte = this->chiffrement(texte);
+        oss << texte.length() + texte;
+     }else {
+        oss << texte;
+    }
+
+
 
     QTextStream t(&soc); //création d'un flux d'ecriture dnas la socket
-    t << texte << endl; // envoie du message en ecrivant dans le flux de la socket
+    t << QString(oss.str()) << endl; // envoie du message en ecrivant dans le flux de la socket
 
 }
 
@@ -45,21 +50,22 @@ void bdd_tcp::attendLecture(int timeout, int type){
 
       chif = soc.readLine(); //lecture du flux
 
-      if(type == 0) msg = QString(this->dechiffrement(chif).c_str());
-      else msg = chif;
+      if(type == 0) msg = this->dechiffrement(chif);
+      else msg = chif.toStdString();
 
 
 }
 
 void bdd_tcp::lecture(){
+    ostringstream oss;
     while(soc.canReadLine()){
-       msg = soc.readLine(); //lecture du flux
-
+       oss << soc.readLine().data(); //lecture du flux
+       msg=oss.str();
     }
 
 }
 
-QString bdd_tcp::getMsg(){
+string bdd_tcp::getMsg(){
     return this->msg;
 }
 
@@ -67,10 +73,11 @@ bool bdd_tcp::getYLecture(){
     return yLecture;
 }
 
-QString bdd_tcp::chiffrement(std::string clair){
+string bdd_tcp::chiffrement(std::string clair){
     EVP_CIPHER_CTX ctx;
     int succ;
     int outlen, tmplen;
+    ostringstream oss;
     
     char* out = (char*) malloc ( 2048 * sizeof ( char ) ) ;
 
@@ -96,13 +103,17 @@ QString bdd_tcp::chiffrement(std::string clair){
     if(!succ)
         std::cout << "erreur aes cleanup" << std::endl;
 
+    oss << out;
+
     free(out);
 
-    return QString(out);
+    return oss.str();
+
+
 
 }
 
-std::string bdd_tcp::dechiffrement(QString chif){
+std::string bdd_tcp::dechiffrement(string chif){
 
     EVP_CIPHER_CTX ctx;
     int succ;
@@ -120,7 +131,7 @@ std::string bdd_tcp::dechiffrement(QString chif){
 
     EVP_CIPHER_CTX_set_padding ( &ctx, 0 ) ;
 
-    succ = EVP_CipherUpdate(&ctx,(unsigned char *)out  ,&outlen, (const unsigned char *)chif.toStdString().c_str(), chif.toStdString().length());
+    succ = EVP_CipherUpdate(&ctx,(unsigned char *)out  ,&outlen, (const unsigned char *)chif.c_str(), chif.length());
 
     if(!succ)
         std::cout << "erreur aes cipher update" << std::endl;

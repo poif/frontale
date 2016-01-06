@@ -62,26 +62,29 @@ void rsaCrypt::keyGen()
     BN_free(bne);
 }
 
-QString rsaCrypt::dechiffrement(QString chif){
+string rsaCrypt::dechiffrement(string chif){
     cout << "dechiffrement" << endl;
+    ostringstream oss;
     unsigned char *clair=(unsigned char*)malloc(1024*sizeof(char));;
     int succ;
     int kLen = RSA_size(rsaKey);
 
 
-    succ = RSA_private_decrypt(kLen,(const unsigned char *)chif.toStdString().c_str(),clair,rsaKey,RSA_PKCS1_PADDING);
+    succ = RSA_private_decrypt(kLen,(const unsigned char *)chif.c_str(),clair,rsaKey,RSA_PKCS1_PADDING);
 
     if (succ < 0)
         cout << "erreur dechiffrement rsa" << endl;
 
-    return QString((const char*)clair);
+    oss << chif;
+
+    return oss.str();
 }
 
-QString rsaCrypt::sendKeyPub(int id){
+string rsaCrypt::sendKeyPub(int id){
     int flen = 0 ;
     unsigned char* key = NULL ;
     BIO *keybio = NULL ;
-    QString msg;
+    ostringstream msg;
     int succ;
 
 
@@ -104,9 +107,9 @@ QString rsaCrypt::sendKeyPub(int id){
 
      cout << key << endl;
 
-     msg = QString("%1%2%3%4%5").arg(id).arg("*").arg("304*").arg((char *)key).arg("*EOF");
+     msg << id + "*" + "304*" + key + "*EOF";
 
-     return msg;
+     return msg.str();
 }
 
 bool rsaCrypt::recupKeyPub(string key){
@@ -141,14 +144,14 @@ bool rsaCrypt::recupKeyPub(string key){
 
 }
 
-bool rsaCrypt::recupAesKey(QString key, int id){
+bool rsaCrypt::recupAesKey(string key, int id){
 
     istringstream iss;
     string bddKey;
     ostringstream oss;
 
     oss << id;
-    iss.str(key.toStdString());
+    iss.str(key);
 
     getline(iss,bddKey,'*');
 
@@ -167,7 +170,7 @@ bool rsaCrypt::recupAesKey(QString key, int id){
             getline(issAes,bddaAes,';');
             aesKey = (char *)bddaAes.c_str();
 
-            getline(issAes,bddaAes,';');
+            getline(issAes,bddaAes,'*');
             aesIv = (char *)bddaAes.c_str();
 
             return true;

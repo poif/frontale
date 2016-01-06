@@ -161,8 +161,8 @@ int Message::genAESKey(){
     char *key = (char *) malloc ( AES_KEY_LENGTH*sizeof(char) ) ;
     char *iv =(char *) malloc (AES_KEY_LENGTH*sizeof(char));
     // On initialise notre structure
-    memset ( exg_key->ckey, '\0', AES_KEY_LENGTH ) ;
-    memset ( exg_key->ivec, '\0', AES_KEY_LENGTH ) ;
+    memset ( key, '\0', AES_KEY_LENGTH ) ;
+    memset ( iv, '\0', AES_KEY_LENGTH ) ;
 
     // On génère les clés et IV avec des caractères aléatoires
     for ( i = 0; i < AES_KEY_LENGTH - 1; i++ )
