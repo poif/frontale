@@ -306,7 +306,7 @@ string traitement_req_client(	string numero,
 		}
 
     to_send += "none*";             //typeData
-    to_send += ref + "*";                 //ref
+    to_send += ref + "*";           //ref
     to_send += "none*";             //user
     to_send += "EOF";
  	}
@@ -320,6 +320,10 @@ string traitement_req_client(	string numero,
     	to_send += "none*";            //user
       to_send += "EOF";
 	}
+
+  else if (action=="6"){             //recherche d'un groupe
+      to_send += groupes_cible +"*EOF";
+  }               
 
   return to_send;
 }
@@ -586,6 +590,15 @@ string traitement_rep_client(list<string>& a_traiter){
        else {
           stringInTheVector = document + "*";
        }
+    }
+
+    else if (action == "6"){
+    //RECHERCHE DUN GROUPE
+       string yn; 
+       if (!getline(ss,yn,'*') || yn !="0" || yn != "1")
+         stringInTheVector = "ERROR*";
+       else
+         stringInTheVector = yn;
     }
 
 
