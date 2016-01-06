@@ -106,6 +106,8 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
         i++;
     }while(chaineTest != "CHALL" && i<nbKey);
 
+
+    // echange de cle
     if(nbKey==i){
         iss << trame;
         getline(iss,chaineTest,'*');
