@@ -13,18 +13,18 @@ class bdd_tcp : public QObject
 public:
     bdd_tcp();
     void connection_tcp(QString IP, int port);
-    void emission(string texte, int type=0);
+    void emission(std::string texte, int type=0);
     void attendLecture(int timeout, int type=0);
     void lecture();
     std::string getMsg();
     bool getYLecture();
-    QString chiffrement(std::string clair);
-    std::string dechiffrement(QString chif);
+    std::string chiffrement(std::string clair);
+    std::string dechiffrement(std::string chif);
     void setKeyIv(char *key, char *iv);
 
 private:
     QTcpSocket soc;
-    QString msg;
+    std::string msg;
     bool yLecture;
     char *key;
     char *iv;

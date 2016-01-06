@@ -26,7 +26,8 @@ void bdd_tcp::emission(string texte, int type){
     if(type == 0){
         texte +="*";
         texte = this->chiffrement(texte);
-        oss << texte.length() + texte;
+        oss << texte.size() ;
+        oss << texte;
      }else {
         oss << texte;
     }
@@ -34,13 +35,13 @@ void bdd_tcp::emission(string texte, int type){
 
 
     QTextStream t(&soc); //création d'un flux d'ecriture dnas la socket
-    t << QString(oss.str()) << endl; // envoie du message en ecrivant dans le flux de la socket
+    t << QString(oss.str().data()) << endl; // envoie du message en ecrivant dans le flux de la socket
 
 }
 
 void bdd_tcp::attendLecture(int timeout, int type){
 
-    QString chif;
+    string chif;
 
    yLecture=soc.waitForReadyRead(timeout);  // attend que le paquet soit pret a etre lut
 
@@ -48,10 +49,10 @@ void bdd_tcp::attendLecture(int timeout, int type){
 
 
 
-      chif = soc.readLine(); //lecture du flux
+      chif = soc.readLine().data(); //lecture du flux
 
       if(type == 0) msg = this->dechiffrement(chif);
-      else msg = chif.toStdString();
+      else msg = chif;
 
 
 }
