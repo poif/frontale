@@ -10,10 +10,10 @@ class rsaCrypt
 {
 public:
     rsaCrypt(int keylen);
-    QString chiffrement(QString clair);
+    std::string chiffrement(std::string clair);
     QString dechiffrement(QString chif);
     QString sendKeyPub(int id);
-    bool recupKeyPub(QString key, int id);
+    bool recupKeyPub(std::string key);
     bool recupAesKey(QString key, int id );
     void keyGen();
     char * getAesKey();

@@ -18,6 +18,9 @@ private:
     string tabKeyIv[NB_MAX_CLIENT][2];
     int nbKey;
     int numClient;
+    string toSend;
+    bool eChangeKey;
+    bool dechiffre;
 
 public:
     Message(QString msg, char type, char separateur);
@@ -32,6 +35,9 @@ public:
     string crypt(unsigned char* aes_input, int size_aes_input, int numkey);
     int genAESKey();
     int getNumClient();
+    string getToSend();
+    bool getEChangeKey();
+    bool getDechiffre();
 
 
 };

@@ -19,18 +19,19 @@ rsaCrypt::rsaCrypt(int keylen)
 
 }
 
-QString rsaCrypt::chiffrement(QString clair){
+string rsaCrypt::chiffrement(string clair){
     cout << "chiffrement rsa" << endl;
+    ostringstream oss;
     unsigned char *chif = (unsigned char*)malloc(1024*sizeof(char));
     int succ;
     int kLen = RSA_size(forgeignKey) - 11;
-    succ = RSA_public_encrypt(kLen,(const unsigned char *)clair.toStdString().c_str(),chif,forgeignKey,RSA_PKCS1_PADDING);
+    succ = RSA_public_encrypt(kLen,(const unsigned char *)clair.c_str(),chif,forgeignKey,RSA_PKCS1_PADDING);
     if(succ <= 0)
             cout << "erreur RSA_encrypt" << endl;
 
-    QString chiffre = QString((const char*)chif);
+    oss << chif;
 
-    return chiffre;
+    return oss.str();
 
 
 
@@ -66,6 +67,7 @@ QString rsaCrypt::dechiffrement(QString chif){
     unsigned char *clair=(unsigned char*)malloc(1024*sizeof(char));;
     int succ;
     int kLen = RSA_size(rsaKey);
+
 
     succ = RSA_private_decrypt(kLen,(const unsigned char *)chif.toStdString().c_str(),clair,rsaKey,RSA_PKCS1_PADDING);
 
@@ -107,34 +109,34 @@ QString rsaCrypt::sendKeyPub(int id){
      return msg;
 }
 
-bool rsaCrypt::recupKeyPub(QString key, int id){
+bool rsaCrypt::recupKeyPub(string key){
     istringstream iss;
     string bddKey;
     ostringstream oss;
     BIO *keybio = NULL ;
-    oss << id;
-    iss.str(key.toStdString());
+   /* oss << id;
+    iss << key;
 
     getline(iss,bddKey,'*');
 
     if(!bddKey.compare(oss.str())){
         getline(iss,bddKey,'*');
 
-        if(!bddKey.compare("304")){
+        if(!bddKey.compare("init")){
             getline(iss,bddKey,'*');
-            cout << bddKey << endl;
+            cout << bddKey << endl;*/
 
             keybio = BIO_new_mem_buf ((unsigned char *)bddKey.c_str() , -1 );
 
             forgeignKey=PEM_read_bio_RSAPublicKey ( keybio, &forgeignKey, NULL, NULL );
 
-            return true;
+           /* return true;
         }else {
            return false;
            }
     }else {
             return false;
-        }
+        }*/
 
 
 }
