@@ -37,8 +37,9 @@ public:
     int getNumClient();
     string getToSend();
     bool getEChangeKey();
-    bool getDechiffre();
-
+    bool getDechiffre(); 
+    string getAESKey(int numKey);
+    string getAESIv(int numKey);
 
 };
 

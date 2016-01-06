@@ -72,7 +72,7 @@ std::string Message::crypt(unsigned char* aes_input, int size_aes_input, int num
 
     AES_KEY enc_key;
     AES_set_encrypt_key((const unsigned char *)tabKeyIv[numkey][0].c_str(), sizeof(tabKeyIv[numkey][0].c_str())*8, &enc_key);
-    AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key, tabKeyIv[numkey][1].c_str(), AES_ENCRYPT);
+    AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key,(unsigned char *) tabKeyIv[numkey][1].c_str(), AES_ENCRYPT);
     //print_data("\n Encrypted",enc_out, strlen(enc_out));
 
     std::string retour = (const char *) trame;
@@ -94,13 +94,13 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
     do{
 
         AES_KEY dec_key;
-        AES_set_decrypt_key(tabKeyIv[i][0].c_str(), sizeof(tabKeyIv[i][0].c_str())*8, &dec_key);
-        AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key, tabKeyIv[i][1].c_str(), AES_DECRYPT);
+        AES_set_decrypt_key((const unsigned char *)tabKeyIv[i][0].c_str(), sizeof(tabKeyIv[i][0].c_str())*8, &dec_key);
+        AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key,(unsigned char *) tabKeyIv[i][1].c_str(), AES_DECRYPT);
         // print_data("\n Decrypted",dec_out, sizeof(dec_out));
 
         printf("%s\n", trame);
 
-        iss << trame;
+        iss.str(string((const char *)trame));
 
         getline(iss,chaineTest,'*');
         i++;
@@ -109,7 +109,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 
     // echange de cle
     if(nbKey==i){
-        iss << trame;
+        iss.str(string((const char *)trame));
         getline(iss,chaineTest,'*');
         if(chaineTest=="init"){
             rsaCrypt rsaClient = rsaCrypt(2048);
