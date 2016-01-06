@@ -71,7 +71,7 @@ std::string Message::crypt(unsigned char* aes_input, int size_aes_input, int num
 
 
     AES_KEY enc_key;
-    AES_set_encrypt_key(tabKeyIv[numkey][0].c_str(), sizeof(tabKeyIv[numkey][0].c_str())*8, &enc_key);
+    AES_set_encrypt_key((const unsigned char *)tabKeyIv[numkey][0].c_str(), sizeof(tabKeyIv[numkey][0].c_str())*8, &enc_key);
     AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key, tabKeyIv[numkey][1].c_str(), AES_ENCRYPT);
     //print_data("\n Encrypted",enc_out, strlen(enc_out));
 
