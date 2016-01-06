@@ -621,7 +621,7 @@ void network_interface::process_received_events(engine_event& e){
 				archiveOut << p;
 				const string &data_encoded = archive_streamOut.str();
 
-				noeudthor->send(data_encoded);
+				noeudthor->sendRep(data_encoded);
 
 			}
 
@@ -689,7 +689,7 @@ void network_interface::process_received_events(engine_event& e){
 			        archiveOut << p;
 			        const string &data_encoded = archive_streamOut.str();
 
-			        noeudthor->send(data_encoded);
+			        noeudthor->sendRep(data_encoded);
 
 			}
 			
@@ -765,7 +765,7 @@ void network_interface::process_received_events(engine_event& e){
 			           archiveOut << p;
 			           const string &data_encoded = archive_streamOut.str();
 
-			           noeudthor->send(data_encoded);
+			           noeudthor->sendRep(data_encoded);
 
 			}
 			
@@ -972,7 +972,7 @@ void network_interface::process_received_events(engine_event& e){
 					            archiveOut << q;
 					            const string &data_encoded = archive_streamOut.str();
 
-						noeudthor->send(data_encoded);
+						noeudthor->sendRep(data_encoded);
 						
 					}
 					

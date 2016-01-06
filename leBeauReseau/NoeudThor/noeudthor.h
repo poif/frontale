@@ -20,6 +20,10 @@ class NoeudThor
 		boost::asio::io_service &io_service;
 		Client<NoeudThor>* noeudServeurCentral;
 		Client<NoeudThor>* noeudSecureNodeListProvider;
+
+		Client<NoeudThor>* previous;
+		Client<NoeudThor>* next;
+
 		network_interface* observeur;
 
 		void handle_accept(Client<NoeudThor> *noeud, const boost::system::error_code &error);
@@ -32,9 +36,10 @@ class NoeudThor
 		void askNeighborList();
 		void giveEarPort();
 		void askNombreNoeuds();
+		void askVoisins();
 		void clientLeave(Client<NoeudThor>* leaving);
 		void send(string toSend);
+		void sendRep(string toSend);
 		void startConnectSecureNodeListProvider();
 };
 #endif //NOEUDTHOR_H
-

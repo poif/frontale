@@ -6,6 +6,8 @@
 #include <string>
 #include <QTextStream>
 #include <sstream>
+
+using namespace std;
 Message::Message(QString msg, char type, char separateur)
 {
     this->msg = msg;
@@ -68,8 +70,8 @@ std::string Message::crypt(unsigned char* aes_input, int size_aes_input, int num
 
 
     AES_KEY enc_key;
-    AES_set_encrypt_key(tabKeyIv[numkey][0].c_str(), sizeof(tabKeyIv[numkey][0].c_str())*8, &enc_key);
-    AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key, tabKeyIv[numkey][1].c_str(), AES_ENCRYPT);
+    AES_set_encrypt_key((const unsigned char *)tabKeyIv[numkey][0].data(), tabKeyIv[numkey][0].size(), &enc_key);
+    AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key, (const unsigned char *)tabKeyIv[numkey][1].data(), AES_ENCRYPT);
     //print_data("\n Encrypted",enc_out, strlen(enc_out));
 
     std::string retour = (const char *) trame;
@@ -89,8 +91,8 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 do{
 
     AES_KEY dec_key;
-    AES_set_decrypt_key(tabKeyIv[i][0].c_str(), sizeof(tabKeyIv[i][0].c_str())*8, &dec_key);
-    AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key, tabKeyIv[i][1].c_str(), AES_DECRYPT);
+    AES_set_decrypt_key((const unsigned char *)tabKeyIv[i][0].data(), tabKeyIv[i][0].size()*8, &dec_key);
+    AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key, (const unsigned char *)tabKeyIv[i][1].data(), AES_DECRYPT);
     // print_data("\n Decrypted",dec_out, sizeof(dec_out));
 
     printf("%s\n", trame);
