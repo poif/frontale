@@ -10,11 +10,11 @@ class rsaCrypt
 {
 public:
     rsaCrypt(int keylen);
-    QString chiffrement(QString clair);
-    QString dechiffrement(QString chif);
-    QString sendKeyPub(int id);
-    bool recupKeyPub(QString key, int id);
-    bool recupAesKey(QString key, int id );
+    std::string chiffrement(std::string clair);
+    std::string dechiffrement(std::string chif);
+    std::string sendKeyPub(int id);
+    bool recupKeyPub(std::string key);
+    bool recupAesKey(std::string key, int id );
     void keyGen();
     char * getAesKey();
     char * getAesIv();

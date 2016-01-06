@@ -13,10 +13,10 @@ class bdd_tcp : public QObject
 public:
     bdd_tcp();
     void connection_tcp(QString IP, int port);
-    void emission(QString texte, int type=0);
+    void emission(string texte, int type=0);
     void attendLecture(int timeout, int type=0);
     void lecture();
-    QString getMsg();
+    std::string getMsg();
     bool getYLecture();
     QString chiffrement(std::string clair);
     std::string dechiffrement(QString chif);

@@ -3,6 +3,8 @@
 #include "traitement.h"  
 #include <algorithm> 
 
+
+
 using namespace std;
 
 Requete::Requete()
@@ -22,6 +24,12 @@ string Requete::getParametre()
 {       return m_parametre;}
 string Requete::getGroupe()
 {       return m_groupe;}
+string Requete::getGroupeCible()		//ADDED
+{       return m_groupe_cible;}
+string Requete::getStatutCible()		//ADDED
+{       return m_statut_cible;}
+string Requete::getAffectationCible()	//ADDED
+{       return m_affectation_cible;}
 string Requete::getCle()
 {       return m_cle;}
 string Requete::getRequete()
@@ -58,15 +66,13 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 		string reference;
 		string inTheVector;
 
-		cout << "it : " << *it << endl;
-
 		if (*it == numero+"*ERROR*") continue; //on passe à la reponse suivante
 		else isError = 0;
 
 		if(m_action.compare("search") == 0) {
 		/*****REQUETE 1*****/
 			if(m_option.compare("-n") == 0) {
-		        hash = hashString(m_statut.c_str());
+		        hash = hashString((char*)m_statut.c_str());
 				while(getline(ss, name, '*') && getline(ss, hash_recu, '*')) {
 					if(hash.compare(hash_recu) == 0)
 						reponseTraitees.push_back(name);	//UN NOM PAR LIGNE DANS LE TABLEAU
@@ -85,15 +91,14 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 
 		/*****REQUETE 2*****/
 			else if (m_option.compare("-e") ==0) {
-				condensate = m_parametre;
-				condensate += m_statut;
-				hash = hashString(condensate.c_str());
-				m_resultat = "no";
+/*ADDED*/				condensate = m_nom + m_statut;
+/*ADDED*/				hash = hashString((char*)condensate.c_str());
+				m_resultat = "R*no";
 				//si aucune réponse n'est "vraie", reste à no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
 					//s'il y en a un, on arrête
 					if(hash.compare(hash_recu) ==0){ 
-						m_resultat = "yes";
+						m_resultat = "R*yes";
 						return 1;	//on a trouvé, c'est tout ce qu'on voulait
 					}
 				}
@@ -101,22 +106,16 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 
 		/*****REQUETE 3*****/
 			else if (m_option.compare("-p") ==0) {
-				condensate = m_parametre;
-				condensate += m_statut;
-				hash = hashString(condensate.c_str());
-				while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
-					if(hash.compare(hash_recu) ==0){
-						reponseTraitees.push_back(reference + "*" + m_groupe);
-					}
+/*ADDED*/			condensate += m_nom+m_statut;
+				hash = hashString((char*)condensate.c_str());
+/*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
+/*REQ3->ID*3*statut*affectation*gp_cible*typedata*/
+						if(hash.compare(hash_recu) ==0)
+							reference = m_reference;
 				}
-			/*ELIMINATION DES DOUBLONS*/
-				sort(reponseTraitees.begin(), reponseTraitees.end() );
-				reponseTraitees.erase( unique( reponseTraitees.begin(), reponseTraitees.end() ), reponseTraitees.end() );
-
-			/*REPONSES FINALES*/
-				for (unsigned int i=0; i<reponseTraitees.size(); i++){
-					m_resultat += reponseTraitees[i] + "*";
-				}
+				m_requete = "4*" + m_statut + "*none*" + m_affectation + "*none*" + m_groupe + "*none*none*" + reference + "*none*";
+				/*TODO ENVOI*/
+				break; //bonjour à Amine
 			}
 
 			else {	//1.6 GIGAWAT? (ne peut jamais arriver?)
@@ -138,7 +137,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 
 	if (isError==1)	{ //Tout est erreur, ou l'option/action est invalide
 		cerr << "Erreur de traitement!" << endl;
-		m_resultat = "ERROR";
+		m_resultat = "R*ERROR";
 		return 0;
 	}
 	else
@@ -157,22 +156,13 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	{
 		pourBdd=false;
 		if(m_option.compare("-n") == 0) // Si on cherche un nom
-			m_requete = m_affectation;
+			m_requete = "1*none*none*" + m_affectation + "*none*none*none*none*none*none*" ;
 
 		else if(m_option.compare("-e") == 0) // Si on cherche l'existance
-			m_requete = m_affectation;
-	
+			m_requete = "2*none*none*" + m_affectation + "*none*none*none*none*none*none*" ;
+
 		else if(m_option.compare("-p") == 0) // Si on cherche une photo(donnée)
-		{
-			/*while(m_option[i] != '\0')
-			{
-				m_requete[i]=m_option[i]; // Premiere partie de la requete : l'option de la requete
-				i++;
-			}
-			m_requete[i]=sep;
-			i++;*/
-			m_requete += "*" + m_affectation;
-		}
+			m_requete = "3*none*" + m_statut_cible + "*none*" + m_affectation_cible + "*none*" + m_groupe_cible + "*" + m_option + "*none*none*";
 
 		else
 			cerr << "Option inconnue" << endl ;
@@ -180,7 +170,8 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
 	{
-		hash = hashString(m_nom.c_str());
+/*ADDED*/ string toHash = m_nom+m_statut;
+		hash = hashString((char*)toHash.c_str());
 	    pourBdd=true;
 	    m_requete = "302*";
 	    m_requete += m_statut + "*" + m_affectation + "*" + m_groupe + m_option + "*" + m_parametre +"*"+ hash +"*EOF";
@@ -189,7 +180,8 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	else if(m_action.compare("delete") == 0)
 	{
 	    pourBdd=true;
-	    hash = hashString(m_nom.c_str());
+	    string toHash = m_nom+m_statut;
+		hash = hashString((char*)toHash.c_str());
 	    m_requete = "303*"+m_parametre+"*"+hash+"*EOF";
 	}
 
@@ -206,8 +198,7 @@ int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
 	//remplissage + test error!
-	if (!getline(ss, m_token, '*') ||
-		!getline(ss, m_affectation, '*') ||
+	if (!getline(ss, m_affectation, '*') ||
 		!getline(ss, m_statut, '*') ||
 		!getline(ss, m_action, '*') ||
 		!getline(ss, m_option, '*') ||
