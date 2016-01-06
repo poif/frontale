@@ -13,12 +13,15 @@ class Requete
 	std::string m_token;
 	std::string m_affectation;
 	std::string m_statut;
-	std::string  m_action;
+	std::string m_action;
 	std::string m_option;
 	std::string m_parametre;
 	std::string m_nom;
 	std::string m_partage;
 	std::string m_groupe;
+	std::string m_groupe_cible;		//ADDED
+	std::string m_statut_cible;		//ADDED
+	std::string m_affectation_cible	//ADDED
 	std::string m_cle;
 	bool pourBdd;
 
@@ -35,6 +38,7 @@ class Requete
 	std::string getOption();
 	std::string getParametre();
 	std::string getGroupe();
+	std::string getGroupeCible();
 	std::string getCle();
 	std::string getRequete();
 	std::string getResultat();

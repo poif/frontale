@@ -3,6 +3,9 @@
 #include "traitement.h"  
 #include <algorithm> 
 
+/*ADD UN CHAMP GROUPE CIBLE
+LE RECEVOIR DU CLIENT ET LENVOYER*/
+
 using namespace std;
 
 Requete::Requete()
@@ -22,6 +25,8 @@ string Requete::getParametre()
 {       return m_parametre;}
 string Requete::getGroupe()
 {       return m_groupe;}
+string Requete::getGroupeCible()	//ADDED
+{       return m_groupe_cible;}
 string Requete::getCle()
 {       return m_cle;}
 string Requete::getRequete()
@@ -58,8 +63,6 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 		string reference;
 		string inTheVector;
 
-		cout << "it : " << *it << endl;
-
 		if (*it == numero+"*ERROR*") continue; //on passe à la reponse suivante
 		else isError = 0;
 
@@ -85,15 +88,14 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 
 		/*****REQUETE 2*****/
 			else if (m_option.compare("-e") ==0) {
-				condensate = m_parametre;
-				condensate += m_statut;
-				hash = hashString(condensate.c_str());
-				m_resultat = "no";
+/*ADDED*/				condensate = m_nom + m_statut;
+/*ADDED*/				hash = hashString(condensate.c_str());
+				m_resultat = "R*no";
 				//si aucune réponse n'est "vraie", reste à no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
 					//s'il y en a un, on arrête
 					if(hash.compare(hash_recu) ==0){ 
-						m_resultat = "yes";
+						m_resultat = "R*yes";
 						return 1;	//on a trouvé, c'est tout ce qu'on voulait
 					}
 				}
@@ -101,11 +103,11 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 
 		/*****REQUETE 3*****/
 			else if (m_option.compare("-p") ==0) {
-				condensate = m_parametre;
-				condensate += m_statut;
+/*ADDED*/			condensate += m_nom+m_statut;
 				hash = hashString(condensate.c_str());
-				while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
-					if(hash.compare(hash_recu) ==0){
+/*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
+/*REQ3->ID*3*statut*affectation*gp_cible*typedata*/				
+						if(hash.compare(hash_recu) ==0){
 						reponseTraitees.push_back(reference + "*" + m_groupe);
 					}
 				}
@@ -114,8 +116,9 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 				reponseTraitees.erase( unique( reponseTraitees.begin(), reponseTraitees.end() ), reponseTraitees.end() );
 
 			/*REPONSES FINALES*/
+				m_resultat = "R*";
 				for (unsigned int i=0; i<reponseTraitees.size(); i++){
-					m_resultat += reponseTraitees[i] + "*";
+/*ADDED*/					m_resultat += reponseTraitees[i] + "*";
 				}
 			}
 
@@ -138,7 +141,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 
 	if (isError==1)	{ //Tout est erreur, ou l'option/action est invalide
 		cerr << "Erreur de traitement!" << endl;
-		m_resultat = "ERROR";
+		m_resultat = "R*ERROR";
 		return 0;
 	}
 	else
@@ -180,7 +183,8 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
 	{
-		hash = hashString(m_nom.c_str());
+/*ADDED*/ string toHash = m_nom+m_statut;
+		hash = hashString((char*)toHash.c_str());
 	    pourBdd=true;
 	    m_requete = "302*";
 	    m_requete += m_statut + "*" + m_affectation + "*" + m_groupe + m_option + "*" + m_parametre +"*"+ hash +"*EOF";
@@ -189,7 +193,8 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	else if(m_action.compare("delete") == 0)
 	{
 	    pourBdd=true;
-	    hash = hashString(m_nom.c_str());
+	    string toHash = m_nom+m_statut;
+		hash = hashString((char*)toHash.c_str());
 	    m_requete = "303*"+m_parametre+"*"+hash+"*EOF";
 	}
 
@@ -206,8 +211,7 @@ int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
 	//remplissage + test error!
-	if (!getline(ss, m_token, '*') ||
-		!getline(ss, m_affectation, '*') ||
+	if (!getline(ss, m_affectation, '*') ||
 		!getline(ss, m_statut, '*') ||
 		!getline(ss, m_action, '*') ||
 		!getline(ss, m_option, '*') ||

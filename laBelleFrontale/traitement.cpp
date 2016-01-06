@@ -236,55 +236,113 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
 string traitement_req_client(	string numero,
 								string action, 
 								string statut, 
-								string affectation, 
+								string statut_cible,
+								string affectation,
+								string affectation_cible, 
 								vector<string> groupes_client,
+								vector<string> groupes_cible,
 								string typeData,
 								string ref, 
 								string user){
-  string to_send = numero + "*";	
-  //string to_send = action + "*";
-  to_send += action + "*";
-  if (statut == "none")
-    to_send +="none*";
-  else 
-    to_send += statut + "*";
 
-  if (affectation == "none")
-    to_send += "none*";
-  else 
-    to_send += affectation + "*"; 
+    string to_send = numero + "*" + action + "*";		
+	if (action=="3"){
+  		if (statut_cible == "none")
+    		to_send +="none*";
+  		else 
+    		to_send += statut_cible + "*";
 
-  if (groupes_client.size()==0)
-    to_send += "none*";
-  else {
-    for (unsigned int i = 0; i < groupes_client.size(); i++){
-      if (i==(groupes_client.size()-1))
-      	to_send += groupes_client[i];
-      else 
-      	to_send += groupes_client[i] + ";";
-    to_send += "*";
+  		if (affectation_cible == "none")
+    		to_send += "none*";
+  		else 
+    		to_send += affectation_cible + "*"; 
+
+  		if (groupes_cible.size()==0)
+    		to_send += "none*";
+  		else {
+    		for (unsigned int i = 0; i < groupes_cible.size(); i++){
+      			if (i==(groupes_cible.size()-1))
+      				to_send += groupes_cible[i];
+     			else 
+      				to_send += groupes_cible[i] + ";";
+      		}
+    		to_send += "*";
+		}
+  		if (typeData == "none")
+    		to_send += "none*";
+ 		else 
+    		to_send += typeData + "*";
+ 	}
+
+ 	if (action=="4"){
+  		if (statut == "none")
+    		to_send +="none*";
+  		else 
+    		to_send += statut + "*";
+
+  		if (affectation == "none")
+    		to_send += "none*";
+  		else 
+    		to_send += affectation + "*"; 
+
+  		if (groupes_client.size()==0)
+    		to_send += "none*";
+  		else {
+    		for (unsigned int i = 0; i < groupes_client.size(); i++){
+      			if (i==(groupes_client.size()-1))
+      				to_send += groupes_client[i];
+     			else 
+      				to_send += groupes_client[i] + ";";
+      		}
+    		to_send += "*";
+		}
+  		if (typeData == "none")
+    		to_send += "none*";
+ 		else 
+    		to_send += typeData + "*";
+ 	}
+
+ 	else if (action=="1" || action=="2"){
+ 		 if (statut == "none")
+    		to_send +="none*";
+  		else 
+    		to_send += statut + "*";
+
+  		if (affectation == "none")
+    		to_send += "none*";
+  		else 
+   			 to_send += affectation + "*"; 
+
+  		if (groupes_client.size()==0)
+    		to_send += "none*";
+ 		else {
+    		for (unsigned int i = 0; i < groupes_client.size(); i++){
+     			if (i==(groupes_client.size()-1))
+      				to_send += groupes_client[i];
+    			else 
+      				to_send += groupes_client[i] + ";";
+      		}
+   		    to_send += "*";
+  		}
+
+ 		if (typeData == "none")
+    		to_send += "none*";
+  		else 
+    		to_send += typeData + "*";
+ 		if (ref == "none")
+    		to_send += "none*";
+  		else 
+    		to_send += ref + "*";
+  		if (user== "none")
+    		to_send += "none*";
+  		else
+    		to_send += user + "*";
 	}
-  }
-
-  if (typeData == "none")
-    to_send += "none*";
-  else 
-    to_send += typeData + "*";
-
-  if (ref == "none")
-    to_send += "none*";
-  else 
-    to_send += ref + "*";
-
-  if (user== "none")
-    to_send += "none*";
-  else
-    to_send += user + "*";
-
-  to_send += "EOF";
-  return to_send;
+	to_send += "EOF";
+  	return to_send;
 }
 
+ 
 /////////////////////////
 /*******REPONSES********/
 /////////////////////////
@@ -469,6 +527,7 @@ string traitement_rep_client(list<string>& a_traiter){
 
 		string stringInTheVector;		//chaine qu'on va push dans le vector
     string nom;
+    string Hnomstat;
     string statut;
     string reference;
     string token;   
@@ -518,7 +577,7 @@ string traitement_rep_client(list<string>& a_traiter){
 	/****************************************/
  
 		else if (action == "3"){
-	     //RECHERCHE REFERENCE;HASH USERNAME
+	     //RECHERCHE STATUT*REFERENCE*NOM
        while (getline(ss , token , '*')){
           if (token == "none"){
              stringInTheVector = "ERROR*";
@@ -576,7 +635,7 @@ string traitement_rep_client(list<string>& a_traiter){
              break;
           }
 
-          else if (token.substr(0,3) =="EOF" || testEOF == 1){
+          else if (token =="EOF" || testEOF == 1){
     /*ON NE PEUT RENTRER QUUNE FOIS SAUF SI LA REPONSE EST INVALIDE*/
              if (testEOF == 0)
                 testEOF=1;
@@ -586,14 +645,14 @@ string traitement_rep_client(list<string>& a_traiter){
 
           else {
              istringstream ssToken(token);
-             if (!getline(ssToken, reference, ';') || !getline(ssToken, nom, ';') ||
+             if (!getline(ssToken, reference, ';') || !getline(ssToken, Hnomstat, ';') ||
                 reference == "EOF" || reference == "NULL" || nom == "EOF" || nom == "NULL"){
                 stringInTheVector = "ERROR*";
                 continue;
              }
              else {
              //BDD : pas besoin de hasher
-                stringInTheVector += reference + "*" + nom + "*";
+                stringInTheVector += reference + "*" + Hnomstat + "*";
              }
           }
        }
@@ -658,54 +717,72 @@ string traitement_rep_client(list<string>& a_traiter){
 string traitement_req_bdd(string numero,
 						  string action, 
 						  string statut, 
+						  string statut_cible,
 						  string affectation, 
+						  string affectation_cible,
 						  vector<string> groupes_client, 
+						  vector<string> groupes_cible,
 						  string typeData, 
 						  string ref, 
 						  string user){
-  string to_send = numero + "*";
-  to_send = action + "*";
-  if (statut == "none")
-    to_send +="NULL*";
-  else 
-    to_send += statut + "*";
 
-  if (affectation == "none")
-    to_send += "NULL*";
-  else 
-    to_send += affectation + "*"; 
+  string to_send = numero + "*" + action + "*";
+  if (action=="300"){
+ 	 if (statut == "none")
+   		 to_send +="NULL*";
+ 	 else 
+   		 to_send += statut_cible + "*";
 
-  if (groupes_client.size() == 0)
-    to_send += "NULL*";
-  else {
-    for (unsigned int i = 0; i < groupes_client.size(); i++){
-      if (i==(groupes_client.size()-1))
-      	to_send += groupes_client[i];
-      else 
-      	to_send += groupes_client[i] + ";";
-      to_send += "*";
-	  }
-  }
+ 	 if (affectation == "none")
+  		 to_send += "NULL*";
+  	 else 
+    	to_send += affectation_cible + "*"; 
+     if (groupes_client.size() == 0)
+    	to_send += "NULL*";
+  	 else {
+   	 	for (unsigned int i = 0; i < groupes_cible.size(); i++){
+      		if (i==(groupes_cible.size()-1))
+      			to_send += groupes_cible[i];
+     		else 
+      			to_send += groupes_client[i] + ";";
+      	 }
+        to_send += "*";
+	 }
 
-  if (typeData == "none")
-    to_send += "NULL*";
-  else 
-    to_send += typeData + "*";
+	 if (typeData == "none")
+    	to_send += "NULL*";
+  	else 
+    	to_send += typeData + "*";
+   }
 
-  if (ref == "none")
-    to_send += "NULL*";
-  else 
-    to_send += ref + "*";
+   if (action=="301"){
+   	 if (statut == "none")
+   		 to_send +="NULL*";
+ 	 else 
+   		 to_send += statut + "*";
 
-  if (user== "none")
-    to_send += "NULL*";
-  else
-    to_send += user + "*";
-
-  to_send += "EOF*:";
-
-  return to_send;
-
+ 	 if (affectation == "none")
+  		 to_send += "NULL*";
+  	 else 
+    	to_send += affectation + "*"; 
+     if (groupes_client.size() == 0)
+    	to_send += "NULL*";
+  	 else {
+   	 	for (unsigned int i = 0; i < groupes_client.size(); i++){
+      		if (i==(groupes_client.size()-1))
+      			to_send += groupes_client[i];
+     		else 
+      			to_send += groupes_client[i] + ";";
+      	 }
+        to_send += "*";
+     }
+	 if (ref == "none")
+     	to_send += "NULL*";
+  	 else 
+    	to_send += ref + "*";
+	}
+ 	 to_send += "EOF*";
+ 	 return to_send;
 }
 
 
