@@ -232,114 +232,96 @@ string traitement_pull(string& reference, vector<string>& groupes_client ) {
 	/*****************/
 
 //fonction de formatage de requete
-//ex : tring testreq = traitement_req_client(action,"none",affectation,vector<string>(),datatype,reference,user);
+
 string traitement_req_client(	string numero,
 								string action, 
 								string statut, 
 								string statut_cible,
 								string affectation,
 								string affectation_cible, 
-								vector<string> groupes_client,
-								vector<string> groupes_cible,
+								string groupes_client,
+								string groupes_cible,
 								string typeData,
 								string ref, 
 								string user){
 
-    string to_send = numero + "*" + action + "*";		
+  string to_send = numero + "*" + action + "*";		
+
 	if (action=="3"){
-  		if (statut_cible == "none")
-    		to_send +="none*";
-  		else 
-    		to_send += statut_cible + "*";
+    to_send += statut_cible + "*";          //statut cible
+    to_send += affectation_cible + "*";     //affectation cible
 
-  		if (affectation_cible == "none")
-    		to_send += "none*";
-  		else 
-    		to_send += affectation_cible + "*"; 
+    //on recupere none s'il n'y a rien, sinon il faut tokenizer
+    //on récuperera les groupes dans un tableau, car il est compliqué de gérer le dernier groupe
+    //(ou il faut mettre * et non ';', avec un simple getline)
 
-  		if (groupes_cible.size()==0)
-    		to_send += "none*";
-  		else {
-    		for (unsigned int i = 0; i < groupes_cible.size(); i++){
-      			if (i==(groupes_cible.size()-1))
-      				to_send += groupes_cible[i];
-     			else 
-      				to_send += groupes_cible[i] + ";";
-      		}
-    		to_send += "*";
+  	if (groupes_cible == "none")           //groupes cible
+    	to_send += "none*";
+  	else {
+      istringstream ss(groupes_cible);
+      vector<string> groups;
+      string readGroup;
+      while(getline(ss, readGroup, ';')){
+        groups.push_back(readGroup);    
+      }
+//on peut ainsi récupérer la taille et traiter spécialement le dernier élément
+    	for (unsigned int i = 0; i < groups.size(); i++){
+      	if (i==(groups.size()-1))
+      		to_send += groups[i];
+     		else 
+      		to_send += groups[i] + ";";
+      }
+    	to_send += "*";
 		}
-  		if (typeData == "none")
-    		to_send += "none*";
- 		else 
-    		to_send += typeData + "*";
+
+    to_send += typeData + "*";        //typedata
+    to_send += "none*";               //reference
+    to_send += "none*";                //nom
+    to_send += "EOF";
  	}
 
- 	if (action=="4"){
-  		if (statut == "none")
-    		to_send +="none*";
-  		else 
-    		to_send += statut + "*";
 
-  		if (affectation == "none")
-    		to_send += "none*";
-  		else 
-    		to_send += affectation + "*"; 
+ 	else if (action=="4"){   
+    to_send += statut + "*";       //statut client
+    to_send += affectation + "*";  //affectation client
 
-  		if (groupes_client.size()==0)
-    		to_send += "none*";
-  		else {
-    		for (unsigned int i = 0; i < groupes_client.size(); i++){
-      			if (i==(groupes_client.size()-1))
-      				to_send += groupes_client[i];
-     			else 
-      				to_send += groupes_client[i] + ";";
-      		}
-    		to_send += "*";
+  	if (groupes_client == "none")    //groupes
+    	to_send += "none*";
+  	else {
+      istringstream ss(groupes_client);
+      vector<string> groups;
+      string readGroup;
+
+      while(getline(ss, readGroup, ';')){
+        groups.push_back(readGroup);    
+      }
+
+    	for (unsigned int i = 0; i < groups.size(); i++){
+      	if (i==(groups.size()-1))
+      	  to_send += groups[i];
+     		else 
+      		to_send += groups[i] + ";";
+      }
+    	to_send += "*";
 		}
-  		if (typeData == "none")
-    		to_send += "none*";
- 		else 
-    		to_send += typeData + "*";
+
+    to_send += "none*";             //typeData
+    to_send += ref + "*";                 //ref
+    to_send += "none*";             //user
+    to_send += "EOF";
  	}
 
  	else if (action=="1" || action=="2"){
- 		 if (statut == "none")
-    		to_send +="none*";
-  		else 
-    		to_send += statut + "*";
-
-  		if (affectation == "none")
-    		to_send += "none*";
-  		else 
-   			 to_send += affectation + "*"; 
-
-  		if (groupes_client.size()==0)
-    		to_send += "none*";
- 		else {
-    		for (unsigned int i = 0; i < groupes_client.size(); i++){
-     			if (i==(groupes_client.size()-1))
-      				to_send += groupes_client[i];
-    			else 
-      				to_send += groupes_client[i] + ";";
-      		}
-   		    to_send += "*";
-  		}
-
- 		if (typeData == "none")
-    		to_send += "none*";
-  		else 
-    		to_send += typeData + "*";
- 		if (ref == "none")
-    		to_send += "none*";
-  		else 
-    		to_send += ref + "*";
-  		if (user== "none")
-    		to_send += "none*";
-  		else
-    		to_send += user + "*";
+    	to_send +="none*";             //status
+   		to_send += affectation + "*";  //affectation
+    	to_send += "none*";            //groupes
+    	to_send += "none*";            //typeData
+    	to_send += "none*";            //ref
+    	to_send += "none*";            //user
+      to_send += "EOF";
 	}
-	to_send += "EOF";
-  	return to_send;
+
+  return to_send;
 }
 
  
@@ -486,24 +468,6 @@ string traitement_rep_client(string a_traiter){
 
 //VERSION AVEC TOKEN EN PARAM ET RECUPERATION DES REQUETES 
 string traitement_rep_client(list<string>& a_traiter){
-//	vector<string> a_traiter = vector<string>();
-	//fonction pour recuperer les requetes depuis le réseau
-	/*BLOC DE TEST EN ATTENDANT*/
-	/*REPONSES 1/2*/
-//	a_traiter.push_back("123*1*Eichler*prof*EOF");
-//	a_traiter.push_back("123*1*Castelain*directeur*EOF");
-//	a_traiter.push_back("123*1*Megy*tyran*EOF");
-//	a_traiter.push_back("123*1*Hernance*general anti-cafe*EOF");
-	/*REPONSES 3*/
-
-
-	/*REPONSES 4*/
-//	a_traiter.push_back("123*4*Ta_mere.mp4*EOF");
-//	a_traiter.push_back("123*4*EddyMalou.tar.gz*EOF");
-//	a_traiter.push_back("123*4*windows10.exe*EOF");
-//	a_traiter.push_back("123*4*traitement.cpp*EOF");
-
-	/****************************/
 
 	vector<string> vectToSend=vector<string>();
 	/*Il vaut mieux décomposer comme ca : Si on se rend compte qu'une requete est invalide
@@ -720,69 +684,79 @@ string traitement_req_bdd(string numero,
 						  string statut_cible,
 						  string affectation, 
 						  string affectation_cible,
-						  vector<string> groupes_client, 
-						  vector<string> groupes_cible,
+						  string groupes_client, 
+						  string groupes_cible,
 						  string typeData, 
 						  string ref, 
 						  string user){
 
   string to_send = numero + "*" + action + "*";
+
   if (action=="300"){
- 	 if (statut == "none")
-   		 to_send +="NULL*";
- 	 else 
-   		 to_send += statut_cible + "*";
+ 	  if (statut_cible == "none")                            //statut cible facultatif
+   		to_send +="NULL*";
+ 	  else 
+   		to_send += statut_cible + "*";
 
- 	 if (affectation == "none")
-  		 to_send += "NULL*";
-  	 else 
-    	to_send += affectation_cible + "*"; 
-     if (groupes_client.size() == 0)
-    	to_send += "NULL*";
-  	 else {
-   	 	for (unsigned int i = 0; i < groupes_cible.size(); i++){
-      		if (i==(groupes_cible.size()-1))
-      			to_send += groupes_cible[i];
-     		else 
-      			to_send += groupes_client[i] + ";";
-      	 }
-        to_send += "*";
-	 }
-
-	 if (typeData == "none")
-    	to_send += "NULL*";
+ 	  if (affectation_cible == "none")                        //affectation cible facultative
+  		to_send += "NULL*";
   	else 
-    	to_send += typeData + "*";
-   }
-
-   if (action=="301"){
-   	 if (statut == "none")
-   		 to_send +="NULL*";
- 	 else 
-   		 to_send += statut + "*";
-
- 	 if (affectation == "none")
-  		 to_send += "NULL*";
-  	 else 
-    	to_send += affectation + "*"; 
-     if (groupes_client.size() == 0)
+    	to_send += affectation_cible + "*"; 
+    if (groupes_cible == "none")                          //groupes cible facultatifs
     	to_send += "NULL*";
-  	 else {
-   	 	for (unsigned int i = 0; i < groupes_client.size(); i++){
-      		if (i==(groupes_client.size()-1))
-      			to_send += groupes_client[i];
+
+  	else {
+      istringstream ss(groupes_cible);
+      vector<string> groups;
+      string readGroup;
+      while(getline(ss, readGroup, ';')){
+        groups.push_back(readGroup);    
+      }
+
+   	  for (unsigned int i = 0; i < groups.size(); i++){
+        if (i==(groups.size()-1))
+      		to_send += groups[i];
      		else 
-      			to_send += groupes_client[i] + ";";
-      	 }
+      		to_send += groups[i] + ";";
+      }
         to_send += "*";
-     }
-	 if (ref == "none")
+	  }
+
+    to_send += typeData + "*";                              //typeData     
+
+  }
+
+  if (action=="301"){
+   	to_send += statut + "*";                                //statut
+    to_send += affectation + "*";                           //affectation
+
+    if (groupes_client == "none")
+    	to_send += "NULL*";
+
+  	else {                                                   //groupes client
+      istringstream ss(groupes_client);
+      vector<string> groups;
+      string readGroup;
+      while(getline(ss, readGroup, ';')){
+        groups.push_back(readGroup);    
+      }
+
+   	 	for (unsigned int i = 0; i < groups.size(); i++){
+      	if (i==(groupes_client.size()-1))
+      		to_send += groups[i];
+     		else 
+      		to_send += groups[i] + ";";
+      }
+      to_send += "*";
+    }
+
+	  if (ref == "none")
      	to_send += "NULL*";
-  	 else 
+  	else 
     	to_send += ref + "*";
 	}
- 	 to_send += "EOF*";
- 	 return to_send;
+ 	to_send += "EOF*";
+ 	return to_send;
 }
 
 
