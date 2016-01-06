@@ -25,8 +25,12 @@ string Requete::getParametre()
 {       return m_parametre;}
 string Requete::getGroupe()
 {       return m_groupe;}
-string Requete::getGroupeCible()	//ADDED
+string Requete::getGroupeCible()		//ADDED
 {       return m_groupe_cible;}
+string Requete::getStatutCible()		//ADDED
+{       return m_statut_cible;}
+string Requete::getAffectationCible()	//ADDED
+{       return m_affectation_cible;}
 string Requete::getCle()
 {       return m_cle;}
 string Requete::getRequete()
