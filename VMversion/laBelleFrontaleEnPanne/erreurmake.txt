@@ -1,0 +1,1348 @@
+In file included from /home/thomas/boost_1_59_0/boost/thread.hpp:24:0,
+                 from Tslot.h:9,
+                 from network_interface.h:22,
+                 from main.cpp:12:
+/home/thomas/boost_1_59_0/boost/thread/future.hpp:410:77: warning: unused parameter ‘lk’ [-Wunused-parameter]
+             future_state::state get_state(boost::unique_lock<boost::mutex>& lk) const
+                                                                             ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:90:7: error: reference to ‘RSA’ is ambiguous
+       RSA *rsa,int padding);
+       ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:90:7: error: ‘RSA’ has not been declared
+       RSA *rsa,int padding);
+       ^
+/usr/include/openssl/rsa.h:93:7: error: reference to ‘RSA’ is ambiguous
+       RSA *rsa,int padding);
+       ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:93:7: error: ‘RSA’ has not been declared
+       RSA *rsa,int padding);
+       ^
+/usr/include/openssl/rsa.h:96:8: error: reference to ‘RSA’ is ambiguous
+        RSA *rsa,int padding);
+        ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:96:8: error: ‘RSA’ has not been declared
+        RSA *rsa,int padding);
+        ^
+/usr/include/openssl/rsa.h:99:8: error: reference to ‘RSA’ is ambiguous
+        RSA *rsa,int padding);
+        ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:99:8: error: ‘RSA’ has not been declared
+        RSA *rsa,int padding);
+        ^
+/usr/include/openssl/rsa.h:100:48: error: reference to ‘RSA’ is ambiguous
+  int (*rsa_mod_exp)(BIGNUM *r0,const BIGNUM *I,RSA *rsa,BN_CTX *ctx); /* Can be null */
+                                                ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:100:48: error: ‘RSA’ has not been declared
+  int (*rsa_mod_exp)(BIGNUM *r0,const BIGNUM *I,RSA *rsa,BN_CTX *ctx); /* Can be null */
+                                                ^
+/usr/include/openssl/rsa.h:104:14: error: reference to ‘RSA’ is ambiguous
+  int (*init)(RSA *rsa);  /* called at new */
+              ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:104:14: error: ‘RSA’ has not been declared
+  int (*init)(RSA *rsa);  /* called at new */
+              ^
+/usr/include/openssl/rsa.h:105:16: error: reference to ‘RSA’ is ambiguous
+  int (*finish)(RSA *rsa); /* called at free */
+                ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:105:16: error: ‘RSA’ has not been declared
+  int (*finish)(RSA *rsa); /* called at free */
+                ^
+/usr/include/openssl/rsa.h:117:54: error: reference to ‘RSA’ is ambiguous
+   unsigned char *sigret, unsigned int *siglen, const RSA *rsa);
+                                                      ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:117:54: error: ‘RSA’ does not name a type
+   unsigned char *sigret, unsigned int *siglen, const RSA *rsa);
+                                                      ^
+/usr/include/openssl/rsa.h:121:15: error: reference to ‘RSA’ is ambiguous
+         const RSA *rsa);
+               ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:121:15: error: ‘RSA’ does not name a type
+         const RSA *rsa);
+               ^
+/usr/include/openssl/rsa.h:126:20: error: reference to ‘RSA’ is ambiguous
+  int (*rsa_keygen)(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                    ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:126:20: error: ‘RSA’ has not been declared
+  int (*rsa_keygen)(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                    ^
+/usr/include/openssl/rsa.h:281:1: error: reference to ‘RSA’ is ambiguous
+ RSA * RSA_new(void);
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:281:1: error: ‘RSA’ does not name a type
+ RSA * RSA_new(void);
+ ^
+/usr/include/openssl/rsa.h:282:1: error: reference to ‘RSA’ is ambiguous
+ RSA * RSA_new_method(ENGINE *engine);
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:282:1: error: ‘RSA’ does not name a type
+ RSA * RSA_new_method(ENGINE *engine);
+ ^
+/usr/include/openssl/rsa.h:283:20: error: reference to ‘RSA’ is ambiguous
+ int RSA_size(const RSA *rsa);
+                    ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:283:20: error: ‘RSA’ does not name a type
+ int RSA_size(const RSA *rsa);
+                    ^
+/usr/include/openssl/rsa.h:287:1: error: reference to ‘RSA’ is ambiguous
+ RSA * RSA_generate_key(int bits, unsigned long e,void
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:287:1: error: ‘RSA’ does not name a type
+ RSA * RSA_generate_key(int bits, unsigned long e,void
+ ^
+/usr/include/openssl/rsa.h:292:25: error: reference to ‘RSA’ is ambiguous
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                         ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:292:30: error: ‘rsa’ was not declared in this scope
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                              ^
+/usr/include/openssl/rsa.h:292:35: error: expected primary-expression before ‘int’
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                                   ^
+/usr/include/openssl/rsa.h:292:52: error: expected primary-expression before ‘*’ token
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                                                    ^
+/usr/include/openssl/rsa.h:292:53: error: ‘e’ was not declared in this scope
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                                                     ^
+/usr/include/openssl/rsa.h:292:65: error: expected primary-expression before ‘*’ token
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                                                                 ^
+/usr/include/openssl/rsa.h:292:66: error: ‘cb’ was not declared in this scope
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                                                                  ^
+/usr/include/openssl/rsa.h:292:68: error: expression list treated as compound expression in initializer [-fpermissive]
+ int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
+                                                                    ^
+/usr/include/openssl/rsa.h:294:25: error: reference to ‘RSA’ is ambiguous
+ int RSA_check_key(const RSA *);
+                         ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:294:25: error: ‘RSA’ does not name a type
+ int RSA_check_key(const RSA *);
+                         ^
+/usr/include/openssl/rsa.h:297:22: error: reference to ‘RSA’ is ambiguous
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:297:22: error: ‘RSA’ has not been declared
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+/usr/include/openssl/rsa.h:299:22: error: reference to ‘RSA’ is ambiguous
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:299:22: error: ‘RSA’ has not been declared
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+/usr/include/openssl/rsa.h:301:22: error: reference to ‘RSA’ is ambiguous
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:301:22: error: ‘RSA’ has not been declared
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+/usr/include/openssl/rsa.h:303:22: error: reference to ‘RSA’ is ambiguous
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:303:22: error: ‘RSA’ has not been declared
+   unsigned char *to, RSA *rsa,int padding);
+                      ^
+/usr/include/openssl/rsa.h:304:16: error: variable or field ‘RSA_free’ declared void
+ void RSA_free (RSA *r);
+                ^
+/usr/include/openssl/rsa.h:304:16: error: reference to ‘RSA’ is ambiguous
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:304:21: error: ‘r’ was not declared in this scope
+ void RSA_free (RSA *r);
+                     ^
+/usr/include/openssl/rsa.h:306:16: error: reference to ‘RSA’ is ambiguous
+ int RSA_up_ref(RSA *r);
+                ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:306:21: error: ‘r’ was not declared in this scope
+ int RSA_up_ref(RSA *r);
+                     ^
+/usr/include/openssl/rsa.h:308:21: error: reference to ‘RSA’ is ambiguous
+ int RSA_flags(const RSA *r);
+                     ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:308:21: error: ‘RSA’ does not name a type
+ int RSA_flags(const RSA *r);
+                     ^
+/usr/include/openssl/rsa.h:312:40: error: reference to ‘RSA’ is ambiguous
+ const RSA_METHOD *RSA_get_method(const RSA *rsa);
+                                        ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:312:40: error: ‘RSA’ does not name a type
+ const RSA_METHOD *RSA_get_method(const RSA *rsa);
+                                        ^
+/usr/include/openssl/rsa.h:313:20: error: reference to ‘RSA’ is ambiguous
+ int RSA_set_method(RSA *rsa, const RSA_METHOD *meth);
+                    ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:313:25: error: ‘rsa’ was not declared in this scope
+ int RSA_set_method(RSA *rsa, const RSA_METHOD *meth);
+                         ^
+/usr/include/openssl/rsa.h:313:30: error: expected primary-expression before ‘const’
+ int RSA_set_method(RSA *rsa, const RSA_METHOD *meth);
+                              ^
+/usr/include/openssl/rsa.h:313:52: error: expression list treated as compound expression in initializer [-fpermissive]
+ int RSA_set_method(RSA *rsa, const RSA_METHOD *meth);
+                                                    ^
+/usr/include/openssl/rsa.h:316:21: error: reference to ‘RSA’ is ambiguous
+ int RSA_memory_lock(RSA *r);
+                     ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:316:26: error: ‘r’ was not declared in this scope
+ int RSA_memory_lock(RSA *r);
+                          ^
+In file included from /usr/include/openssl/rsa.h:62:0,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:323:1: error: reference to ‘RSA’ is ambiguous
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPublicKey)
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from /usr/include/openssl/rsa.h:62:0,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:323:1: error: ‘RSA’ does not name a type
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPublicKey)
+ ^
+/usr/include/openssl/rsa.h:323:1: error: reference to ‘RSA’ is ambiguous
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPublicKey)
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from /usr/include/openssl/rsa.h:62:0,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:323:1: error: ‘RSA’ does not name a type
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPublicKey)
+ ^
+/usr/include/openssl/rsa.h:324:1: error: reference to ‘RSA’ is ambiguous
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPrivateKey)
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from /usr/include/openssl/rsa.h:62:0,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:324:1: error: ‘RSA’ does not name a type
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPrivateKey)
+ ^
+/usr/include/openssl/rsa.h:324:1: error: reference to ‘RSA’ is ambiguous
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPrivateKey)
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from /usr/include/openssl/rsa.h:62:0,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:324:1: error: ‘RSA’ does not name a type
+ DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPrivateKey)
+ ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:337:34: error: reference to ‘RSA’ is ambiguous
+ int RSA_print_fp(FILE *fp, const RSA *r,int offset);
+                                  ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:337:34: error: ‘RSA’ does not name a type
+ int RSA_print_fp(FILE *fp, const RSA *r,int offset);
+                                  ^
+/usr/include/openssl/rsa.h:341:30: error: reference to ‘RSA’ is ambiguous
+ int RSA_print(BIO *bp, const RSA *r,int offset);
+                              ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:341:30: error: ‘RSA’ does not name a type
+ int RSA_print(BIO *bp, const RSA *r,int offset);
+                              ^
+/usr/include/openssl/rsa.h:345:23: error: reference to ‘RSA’ is ambiguous
+ int i2d_RSA_NET(const RSA *a, unsigned char **pp,
+                       ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:345:23: error: ‘RSA’ does not name a type
+ int i2d_RSA_NET(const RSA *a, unsigned char **pp,
+                       ^
+/usr/include/openssl/rsa.h:348:1: error: reference to ‘RSA’ is ambiguous
+ RSA *d2i_RSA_NET(RSA **a, const unsigned char **pp, long length,
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:348:1: error: ‘RSA’ does not name a type
+ RSA *d2i_RSA_NET(RSA **a, const unsigned char **pp, long length,
+ ^
+/usr/include/openssl/rsa.h:352:28: error: reference to ‘RSA’ is ambiguous
+ int i2d_Netscape_RSA(const RSA *a, unsigned char **pp,
+                            ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:352:28: error: ‘RSA’ does not name a type
+ int i2d_Netscape_RSA(const RSA *a, unsigned char **pp,
+                            ^
+/usr/include/openssl/rsa.h:355:1: error: reference to ‘RSA’ is ambiguous
+ RSA *d2i_Netscape_RSA(RSA **a, const unsigned char **pp, long length,
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:355:1: error: ‘RSA’ does not name a type
+ RSA *d2i_Netscape_RSA(RSA **a, const unsigned char **pp, long length,
+ ^
+/usr/include/openssl/rsa.h:363:47: error: reference to ‘RSA’ is ambiguous
+  unsigned char *sigret, unsigned int *siglen, RSA *rsa);
+                                               ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:363:47: error: ‘RSA’ has not been declared
+  unsigned char *sigret, unsigned int *siglen, RSA *rsa);
+                                               ^
+/usr/include/openssl/rsa.h:365:52: error: reference to ‘RSA’ is ambiguous
+  const unsigned char *sigbuf, unsigned int siglen, RSA *rsa);
+                                                    ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:365:52: error: ‘RSA’ has not been declared
+  const unsigned char *sigbuf, unsigned int siglen, RSA *rsa);
+                                                    ^
+/usr/include/openssl/rsa.h:371:47: error: reference to ‘RSA’ is ambiguous
+  unsigned char *sigret, unsigned int *siglen, RSA *rsa);
+                                               ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:371:47: error: ‘RSA’ has not been declared
+  unsigned char *sigret, unsigned int *siglen, RSA *rsa);
+                                               ^
+/usr/include/openssl/rsa.h:374:46: error: reference to ‘RSA’ is ambiguous
+  unsigned char *sigbuf, unsigned int siglen, RSA *rsa);
+                                              ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:374:46: error: ‘RSA’ has not been declared
+  unsigned char *sigbuf, unsigned int siglen, RSA *rsa);
+                                              ^
+/usr/include/openssl/rsa.h:376:21: error: reference to ‘RSA’ is ambiguous
+ int RSA_blinding_on(RSA *rsa, BN_CTX *ctx);
+                     ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:376:26: error: ‘rsa’ was not declared in this scope
+ int RSA_blinding_on(RSA *rsa, BN_CTX *ctx);
+                          ^
+/usr/include/openssl/rsa.h:376:38: error: expected primary-expression before ‘*’ token
+ int RSA_blinding_on(RSA *rsa, BN_CTX *ctx);
+                                      ^
+/usr/include/openssl/rsa.h:376:39: error: ‘ctx’ was not declared in this scope
+ int RSA_blinding_on(RSA *rsa, BN_CTX *ctx);
+                                       ^
+/usr/include/openssl/rsa.h:376:42: error: expression list treated as compound expression in initializer [-fpermissive]
+ int RSA_blinding_on(RSA *rsa, BN_CTX *ctx);
+                                          ^
+/usr/include/openssl/rsa.h:377:23: error: variable or field ‘RSA_blinding_off’ declared void
+ void RSA_blinding_off(RSA *rsa);
+                       ^
+/usr/include/openssl/rsa.h:377:23: error: reference to ‘RSA’ is ambiguous
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:377:28: error: ‘rsa’ was not declared in this scope
+ void RSA_blinding_off(RSA *rsa);
+                            ^
+/usr/include/openssl/rsa.h:378:33: error: reference to ‘RSA’ is ambiguous
+ BN_BLINDING *RSA_setup_blinding(RSA *rsa, BN_CTX *ctx);
+                                 ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:378:38: error: ‘rsa’ was not declared in this scope
+ BN_BLINDING *RSA_setup_blinding(RSA *rsa, BN_CTX *ctx);
+                                      ^
+/usr/include/openssl/rsa.h:378:50: error: expected primary-expression before ‘*’ token
+ BN_BLINDING *RSA_setup_blinding(RSA *rsa, BN_CTX *ctx);
+                                                  ^
+/usr/include/openssl/rsa.h:378:51: error: ‘ctx’ was not declared in this scope
+ BN_BLINDING *RSA_setup_blinding(RSA *rsa, BN_CTX *ctx);
+                                                   ^
+/usr/include/openssl/rsa.h:378:54: error: expression list treated as compound expression in initializer [-fpermissive]
+ BN_BLINDING *RSA_setup_blinding(RSA *rsa, BN_CTX *ctx);
+                                                      ^
+/usr/include/openssl/rsa.h:410:26: error: reference to ‘RSA’ is ambiguous
+ int RSA_verify_PKCS1_PSS(RSA *rsa, const unsigned char *mHash,
+                          ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:410:31: error: ‘rsa’ was not declared in this scope
+ int RSA_verify_PKCS1_PSS(RSA *rsa, const unsigned char *mHash,
+                               ^
+/usr/include/openssl/rsa.h:410:36: error: expected primary-expression before ‘const’
+ int RSA_verify_PKCS1_PSS(RSA *rsa, const unsigned char *mHash,
+                                    ^
+/usr/include/openssl/rsa.h:411:4: error: expected primary-expression before ‘const’
+    const EVP_MD *Hash, const unsigned char *EM, int sLen);
+    ^
+/usr/include/openssl/rsa.h:411:24: error: expected primary-expression before ‘const’
+    const EVP_MD *Hash, const unsigned char *EM, int sLen);
+                        ^
+/usr/include/openssl/rsa.h:411:49: error: expected primary-expression before ‘int’
+    const EVP_MD *Hash, const unsigned char *EM, int sLen);
+                                                 ^
+/usr/include/openssl/rsa.h:411:57: error: expression list treated as compound expression in initializer [-fpermissive]
+    const EVP_MD *Hash, const unsigned char *EM, int sLen);
+                                                         ^
+/usr/include/openssl/rsa.h:412:31: error: reference to ‘RSA’ is ambiguous
+ int RSA_padding_add_PKCS1_PSS(RSA *rsa, unsigned char *EM,
+                               ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:412:36: error: ‘rsa’ was not declared in this scope
+ int RSA_padding_add_PKCS1_PSS(RSA *rsa, unsigned char *EM,
+                                    ^
+/usr/include/openssl/rsa.h:412:41: error: expected primary-expression before ‘unsigned’
+ int RSA_padding_add_PKCS1_PSS(RSA *rsa, unsigned char *EM,
+                                         ^
+/usr/include/openssl/rsa.h:413:4: error: expected primary-expression before ‘const’
+    const unsigned char *mHash,
+    ^
+/usr/include/openssl/rsa.h:414:4: error: expected primary-expression before ‘const’
+    const EVP_MD *Hash, int sLen);
+    ^
+/usr/include/openssl/rsa.h:414:24: error: expected primary-expression before ‘int’
+    const EVP_MD *Hash, int sLen);
+                        ^
+/usr/include/openssl/rsa.h:414:32: error: expression list treated as compound expression in initializer [-fpermissive]
+    const EVP_MD *Hash, int sLen);
+                                ^
+/usr/include/openssl/rsa.h:416:31: error: reference to ‘RSA’ is ambiguous
+ int RSA_verify_PKCS1_PSS_mgf1(RSA *rsa, const unsigned char *mHash,
+                               ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:416:36: error: ‘rsa’ was not declared in this scope
+ int RSA_verify_PKCS1_PSS_mgf1(RSA *rsa, const unsigned char *mHash,
+                                    ^
+/usr/include/openssl/rsa.h:416:41: error: expected primary-expression before ‘const’
+ int RSA_verify_PKCS1_PSS_mgf1(RSA *rsa, const unsigned char *mHash,
+                                         ^
+/usr/include/openssl/rsa.h:417:4: error: expected primary-expression before ‘const’
+    const EVP_MD *Hash, const EVP_MD *mgf1Hash, 
+    ^
+/usr/include/openssl/rsa.h:417:24: error: expected primary-expression before ‘const’
+    const EVP_MD *Hash, const EVP_MD *mgf1Hash, 
+                        ^
+/usr/include/openssl/rsa.h:418:4: error: expected primary-expression before ‘const’
+    const unsigned char *EM, int sLen);
+    ^
+/usr/include/openssl/rsa.h:418:29: error: expected primary-expression before ‘int’
+    const unsigned char *EM, int sLen);
+                             ^
+/usr/include/openssl/rsa.h:418:37: error: expression list treated as compound expression in initializer [-fpermissive]
+    const unsigned char *EM, int sLen);
+                                     ^
+/usr/include/openssl/rsa.h:420:36: error: reference to ‘RSA’ is ambiguous
+ int RSA_padding_add_PKCS1_PSS_mgf1(RSA *rsa, unsigned char *EM,
+                                    ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:420:41: error: ‘rsa’ was not declared in this scope
+ int RSA_padding_add_PKCS1_PSS_mgf1(RSA *rsa, unsigned char *EM,
+                                         ^
+/usr/include/openssl/rsa.h:420:46: error: expected primary-expression before ‘unsigned’
+ int RSA_padding_add_PKCS1_PSS_mgf1(RSA *rsa, unsigned char *EM,
+                                              ^
+/usr/include/openssl/rsa.h:421:4: error: expected primary-expression before ‘const’
+    const unsigned char *mHash,
+    ^
+/usr/include/openssl/rsa.h:422:4: error: expected primary-expression before ‘const’
+    const EVP_MD *Hash, const EVP_MD *mgf1Hash, int sLen);
+    ^
+/usr/include/openssl/rsa.h:422:24: error: expected primary-expression before ‘const’
+    const EVP_MD *Hash, const EVP_MD *mgf1Hash, int sLen);
+                        ^
+/usr/include/openssl/rsa.h:422:48: error: expected primary-expression before ‘int’
+    const EVP_MD *Hash, const EVP_MD *mgf1Hash, int sLen);
+                                                ^
+/usr/include/openssl/rsa.h:422:56: error: expression list treated as compound expression in initializer [-fpermissive]
+    const EVP_MD *Hash, const EVP_MD *mgf1Hash, int sLen);
+                                                        ^
+/usr/include/openssl/rsa.h:426:21: error: reference to ‘RSA’ is ambiguous
+ int RSA_set_ex_data(RSA *r,int idx,void *arg);
+                     ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:426:26: error: ‘r’ was not declared in this scope
+ int RSA_set_ex_data(RSA *r,int idx,void *arg);
+                          ^
+/usr/include/openssl/rsa.h:426:28: error: expected primary-expression before ‘int’
+ int RSA_set_ex_data(RSA *r,int idx,void *arg);
+                            ^
+/usr/include/openssl/rsa.h:426:36: error: expected primary-expression before ‘void’
+ int RSA_set_ex_data(RSA *r,int idx,void *arg);
+                                    ^
+/usr/include/openssl/rsa.h:426:45: error: expression list treated as compound expression in initializer [-fpermissive]
+ int RSA_set_ex_data(RSA *r,int idx,void *arg);
+                                             ^
+/usr/include/openssl/rsa.h:427:29: error: reference to ‘RSA’ is ambiguous
+ void *RSA_get_ex_data(const RSA *r, int idx);
+                             ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:427:29: error: ‘RSA’ does not name a type
+ void *RSA_get_ex_data(const RSA *r, int idx);
+                             ^
+/usr/include/openssl/rsa.h:429:1: error: reference to ‘RSA’ is ambiguous
+ RSA *RSAPublicKey_dup(RSA *rsa);
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:429:1: error: ‘RSA’ does not name a type
+ RSA *RSAPublicKey_dup(RSA *rsa);
+ ^
+/usr/include/openssl/rsa.h:430:1: error: reference to ‘RSA’ is ambiguous
+ RSA *RSAPrivateKey_dup(RSA *rsa);
+ ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from rsacrypt.h:3:0,
+                 from main.cpp:14:
+/usr/include/openssl/rsa.h:430:1: error: ‘RSA’ does not name a type
+ RSA *RSAPrivateKey_dup(RSA *rsa);
+ ^
+In file included from main.cpp:14:0:
+rsacrypt.h:24:5: error: reference to ‘RSA’ is ambiguous
+     RSA *rsaKey;
+     ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from main.cpp:14:0:
+rsacrypt.h:24:5: error: ‘RSA’ does not name a type
+     RSA *rsaKey;
+     ^
+rsacrypt.h:26:5: error: reference to ‘RSA’ is ambiguous
+     RSA *forgeignKey;
+     ^
+In file included from /usr/include/openssl/crypto.h:131:0,
+                 from /usr/include/openssl/bio.h:69,
+                 from /usr/include/openssl/asn1.h:65,
+                 from /usr/include/openssl/rsa.h:62,
+                 from rsacrypt.h:3,
+                 from main.cpp:14:
+/usr/include/openssl/ossl_typ.h:144:23: note: candidates are: typedef struct rsa_st RSA
+ typedef struct rsa_st RSA;
+                       ^
+In file included from network_interface.h:6:0,
+                 from main.cpp:12:
+/usr/include/cryptopp/rsa.h:121:21: note:                 struct CryptoPP::RSA
+ struct CRYPTOPP_DLL RSA
+                     ^
+In file included from main.cpp:14:0:
+rsacrypt.h:26:5: error: ‘RSA’ does not name a type
+     RSA *forgeignKey;
+     ^
+main.cpp: In function ‘int main(int, char**)’:
+main.cpp:29:9: error: ‘class rsaCrypt’ has no member named ‘ketGen’
+  rsabdd.ketGen();
+         ^
+In file included from /home/thomas/boost_1_59_0/boost/asio/io_service.hpp:25:0,
+                 from /home/thomas/boost_1_59_0/boost/asio/basic_io_object.hpp:19,
+                 from /home/thomas/boost_1_59_0/boost/asio/basic_socket.hpp:20,
+                 from /home/thomas/boost_1_59_0/boost/asio/basic_datagram_socket.hpp:20,
+                 from /home/thomas/boost_1_59_0/boost/asio.hpp:21,
+                 from network_interface.h:15,
+                 from main.cpp:12:
+/home/thomas/boost_1_59_0/boost/system/error_code.hpp: At global scope:
+/home/thomas/boost_1_59_0/boost/system/error_code.hpp:221:36: warning: ‘boost::system::posix_category’ defined but not used [-Wunused-variable]
+     static const error_category &  posix_category = generic_category();
+                                    ^
+/home/thomas/boost_1_59_0/boost/system/error_code.hpp:222:36: warning: ‘boost::system::errno_ecat’ defined but not used [-Wunused-variable]
+     static const error_category &  errno_ecat     = generic_category();
+                                    ^
+/home/thomas/boost_1_59_0/boost/system/error_code.hpp:223:36: warning: ‘boost::system::native_ecat’ defined but not used [-Wunused-variable]
+     static const error_category &  native_ecat    = system_category();
+                                    ^
+In file included from /home/thomas/boost_1_59_0/boost/asio/detail/impl/posix_mutex.ipp:24:0,
+                 from /home/thomas/boost_1_59_0/boost/asio/detail/posix_mutex.hpp:73,
+                 from /home/thomas/boost_1_59_0/boost/asio/detail/mutex.hpp:25,
+                 from /home/thomas/boost_1_59_0/boost/asio/detail/service_registry.hpp:20,
+                 from /home/thomas/boost_1_59_0/boost/asio/impl/io_service.hpp:19,
+                 from /home/thomas/boost_1_59_0/boost/asio/io_service.hpp:767,
+                 from /home/thomas/boost_1_59_0/boost/asio/basic_io_object.hpp:19,
+                 from /home/thomas/boost_1_59_0/boost/asio/basic_socket.hpp:20,
+                 from /home/thomas/boost_1_59_0/boost/asio/basic_datagram_socket.hpp:20,
+                 from /home/thomas/boost_1_59_0/boost/asio.hpp:21,
+                 from network_interface.h:15,
+                 from main.cpp:12:
+/home/thomas/boost_1_59_0/boost/asio/error.hpp:258:45: warning: ‘boost::asio::error::system_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& system_category
+                                             ^
+/home/thomas/boost_1_59_0/boost/asio/error.hpp:260:45: warning: ‘boost::asio::error::netdb_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& netdb_category
+                                             ^
+/home/thomas/boost_1_59_0/boost/asio/error.hpp:262:45: warning: ‘boost::asio::error::addrinfo_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& addrinfo_category
+                                             ^
+/home/thomas/boost_1_59_0/boost/asio/error.hpp:264:45: warning: ‘boost::asio::error::misc_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& misc_category
+                                             ^
+make: *** [main.o] Error 1
