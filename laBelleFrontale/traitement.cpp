@@ -495,13 +495,12 @@ string traitement_rep_client(list<string>& a_traiter){
 
 		string stringInTheVector;		//chaine qu'on va push dans le vector
     string nom;
-    string Hnomstat;
     string statut;
     string reference;
     string token;   
+    string Hnom;
     string document;
     string tokenEOF;        //hey are you EOF?
-    int testEOF = 0;        //avez-vous déjà croisé EOF?
 	
 	/*LE NUMERO NE SERA RENVOYEE QU'UNE SEULE FOIS*/
 
@@ -510,15 +509,10 @@ string traitement_rep_client(list<string>& a_traiter){
 
 		if (action=="1") {
 		//RECHERCHE UTILISATEUR : RECUPERATION DU NOM ET DU HASH STATUT
-			if (!getline(ss, nom, '*') || !getline(ss, statut, '*') || !getline(ss,tokenEOF,'*') ||
-          nom == "none" || statut == "none" ||
-          nom == "EOF"  || statut == "EOF" || tokenEOF != "EOF") {
-
-					stringInTheVector ="ERROR*";
-			}
-
-			else {
-			   stringInTheVector += nom + "*" + hashString((char*)statut.c_str())+"*";
+			if (getline(ss, nom, '*') && getline(ss, statut, '*') && getline(ss,tokenEOF,'*') &&
+        nom != "none" && statut != "none" &&
+        nom != "EOF"  && statut != "EOF" && tokenEOF == "EOF") {
+			  stringInTheVector += nom + "*" + hashString((char*)statut.c_str())+"*";
 			}
 		}
 
@@ -526,19 +520,14 @@ string traitement_rep_client(list<string>& a_traiter){
 
 		else if (action=="2"){
 		//RECHERCHE EXISTENCE DUNE PERSONNE : RECUPERATION DU NOM ET DU STATUT
-			if (!getline(ss, nom, '*') || !getline(ss, statut, '*') || !getline(ss, tokenEOF, '*')|| 
-          nom == "EOF"  || statut == "EOF" ||
-          nom == "none" || statut == "none"||
-          tokenEOF != "EOF") {
-
-					stringInTheVector = "ERROR*";
-			}
-
-			/***************************************************************/
-			else { //valide -> renvoi hash(nom+statut)
-         string to_hash = nom + statut;
-         char *hash = (char*)to_hash.c_str();
-				 stringInTheVector += hashString(hash) + "*";
+			if (getline(ss, nom, '*') && getline(ss, statut, '*') && getline(ss, tokenEOF, '*')&& 
+          nom != "EOF"  && statut != "EOF" &&
+          nom != "none" && statut != "none"&&
+          tokenEOF == "EOF") {
+			//valide -> renvoi hash(nom+statut)
+        string to_hash = nom + statut;
+        char *hash = (char*)to_hash.c_str();
+				stringInTheVector += hashString(hash) + "*";
       }
 		}
 
@@ -546,59 +535,33 @@ string traitement_rep_client(list<string>& a_traiter){
  
 		else if (action == "3"){
 	     //RECHERCHE STATUT*REFERENCE*NOM
-       while (getline(ss , token , '*')){
-          if (token == "none"){
-             stringInTheVector = "ERROR*";
-             break;
-          }
-
-          else if (token =="EOF" || testEOF == 1){
-    /*ON NE PEUT RENTRER QUUNE FOIS SAUF SI LA REPONSE EST INVALIDE*/
-             if (testEOF == 0)
-                testEOF=1;
-             else  
-                stringInTheVector = "ERROR*";
-          }
-
-          else {
-             istringstream ssToken(token);
-             if ( !getline(ssToken,statut,';') || !getline(ssToken, reference, ';') || !getline(ssToken, nom, ';') ||
-                reference == "EOF" || reference == "none" || nom == "EOF" || nom == "none" || 
-                statut == "none"||statut == "EOF"){
-                stringInTheVector = "ERROR*";
-                continue;
-             }
-             else {
-                string to_hash = nom + statut;
-                char *hash = (char*)to_hash.c_str();
-                stringInTheVector += reference + "*" + hashString(hash) + "*";
-             }
-          }
-       }
+      while (getline(ss , token , '*') && token != "EOF" && token != "none"){
+        istringstream ssToken(token);
+        if (getline(ssToken, reference, ';') && getline(ssToken, nom, ';')){
+          char *hash = (char*)nom.c_str();
+          stringInTheVector += reference + "*" + hashString(hash) + "*";
+        }
+      }
     }
 
 	/*************************************************/
 
 	  else if (action == "4"){
 		//RECUPERATION DOCUMENT
-       if (!getline(ss, document, '*') || !getline(ss, tokenEOF, '*')|| 
-          document == "EOF" || document == "none" || tokenEOF != "EOF"){
-
-          stringInTheVector = "ERROR*";
-       }
-
-       else {
-          stringInTheVector = document + "*";
-       }
+      if (getline(ss, document, '*') && getline(ss, tokenEOF, '*') && 
+        document != "EOF" && document != "none" && tokenEOF == "EOF"){
+        stringInTheVector = document + "*";
+      }
     }
+
+  /************************************************/
 
     else if (action == "6"){
     //RECHERCHE DUN GROUPE
-       string yn; 
-       if (!getline(ss,yn,'*') || yn !="0" || yn != "1")
-         stringInTheVector = "ERROR*";
-       else
-         stringInTheVector = yn;
+      string yn; 
+      if (getline(ss,yn,'*') && getline(ss,tokenEOF,'*') && (yn !="0" || yn != "1")
+          && tokenEOF == "EOF")
+        stringInTheVector = yn;
     }
 
 
@@ -606,80 +569,38 @@ string traitement_rep_client(list<string>& a_traiter){
 
     else if (action == "300"){
     //déja hashé!
-       while (getline(ss , token , '*')){
-          if (token == "NULL"){
-             stringInTheVector = "ERROR*";
-             break;
-          }
-
-          else if (token =="EOF" || testEOF == 1){
-    /*ON NE PEUT RENTRER QUUNE FOIS SAUF SI LA REPONSE EST INVALIDE*/
-             if (testEOF == 0)
-                testEOF=1;
-             else 
-                stringInTheVector = "ERROR*";
-          }
-
-          else {
-             istringstream ssToken(token);
-             if (!getline(ssToken, reference, ';') || !getline(ssToken, Hnomstat, ';') ||
-                reference == "EOF" || reference == "NULL" || nom == "EOF" || nom == "NULL"){
-                stringInTheVector = "ERROR*";
-                continue;
-             }
-             else {
-             //BDD : pas besoin de hasher
-                stringInTheVector += reference + "*" + Hnomstat + "*";
-             }
-          }
-       }
+      while (getline(ss , token , '*') && token != "EOF" && token != "NULL"){
+        istringstream ssToken(token);
+        if (getline(ssToken, reference, ';') && getline(ssToken, Hnom, ';')){
+          stringInTheVector += reference + "*" + Hnom + "*";
+        }
+      }
     }
+
+    /*********************************************************/
 
     else if (action == "301"){
       //RECUPERATION DOCUMENT
-       if (!getline(ss, document, '*') || !getline(ss, tokenEOF, '*')|| 
-          document == "EOF" || document == "none" || tokenEOF != "EOF"){
-
-          stringInTheVector = "ERROR*";
-       }
-
-       else {
-          stringInTheVector = document + "*";
-       }
+      if (getline(ss, document, '*') && getline(ss, tokenEOF, '*') && 
+        document != "EOF" && document != "none" && tokenEOF == "EOF"){
+        stringInTheVector = document + "*";
+      }
     }
 
-		/*TEST D'ERREUR DE LA REPONSE : CHAMP ACTION INVALIDE*/
-		else {
-			stringInTheVector = "ERROR*";
-		}
+    //else{}
 
 		/*****************************************************/
 
-		vectToSend.push_back(stringInTheVector);
+		if (!stringInTheVector.empty())   
+      vectToSend.push_back(stringInTheVector);
 		//on ajoute une réponse traitée dans le vector
 	}
 
-/**********************************************************************/
-//ON BOUCLE POUR TESTER SIL EXISTE UNE REPONSE QUI NEST PAS UNE ERREUR//
-/**********************************************************************/
-	int valid_existence=0;
-	unsigned int i=0;
-	while (i<vectToSend.size() && valid_existence==0){
-		 if (vectToSend[i] !="ERROR*"){
-		 	 valid_existence = 1;
-		 }
-		 i++;
-	}
-
-//On remplit to_send avec les réponses valides, ou avec ERROR* si aucune n'est valide 
-
-	if (valid_existence==0)
-		to_send += "ERROR*";
-	else {
-		for (i=0;i<vectToSend.size();i++){
-			if (vectToSend[i] != "ERROR*")
-				to_send += vectToSend[i];
-		}
+  if (vectToSend.size()==0) 
+    to_send += "ERROR*";
+ 
+	for (unsigned int i=0;i<vectToSend.size();i++){
+			to_send += vectToSend[i];
 	}
 
 	return to_send;
