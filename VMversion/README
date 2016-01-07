@@ -1,0 +1,5 @@
+A modifier pour votre cas de figure : 
+Adresse IP utilisé par le client pour joindre la frontale : config.ini dans leBeauClient
+Adresses IP/port utilisées par la frontale pour joindre le Serveur et le SecureNodeProvider : network_engine.cpp dans network_interface::spawn() ligne 90
+
+NB: dernière version du Réseau, mais utilisation de send au lieu de sendRep pour éviter le crash
