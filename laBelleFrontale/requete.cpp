@@ -49,16 +49,16 @@ void Requete::setResultat(string buffer)
 =========================================================================================================================*/
 
 
-int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les éléments nécessaire suivant le type de requête => construit la requete à envoyer sur le réseau
+int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã©lÃ©ments nÃ©cessaire suivant le type de requÃªte => construit la requete Ã  envoyer sur le rÃ©seau
 {
 //CONSIDEREES DU MEME TOKEN
-//PAS BESOIN DUN VECTOR<STRING>, on gère les réponses l'une après l'autre
-	int isError=1;	//1 si aucune réponse n'est valide
+//PAS BESOIN DUN VECTOR<STRING>, on gÃ¨re les rÃ©ponses l'une aprÃ¨s l'autre
+	int isError=1;	//1 si aucune rÃ©ponse n'est valide
 	vector<string> reponseTraitees = vector<string>();	//pareil que pour les reponses clients
 	for (list<string>::iterator it = reponse.begin(); it != reponse.end(); it++){
 		//recup dans l'iss de la reponse
 		istringstream ss(*it);
-		string numero; getline(ss, numero, '*');	//récupération du numéro pour chaque réponse
+		string numero; getline(ss, numero, '*');	//rÃ©cupÃ©ration du numÃ©ro pour chaque rÃ©ponse
 		string name;
 		string hash_recu;
 		string hash;
@@ -66,13 +66,15 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 		string reference;
 		string inTheVector;
 
-		if (*it == numero+"*ERROR*") continue; //on passe à la reponse suivante
+
+		if (*it == numero+"*ERROR*") continue; //on passe Ã  la reponse suivante
 		else isError = 0;
 
 		if(m_action.compare("search") == 0) {
 		/*****REQUETE 1*****/
 			if(m_option.compare("-n") == 0) {
-		        hash = hashString((char*)m_statut.c_str());
+		 	       m_requete = "R*1*";
+				hash = hashString((char*)m_statut.c_str());
 				while(getline(ss, name, '*') && getline(ss, hash_recu, '*')) {
 					if(hash.compare(hash_recu) == 0)
 						reponseTraitees.push_back(name);	//UN NOM PAR LIGNE DANS LE TABLEAU
@@ -93,19 +95,19 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 			else if (m_option.compare("-e") ==0) {
 /*ADDED*/				condensate = m_nom + m_statut;
 /*ADDED*/				hash = hashString((char*)condensate.c_str());
-				m_resultat = "R*no";
-				//si aucune réponse n'est "vraie", reste à no, sinon, dira yes
+				m_resultat = "R*2*no";
+				//si aucune rÃ©ponse n'est "vraie", reste Ã  no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
-					//s'il y en a un, on arrête
+					//s'il y en a un, on arrÃªte
 					if(hash.compare(hash_recu) ==0){ 
-						m_resultat = "R*yes";
-						return 1;	//on a trouvé, c'est tout ce qu'on voulait
+						m_resultat = "R*2*yes";
+						return 1;	//on a trouvÃ©, c'est tout ce qu'on voulait
 					}
 				}
 			}
 
 		/*****REQUETE 3*****/
-			else if (m_option.compare("-p") ==0) {
+			else if (m_option.compare("-r") ==0) {
 /*ADDED*/			condensate += m_nom+m_statut;
 				hash = hashString((char*)condensate.c_str());
 /*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
@@ -113,10 +115,12 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 						if(hash.compare(hash_recu) ==0)
 							reference = m_reference;
 				}
+/* Pour Thomas */
 				m_requete = "4*" + m_statut + "*none*" + m_affectation + "*none*" + m_groupe + "*none*none*" + reference + "*none*";
 				/*TODO ENVOI*/
-				break; //bonjour à Amine
+				break; //bonjour Ã  Amine
 			}
+
 
 			else {	//1.6 GIGAWAT? (ne peut jamais arriver?)
 				cerr << "Tri : Option inconnu" << endl ;
@@ -125,7 +129,21 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les é
 			}
 		}
 
-		else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'était une interaction bdd, il faut juste retransmettre le message au client
+		else if(m_action.compare("group") ==0)
+		{
+			string found_group;
+			while(getline(ss, found_group, '*')){
+				if (found_group == "1"){
+					m_requete = "R*6*1";
+					return 1 ;
+				}
+			}
+			m_requete = "R*6*0";
+			return 0;
+		}
+
+
+		else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'Ã©tait une interaction bdd, il faut juste retransmettre le message au client
 			m_resultat = *it;
 
 		else {
@@ -161,14 +179,20 @@ void Requete::construction() //construit la requete suivant action, option et pa
 		else if(m_option.compare("-e") == 0) // Si on cherche l'existance
 			m_requete = "2*none*none*" + m_affectation + "*none*none*none*none*none*none*" ;
 
-		else if(m_option.compare("-p") == 0) // Si on cherche une photo(donnée)
+		else if(m_option.compare("-r") == 0) // Si on cherche une photo(donnÃ©e)
 			m_requete = "3*none*" + m_statut_cible + "*none*" + m_affectation_cible + "*none*" + m_groupe_cible + "*" + m_option + "*none*none*";
 
 		else
 			cerr << "Option inconnue" << endl ;
 	}
+//requete 6
+	else if(m_action.compare("group") == 0) // Action groupe
+        {
+                pourBdd=false;
+                m_requete = "6*none*none*none*none*none*" + m_parametre + "*none*none*none*";
+        }
 
-	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneé dans la bdd
+	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneÃ© dans la bdd
 	{
 /*ADDED*/ string toHash = m_nom+m_statut;
 		hash = hashString((char*)toHash.c_str());
@@ -191,7 +215,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 
 /*===========================================================================================
-	FONCTION DE DECOUPAGE : DECOUPE LA REQUETE RECU DU CLIENT (1ere fonction appelée)
+	FONCTION DE DECOUPAGE : DECOUPE LA REQUETE RECU DU CLIENT (1ere fonction appelÃ©e)
 ===========================================================================================*/
 
 int Requete::decoupage(string chaine)
@@ -206,11 +230,11 @@ int Requete::decoupage(string chaine)
 		return 0;
 	else {
 	//it's ok
-		if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) {// Si c'est une requête pour la bdd on a un champ en plus : le nom de la personne
+		if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0 || (m_action.compare("search") == 0 && m_action.compare("-r"))) {// Si c'est une requÃªte pour la bdd on a un champ en plus : le nom de la personne
 			if (!getline(ss, m_nom, '*')) 
 				return 0;
 		}
-		if(m_action.compare("insert") == 0) {	// Et si la requete est insert => champ supplémentaire : politique de partage
+		if(m_action.compare("insert") == 0) {	// Et si la requete est insert => champ supplÃ©mentaire : politique de partage
 			if (!getline(ss, m_partage, '*')) 
 				return 0;
 		}
