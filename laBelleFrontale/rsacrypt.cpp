@@ -63,21 +63,40 @@ void rsaCrypt::keyGen()
 }
 
 string rsaCrypt::dechiffrement(string chif){
+
+    // DECODAGE BASE64
+/*	char *buffer=(char *)malloc(1024*sizeof(char));
+    BIO *bio, *b64;
+
+    
+    bio = BIO_new_mem_buf((char *)chif.c_str(), -1);
+    b64 = BIO_new(BIO_f_base64());
+    bio = BIO_push(b64,bio);
+    
+    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
+    BIO_read(bio, buffer, chif.length());
+    
+    BIO_free_all(bio);
+
+*/
     cout << "dechiffrement" << endl;
     ostringstream oss;
     unsigned char *clair=(unsigned char*)malloc(1024*sizeof(char));;
     int succ;
     int kLen = RSA_size(rsaKey);
 
+	cout << chif << endl;	
 
     succ = RSA_private_decrypt(kLen,(const unsigned char *)chif.c_str(),clair,rsaKey,RSA_PKCS1_PADDING);
 
     if (succ < 0)
         cout << "erreur dechiffrement rsa" << endl;
-
-    oss << chif;
-
+   
+    oss << clair;
+    free(clair);
+//    free(buffer);
     return oss.str();
+ 
 }
 
 string rsaCrypt::sendKeyPub(int id){
@@ -107,7 +126,11 @@ string rsaCrypt::sendKeyPub(int id){
 
      cout << key << endl;
 
-     msg << id + "*" + "304*" + key + "*EOF";
+     msg << id ;
+     msg << "*" ;
+     msg << "304*"; 
+     msg << key; 
+     msg << "*EOF";
 
      return msg.str();
 }
@@ -119,7 +142,7 @@ bool rsaCrypt::recupKeyPub(string key){
     BIO *keybio = NULL ;
    /* oss << id;
     iss << key;
-
+	cout << key << endl;
     getline(iss,bddKey,'*');
 
     if(!bddKey.compare(oss.str())){
@@ -149,6 +172,7 @@ bool rsaCrypt::recupAesKey(string key, int id){
     istringstream iss;
     string bddKey;
     ostringstream oss;
+    ostringstream bufferchif;    
 
     oss << id;
     iss.str(key);
@@ -160,19 +184,28 @@ bool rsaCrypt::recupAesKey(string key, int id){
 
         if(!bddKey.compare("304")){
             getline(iss,bddKey,'*');
-            cout << bddKey << endl;
+            bufferchif << bddKey;
+	    getline(iss,bddKey,'*');
+            while(bddKey!="EOF"){
+		bufferchif << "*";
+		bufferchif << bddKey;
+		getline(iss,bddKey,'*');
+		}
+	    cout << "debut chiffré :" + bufferchif.str() + "fin chiffré" << endl;		
 
             istringstream issAes;
             string bddaAes;
 
-            issAes.str(this->dechiffrement(QString(bddKey.c_str())).toStdString());
+            issAes.str(this->dechiffrement(bufferchif.str()));
 
             getline(issAes,bddaAes,';');
             aesKey = (char *)bddaAes.c_str();
-
+		cout << "cle aes :";
+		cout << aesKey << endl;
             getline(issAes,bddaAes,'*');
             aesIv = (char *)bddaAes.c_str();
-
+		cout << "iv aes :"; 
+		cout << aesIv << endl;
             return true;
         }else {
             return false;

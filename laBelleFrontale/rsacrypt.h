@@ -2,6 +2,7 @@
 #define RSACRYPT_H
 #include <openssl/rsa.h>
 #include <openssl/aes.h>
+#include <openssl/evp.h>
 #include <QCoreApplication>
 
 

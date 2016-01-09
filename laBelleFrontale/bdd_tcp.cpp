@@ -41,26 +41,29 @@ void bdd_tcp::emission(string texte, int type){
 
 void bdd_tcp::attendLecture(int timeout, int type){
 
-    string chif;
+    
+   
+    ostringstream oss;
 
    yLecture=soc.waitForReadyRead(timeout);  // attend que le paquet soit pret a etre lut
 
    QTextStream(stdout) << "it's ok" << endl;
 
+    while(soc.canReadLine()){
 
-
-      chif = soc.readLine().data(); //lecture du flux
-
-      if(type == 0) msg = this->dechiffrement(chif);
-      else msg = chif;
-
+      oss << soc.readAll().data(); //lecture du flux
+	}
+      if(type == 0) msg = this->dechiffrement(oss.str());
+      else msg = oss.str();
+	
+	cout << "retour de cle" + oss.str() << endl;
 
 }
 
 void bdd_tcp::lecture(){
     ostringstream oss;
     while(soc.canReadLine()){
-       oss << soc.readLine().data(); //lecture du flux
+       oss << soc.readAll().data(); //lecture du flux
        msg=oss.str();
     }
 

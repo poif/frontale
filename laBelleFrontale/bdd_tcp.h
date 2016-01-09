@@ -4,7 +4,7 @@
 #include <QCoreApplication>
 #include <QTcpServer>
 #include <openssl/aes.h>
-#include <QCoreApplication>
+
 
 class bdd_tcp : public QObject
 {
