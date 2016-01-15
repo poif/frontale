@@ -30,7 +30,7 @@ private :
     QHostAddress hostAddr;
     quint16 hostPort;
     list<string> fileMsg;
-    Message mess;
+    Message * mess;
 
 public:
     reception(Tslot * ts, bdd_tcp * bdd,Message * ourMsg,  network_interface * netinf = NULL);

@@ -99,19 +99,19 @@ void reception::traitement(string messageStr){
         //QTextStream(stdout) << msg.getMsg() << endl;
 
         //string input = msg.getMsg().toStdString();
-        string input = mess.decrypt((unsigned char*) messageStr.data(), messageStr.size());
+        string input = mess->decrypt((unsigned char*) messageStr.data(), messageStr.size());
 
-        if(mess.getEChangeKey()){
+        if(mess->getEChangeKey()){
 
             clientFront cli;
             cli.socBind();
-            cli.emission(msg.getToSend());
+            cli.emission(mess->getToSend());
 
 
 
         }else {
 
-        numKey = mess.getNumClient();
+        numKey = mess->getNumClient();
 
         input = token + "*" + input;
 
@@ -125,11 +125,11 @@ void reception::traitement(string messageStr){
             if(req.getPourBdd()){
                 versBdd = QString("%1").arg(req.getRequete().c_str());
 
-                m_bdd->emission(versBdd);
+                m_bdd->emission(req.getRequete());
                 
                 m_bdd->attendLecture(300);
 
-                string messBdd = m_bdd->getMsg().toStdString();
+                string messBdd = m_bdd->getMsg();
 
                 list<string> listReponseBdd;
                 listReponseBdd.push_back(messBdd);
@@ -181,7 +181,7 @@ void reception::traitement(string messageStr){
 
             string repo = "1*R*" + req.getResultat();
 
-            string chiffrer = mess.crypt((unsigned char*) repo.data(), repo.size(), numKey);
+            string chiffrer = mess->crypt((unsigned char*) repo.data(), repo.size(), numKey);
 
             //string toto = msg2.getMsg().toStdString();
             cout << chiffrer << endl;

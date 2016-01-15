@@ -4,11 +4,8 @@
 int main (void)
 {
 	char * command = malloc (sizeof (char*) *1024);
-	//unsigned char entre[] = "bonjourj'aimelecheval";
-	//unsigned char sortie[sizeof(entre)];// = malloc (sizeof(entre));
-	//unsigned char lafin[sizeof(entre)];// = malloc (sizeof(entre));
 
-	partage_create("fichier.txt", "/home/valou/fichier.txt", 0, "mongroup,niania");
+	//AES_generate_key ();
 
 	if(memcmp(recup_valeur("accueil_visible"), "true", 4) == 0)
 		accueil();
@@ -19,10 +16,14 @@ int main (void)
 		return -1;
 	}
 
-	//crypt(entre, sortie, sizeof(entre));
-	//decrypt(sortie, lafin, sizeof(entre));
+	/*generate_RSA_keys ();
+	RSA_envoi_key_pub ();
 
-	//printf("La fin -> %s\n", lafin);
+	pthread_t attente_reponse;
+
+	pthread_create(&attente_reponse, NULL, wait_answer, NULL);
+
+	pthread_join(&attente_reponse, NULL);*/
 
 	puts("Entrez une commande ou help !");
 

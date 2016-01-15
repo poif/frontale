@@ -482,7 +482,7 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
 
-    int i;
+    
 
 	list<string> * a_traiter;
 	list<string> a_traiter_clair;
@@ -498,13 +498,12 @@ string network_interface::treat_resource(string& request, string& token, int act
 	/* --- On interroge le client --- */
 	clientFront cli;
 
-    for(i; i < mess.getNbKey(); i++){
+	for(int i=0; i < mess->getNbKey(); i++){
 
-    string chiffrer = mess.crypt((unsigned char*) request.data(), request.size(),i);
-	cli.socBind();
-	cli.emission(chiffrer);
-
-    }
+	string chiffrer = mess->crypt((unsigned char*) request.data(), request.size(),i);
+		cli.socBind();
+		cli.emission(chiffrer);
+	}
 
 	if(ts_s->TriggerToken(token) == false) return "";
 
@@ -523,7 +522,7 @@ string network_interface::treat_resource(string& request, string& token, int act
                         //msg.dechiffrement(key);
 
 			//string rep = msg.getMsg().toStdString();
-            string rep = mess.decrypt((unsigned char*) messageStr.data(), messageStr.size());
+            string rep = mess->decrypt((unsigned char*) messageStr.data(), messageStr.size());
 
 			a_traiter_clair.push_back(rep);
 
@@ -566,7 +565,7 @@ void network_interface::process_received_events(engine_event& e){
 
 		 	engine_event r;
 			engine_event p;
-			vector<string> groups;
+			//vector<string> groups;
 
 			string reqFormat;
 
@@ -574,8 +573,8 @@ void network_interface::process_received_events(engine_event& e){
 			string affectationReq = e.s_data["AFFECTATION"];
 			string token = e.s_data["TOKEN"];
 
-			groups.push_back("none");
-			reqFormat = traitement_req_client(token,"1", "none", affectationReq, groups,"none","none", "none");
+			//groups.push_back("none");
+			reqFormat = traitement_req_client(token,"1", "none", "none", affectationReq, "none", "none", "none", "none","none", "none");
 
 			string repFormat = treat_resource(reqFormat, token);
 
@@ -637,15 +636,15 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event r;
 			engine_event p;
 			string reqFormat;
-			vector<string> groups;
+			//vector<string> groups;
 
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
 			string token = e.s_data["TOKEN"];
 			/*Traitement de la requete */
 
-			groups.push_back("none");
-			reqFormat = traitement_req_client(token,"2", "none", affectationReq, groups,"none","none", "none");
+			//groups.push_back("none");
+			reqFormat = traitement_req_client(token,"2", "none", "none", affectationReq, "none", "none", "none","none","none", "none");
 
 			string repFormat = treat_resource(reqFormat, token);
 
@@ -705,7 +704,7 @@ void network_interface::process_received_events(engine_event& e){
 
 			engine_event r;
 			engine_event p;
-			vector<string> groups;
+			//vector<string> groups;
 
 			string reqFormat;
 			string reqFormatBdd;
@@ -714,8 +713,8 @@ void network_interface::process_received_events(engine_event& e){
 			string affectationReq = e.s_data["AFFECTATION"];
 			string token = e.s_data["TOKEN"];
 
-			groups.push_back("none");
-			reqFormat = traitement_req_client(token,"3", "none", affectationReq, groups,dataType,"none", "none");
+			//groups.push_back("none");
+			reqFormat = traitement_req_client(token,"3", "none", "none", affectationReq, "none", "none", "none",dataType,"none", "none");
 			//reqFormatBdd = traitement_req_bdd(token,"300", "none", affectationReq, groups,dataType,"none", "none");
 
 			string repFormat = treat_resource(reqFormat, token, 3, reqFormatBdd);
@@ -935,21 +934,21 @@ void network_interface::process_received_events(engine_event& e){
 					string reference = r.s_data["REFERENCE"];
 					string groClient = r.s_data["GRCLIENT"];
 					string token = r.s_data["TOKEN"];
-					vector<string> groupeClient;
+					//vector<string> groupeClient;
 
 					string reqFormat;
 					string reqFormatBdd;
 
-					istringstream issGroupe(groClient);
-					string groupeUnique;
-					while ( std::getline( issGroupe, groupeUnique, '*' )) 
+					//istringstream issGroupe(groClient);
+					//string groupeUnique;
+					/*while ( std::getline( issGroupe, groupeUnique, '*' )) 
 					{ 
 						groupeClient.push_back(groupeUnique);
-					}
+					}*/
 
 					/*Traitement de la requete */
 					
-					reqFormat = traitement_req_client(token,"4", "none", "none", groupeClient,"none",reference, "none");
+					reqFormat = traitement_req_client(token,"4", "none", "none", "none", "none", groClient, "none","none",reference, "none");
 					//reqFormatBdd = traitement_req_bdd(token,"301", "none", "none", groupeClient,"none",reference, "none");
 
 					string document = treat_resource(reqFormat, token, 4, reqFormatBdd);			

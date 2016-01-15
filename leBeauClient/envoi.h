@@ -1,3 +1,3 @@
 #include "default_lib.h"
 
-int envoi_requete(char *requete, int type);
+int envoi_requete(char *requete);

@@ -32,7 +32,7 @@ class reception;
 
 class network_interface{
 public:
-    network_interface(bdd_tcp *outbdd,  Tslot *ourts, Tslot * ourts_s, reception * outres, Message *ourMsg);
+    network_interface(bdd_tcp * outbdd,  Tslot * ourts, Tslot * ourts_s, reception * outres, Message * ourMsg);
 	~network_interface();
 
 	void spawn();
@@ -96,7 +96,7 @@ private:
 
 	boost::asio::ip::udp::socket *s_udp_in;
 
-	NoeudThor *noeudthor;
+	NoeudThor * noeudthor;
 
 	boost::asio::ip::udp::endpoint udp_remote_endpoint;
 	boost::asio::io_service io;
@@ -110,7 +110,7 @@ private:
 	Tslot * ts;
 	Tslot * ts_s;
 	reception * res;
-    Message mess;
+    	Message * mess;
 	
 	int type;
 	bool running;

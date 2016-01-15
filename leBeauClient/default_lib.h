@@ -10,11 +10,11 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/stat.h>
+
 #include <openssl/aes.h>
+#include <openssl/rsa.h>
 
 #include "recup_config.h"
-
-#define WANT 1
-#define GIVE 0
 
 #endif

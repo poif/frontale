@@ -3,4 +3,6 @@
 
 #include "default_lib.h"
 
+int groupe_correspondance(char *demande);
+
 #endif
