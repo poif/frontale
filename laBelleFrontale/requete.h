@@ -25,6 +25,7 @@ class Requete
 	std::string m_affectation_cible;	//ADDED
 	std::string m_cle;
 	bool pourBdd;
+	bool pourThomas;
 
 	std::string m_requete;
 	std::string m_resultat;
@@ -32,6 +33,7 @@ class Requete
 	public:
 
 	Requete();
+	bool getPourThomas();
 	std::string getToken();
 	std::string getAffectation();
 	std::string getStatut();
@@ -53,3 +55,4 @@ class Requete
 };
 
 #endif
+

@@ -8,7 +8,9 @@
 using namespace std;
 
 Requete::Requete()
-{}
+{
+pourThomas = false; //Ce booleen est initialisé à false
+}
 
 string Requete::getToken()
 {	return m_token;}
@@ -38,6 +40,8 @@ string Requete::getResultat()
 {	return m_resultat;}
 bool Requete::getPourBdd()
 {	return pourBdd;}
+bool Requete::getPourThomas()
+{	return pourThomas;}
 
 void Requete::setResultat(string buffer)
 {	m_resultat = buffer;}
@@ -65,15 +69,15 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		string condensate;
 		string reference;
 		string inTheVector;
-
+		string data;
 
 		if (*it == numero+"*ERROR*") continue; //on passe Ã  la reponse suivante
 		else isError = 0;
 
 		if(m_action.compare("search") == 0) {
 		/*****REQUETE 1*****/
-			if(m_option.compare("-n") == 0) {
-		 	       m_requete = "R*1*";
+			if(m_option.compare("-n") == 0){
+				m_requete = "R*1*";
 				hash = hashString((char*)m_statut.c_str());
 				while(getline(ss, name, '*') && getline(ss, hash_recu, '*')) {
 					if(hash.compare(hash_recu) == 0)
@@ -93,31 +97,31 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 
 		/*****REQUETE 2*****/
 			else if (m_option.compare("-e") ==0) {
-/*ADDED*/				condensate = m_nom + m_statut;
-/*ADDED*/				hash = hashString((char*)condensate.c_str());
-				m_resultat = "R*2*no";
+				condensate = m_nom + m_statut;
+				hash = hashString((char*)condensate.c_str());
+				m_resultat = "R*2*0";
 				//si aucune rÃ©ponse n'est "vraie", reste Ã  no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
 					//s'il y en a un, on arrÃªte
 					if(hash.compare(hash_recu) ==0){ 
-						m_resultat = "R*2*yes";
+						m_resultat = "R*2*1";
 						return 1;	//on a trouvÃ©, c'est tout ce qu'on voulait
 					}
 				}
 			}
 
 		/*****REQUETE 3*****/
-			else if (m_option.compare("-r") ==0) {
-/*ADDED*/			condensate += m_nom+m_statut;
+			else if (m_option.compare("-r") ==0 && pourThomas == false) //Si ce booleen est à false => c'est la requête à envoyer à Thomas
+			{
+/*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
+				condensate += m_nom+m_statut;
 				hash = hashString((char*)condensate.c_str());
 /*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
 /*REQ3->ID*3*statut*affectation*gp_cible*typedata*/
 						if(hash.compare(hash_recu) ==0)
 							reference = m_reference;
 				}
-/* Pour Thomas */
 				m_requete = "4*" + m_statut + "*none*" + m_affectation + "*none*" + m_groupe + "*none*none*" + reference + "*none*";
-				/*TODO ENVOI*/
 				break; //bonjour Ã  Amine
 			}
 
@@ -143,8 +147,22 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		}
 
 
-		else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'Ã©tait une interaction bdd, il faut juste retransmettre le message au client
-			m_resultat = *it;
+		else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'Ã©tait une interaction bdd, il faut juste retransmettre le message au client			
+		{
+				m_resultat = *it;
+				pourThomas = false; // On remet le booleen à false
+		}
+
+		else if(m_action.compare("search") && m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		{
+			getline(ss, data, '*');
+			if(data != "none")
+			{
+				m_resultat = data;
+				return 1;
+			}
+		}
+
 
 		else {
 			cerr << "Tri : Option inconnu" << endl ;
@@ -222,24 +240,45 @@ int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
 	//remplissage + test error!
-	if (!getline(ss, m_affectation, '*') ||
-		!getline(ss, m_statut, '*') ||
-		!getline(ss, m_action, '*') ||
-		!getline(ss, m_option, '*') ||
-		!getline(ss, m_parametre, '*')) 
-		return 0;
-	else {
-	//it's ok
-		if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0 || (m_action.compare("search") == 0 && m_action.compare("-r"))) {// Si c'est une requÃªte pour la bdd on a un champ en plus : le nom de la personne
-			if (!getline(ss, m_nom, '*')) 
+	if(m_action.compare("search") && m_option.compare("-r"))  //cas particulier de decoupage pour requete 3
+	{
+		if(!getline(ss, m_affectation_cible, '*') ||
+			!getline(ss, m_statut_cible, '*') ||
+			!getline(ss, m_action, '*') ||
+			!getline(ss, m_option, '*') ||
+			!getline(ss, m_parametre, '*') ||
+			!getline(ss, m_nom, '*') ||
+			!getline(ss, m_affectation, '*') ||
+			!getline(ss, m_statut, '*') ||
+			!getline(ss, m_groupe_cible, '*') ||
+			!getline(ss, m_groupe, '*'))
 				return 0;
-		}
-		if(m_action.compare("insert") == 0) {	// Et si la requete est insert => champ supplÃ©mentaire : politique de partage
-			if (!getline(ss, m_partage, '*')) 
-				return 0;
-		}
-		if (!getline(ss, m_groupe, '*') || !getline(ss, m_cle, '*')) 
-			return 0;
-		return 1;
 	}
+	else
+	{
+		if (!getline(ss, m_affectation, '*') ||
+			!getline(ss, m_statut, '*') ||
+			!getline(ss, m_action, '*') ||
+			!getline(ss, m_option, '*') ||
+			!getline(ss, m_parametre, '*')) 
+			return 0;
+		else {
+		//it's ok
+			if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) {// Si c'est une requÃªte pour la bdd on a un champ en plus : le nom de la personne
+				if (!getline(ss, m_nom, '*')) 
+					return 0;
+			}
+
+			if(m_action.compare("insert") == 0) {	// Et si la requete est insert => champ supplÃ©mentaire : politique de partage
+				if (!getline(ss, m_partage, '*')) 
+					return 0;
+			}
+			if (!getline(ss, m_groupe, '*') || !getline(ss, m_cle, '*')) 
+				return 0;
+			return 1;
+		}
+	}
+	return 1;
 }
+
+//affectation_cible * statut_cible * action * option * parametre * nom * affectation * statut * groupe_cible * groupe
