@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     bdd.setKeyIv(rsabdd.getAesKey(),rsabdd.getAesIv());
 
-	reception res(&ts_s, &bdd);
+	reception res(&ts_s, &bdd, &mess);
 
     network_interface netinf(&bdd, &ts, &ts_s, &res, &mess);
     	std::thread tspawn = netinf.spawnThread();

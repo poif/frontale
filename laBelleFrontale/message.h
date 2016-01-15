@@ -25,6 +25,7 @@ private:
 public:
     Message(QString msg, char type, char separateur);
     Message(QString chiffre, char separateur);
+    Message();
     QString getMsg();
     QString getChiffre();
     void chiffrement(const unsigned char *key);

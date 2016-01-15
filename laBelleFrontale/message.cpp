@@ -22,6 +22,10 @@ Message::Message(QString chiffre, char separateur){
     this->separateur = separateur;
 }
 
+Message::Message(){
+ 
+}
+
 
 QString Message::getMsg(){
     return this->msg;
