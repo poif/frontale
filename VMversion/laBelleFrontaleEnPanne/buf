@@ -1,0 +1,123 @@
+In file included from /home/helvestrom/boost_1_59_0/boost/thread.hpp:24:0,
+                 from Tslot.h:9,
+                 from network_interface.h:22,
+                 from main.cpp:13:
+/home/helvestrom/boost_1_59_0/boost/thread/future.hpp:410:33: warning: unused parameter ‘lk’ [-Wunused-parameter]
+             future_state::state get_state(boost::unique_lock<boost::mutex>& lk) const
+                                 ^
+In file included from /home/helvestrom/boost_1_59_0/boost/thread.hpp:24:0,
+                 from Tslot.h:9,
+                 from network_interface.h:22,
+                 from network_interface.cpp:23:
+/home/helvestrom/boost_1_59_0/boost/thread/future.hpp:410:33: warning: unused parameter ‘lk’ [-Wunused-parameter]
+             future_state::state get_state(boost::unique_lock<boost::mutex>& lk) const
+                                 ^
+network_interface.cpp: In member function ‘std::string network_interface::treat_resource(std::string&, std::string&, int, std::string)’:
+network_interface.cpp:483:22: warning: unused variable ‘key’ [-Wunused-variable]
+  const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
+                      ^
+network_interface.cpp: At global scope:
+network_interface.cpp:481:8: warning: unused parameter ‘action’ [-Wunused-parameter]
+ string network_interface::treat_resource(string& request, string& token, int action, string requetebdd){
+        ^
+network_interface.cpp:481:8: warning: unused parameter ‘requetebdd’ [-Wunused-parameter]
+In file included from /home/helvestrom/boost_1_59_0/boost/thread.hpp:24:0,
+                 from Tslot.h:9,
+                 from network_interface.h:22,
+                 from noeudthor.h:7,
+                 from noeudthor.cpp:1:
+/home/helvestrom/boost_1_59_0/boost/thread/future.hpp:410:33: warning: unused parameter ‘lk’ [-Wunused-parameter]
+             future_state::state get_state(boost::unique_lock<boost::mutex>& lk) const
+                                 ^
+In file included from /home/helvestrom/boost_1_59_0/boost/thread.hpp:24:0,
+                 from Tslot.h:9,
+                 from network_interface.h:22,
+                 from reception.h:8,
+                 from reception.cpp:1:
+/home/helvestrom/boost_1_59_0/boost/thread/future.hpp:410:33: warning: unused parameter ‘lk’ [-Wunused-parameter]
+             future_state::state get_state(boost::unique_lock<boost::mutex>& lk) const
+                                 ^
+In file included from reception.cpp:1:0:
+reception.h: In constructor ‘reception::reception(Tslot*, bdd_tcp*, network_interface*)’:
+reception.h:26:15: warning: ‘reception::m_bdd’ will be initialized after [-Wreorder]
+     bdd_tcp * m_bdd;
+               ^
+reception.h:24:25: warning:   ‘network_interface* reception::m_netinf’ [-Wreorder]
+     network_interface * m_netinf;
+                         ^
+reception.cpp:12:1: warning:   when initialized here [-Wreorder]
+ reception::reception(Tslot * ts, bdd_tcp * bdd, network_interface * netinf): m_ts(ts), m_bdd(bdd), m_netinf(netinf)
+ ^
+reception.cpp: In member function ‘void reception::traitement(std::string)’:
+reception.cpp:116:40: error: no matching function for call to ‘bdd_tcp::emission(QString&)’
+                 m_bdd->emission(versBdd);
+                                        ^
+reception.cpp:116:40: note: candidate is:
+In file included from network_interface.h:21:0,
+                 from reception.h:8,
+                 from reception.cpp:1:
+bdd_tcp.h:16:10: note: void bdd_tcp::emission(std::string, int)
+     void emission(std::string texte, int type=0);
+          ^
+bdd_tcp.h:16:10: note:   no known conversion for argument 1 from ‘QString’ to ‘std::string {aka std::basic_string<char>}’
+reception.cpp:118:38: error: no matching function for call to ‘bdd_tcp::attendLecture()’
+                 m_bdd->attendLecture();
+                                      ^
+reception.cpp:118:38: note: candidate is:
+In file included from network_interface.h:21:0,
+                 from reception.h:8,
+                 from reception.cpp:1:
+bdd_tcp.h:17:10: note: void bdd_tcp::attendLecture(int, int)
+     void attendLecture(int timeout, int type=0);
+          ^
+bdd_tcp.h:17:10: note:   candidate expects 2 arguments, 0 provided
+reception.cpp:120:50: error: ‘std::string’ has no member named ‘toStdString’
+                 string messBdd = m_bdd->getMsg().toStdString();
+                                                  ^
+reception.cpp:74:36: warning: unused variable ‘key’ [-Wunused-variable]
+         const static unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
+                                    ^
+In file included from /home/helvestrom/boost_1_59_0/boost/asio/io_service.hpp:25:0,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/basic_io_object.hpp:19,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/basic_socket.hpp:20,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/basic_datagram_socket.hpp:20,
+                 from /home/helvestrom/boost_1_59_0/boost/asio.hpp:21,
+                 from network_interface.h:15,
+                 from reception.h:8,
+                 from reception.cpp:1:
+/home/helvestrom/boost_1_59_0/boost/system/error_code.hpp: At global scope:
+/home/helvestrom/boost_1_59_0/boost/system/error_code.hpp:221:36: warning: ‘boost::system::posix_category’ defined but not used [-Wunused-variable]
+     static const error_category &  posix_category = generic_category();
+                                    ^
+/home/helvestrom/boost_1_59_0/boost/system/error_code.hpp:222:36: warning: ‘boost::system::errno_ecat’ defined but not used [-Wunused-variable]
+     static const error_category &  errno_ecat     = generic_category();
+                                    ^
+/home/helvestrom/boost_1_59_0/boost/system/error_code.hpp:223:36: warning: ‘boost::system::native_ecat’ defined but not used [-Wunused-variable]
+     static const error_category &  native_ecat    = system_category();
+                                    ^
+In file included from /home/helvestrom/boost_1_59_0/boost/asio/detail/impl/posix_mutex.ipp:24:0,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/detail/posix_mutex.hpp:73,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/detail/mutex.hpp:25,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/detail/service_registry.hpp:20,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/impl/io_service.hpp:19,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/io_service.hpp:767,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/basic_io_object.hpp:19,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/basic_socket.hpp:20,
+                 from /home/helvestrom/boost_1_59_0/boost/asio/basic_datagram_socket.hpp:20,
+                 from /home/helvestrom/boost_1_59_0/boost/asio.hpp:21,
+                 from network_interface.h:15,
+                 from reception.h:8,
+                 from reception.cpp:1:
+/home/helvestrom/boost_1_59_0/boost/asio/error.hpp:258:45: warning: ‘boost::asio::error::system_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& system_category
+                                             ^
+/home/helvestrom/boost_1_59_0/boost/asio/error.hpp:260:45: warning: ‘boost::asio::error::netdb_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& netdb_category
+                                             ^
+/home/helvestrom/boost_1_59_0/boost/asio/error.hpp:262:45: warning: ‘boost::asio::error::addrinfo_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& addrinfo_category
+                                             ^
+/home/helvestrom/boost_1_59_0/boost/asio/error.hpp:264:45: warning: ‘boost::asio::error::misc_category’ defined but not used [-Wunused-variable]
+ static const boost::system::error_category& misc_category
+                                             ^
+make: *** [reception.o] Erreur 1

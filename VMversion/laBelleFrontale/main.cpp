@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <string>
 #include <QtNetwork>
+#include "rsacrypt.h"
 
 #include "network_interface.h"
 #include "reception.h"

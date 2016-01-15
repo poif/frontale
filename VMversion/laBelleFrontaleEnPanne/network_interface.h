@@ -31,7 +31,7 @@ class reception;
 
 class network_interface{
 public:
-	network_interface(bdd_tcp *outbdd,  Tslot *ourts, Tslot * ourts_s, reception * outres);
+	network_interface(bdd_tcp *outbdd,  Tslot *ourts, Tslot * ourts_s, reception * outres, Message * ourMess);
 	~network_interface();
 
 	void spawn();
@@ -109,6 +109,7 @@ private:
 	Tslot * ts;
 	Tslot * ts_s;
 	reception * res;
+	Message * mess;
 	
 	
 	int type;

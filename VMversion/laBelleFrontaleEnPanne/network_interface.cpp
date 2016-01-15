@@ -33,7 +33,7 @@ using namespace CryptoPP;
 /**
  * constructeur
  */
-network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres) {
+network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres, Message * ourMess): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres), mess(ourMess) {
 	running = true;
 	host_rem = "127.0.0.1";
     	port_rem = 8082;
