@@ -27,6 +27,7 @@ void bdd_tcp::emission(string texte, int type){
         texte +="*";
         texte = this->chiffrement(texte);
         oss << texte.size() ;
+        oss << '*';
         oss << texte;
      }else {
         oss << texte;

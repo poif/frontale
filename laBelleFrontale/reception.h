@@ -30,8 +30,10 @@ private :
     QHostAddress hostAddr;
     quint16 hostPort;
     list<string> fileMsg;
+    Message mess;
+
 public:
-    reception(Tslot * ts, bdd_tcp * bdd,  network_interface * netinf = NULL);
+    reception(Tslot * ts, bdd_tcp * bdd,Message ourMsg,  network_interface * netinf = NULL);
     void ecoute();
     void ecoute_s();
     string getFileMsg();

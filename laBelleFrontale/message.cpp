@@ -207,3 +207,7 @@ bool Message::getDechiffre(){
 bool Message::getEChangeKey(){
     return eChangeKey;
 }
+
+int Message::getNbKey(){
+    return nbKey;
+}

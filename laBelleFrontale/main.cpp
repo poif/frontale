@@ -12,6 +12,7 @@
 
 #include "network_interface.h"
 #include "reception.h"
+#include "message.h"
 
 using namespace std;
 
@@ -22,6 +23,8 @@ int main(int argc, char *argv[])
 	
 	Tslot ts;
 	Tslot ts_s;
+
+    Message mess;
 
 	bdd_tcp bdd;
 	bdd.connection_tcp("127.0.0.1",2211);
@@ -42,10 +45,10 @@ int main(int argc, char *argv[])
 
 	reception res(&ts_s, &bdd);
 
-	network_interface netinf(&bdd, &ts, &ts_s, &res);
+    network_interface netinf(&bdd, &ts, &ts_s, &res, &mess);
     	std::thread tspawn = netinf.spawnThread();
  
-	reception ser(&ts, &bdd, &netinf);
+    reception ser(&ts, &bdd, &mess, &netinf);
 
 	ser.ecoute();
 

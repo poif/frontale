@@ -33,7 +33,7 @@ using namespace CryptoPP;
 /**
  * constructeur
  */
-network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres) {
+network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres, Message *ourMsg): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres) , mess(ourMsg) {
 	running = true;
 	host_rem = "127.0.0.1";
     	port_rem = 8082;
@@ -482,22 +482,29 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
 
+    int i;
+
 	list<string> * a_traiter;
 	list<string> a_traiter_clair;
 
 	QString qreqFormat = QString("%1").arg(request.data());
 
-	Message msg2(qreqFormat,'2','*');
+
 	//msg2.chiffrement(key);
-	string chiffrer = msg2.crypt((unsigned char*) request.data(), request.size());
+
 
 	//string toto = msg2.getChiffre().toStdString();
 
 	/* --- On interroge le client --- */
 	clientFront cli;
 
+    for(i; i < mess.getNbKey(); i++){
+
+    string chiffrer = mess.crypt((unsigned char*) request.data(), request.size(),i);
 	cli.socBind();
 	cli.emission(chiffrer);
+
+    }
 
 	if(ts_s->TriggerToken(token) == false) return "";
 
@@ -513,11 +520,10 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 			string messageStr = it;
 			QString message = QString("%1").arg(messageStr.data());
-			Message msg(message,'*');
-			//msg.dechiffrement(key);
+                        //msg.dechiffrement(key);
 
 			//string rep = msg.getMsg().toStdString();
-			string rep = msg.decrypt((unsigned char*) messageStr.data(), messageStr.size());
+            string rep = mess.decrypt((unsigned char*) messageStr.data(), messageStr.size());
 
 			a_traiter_clair.push_back(rep);
 

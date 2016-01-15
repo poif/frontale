@@ -9,7 +9,7 @@
 #include <boost/thread.hpp>
 
 
-reception::reception(Tslot * ts, bdd_tcp * bdd, network_interface * netinf): m_ts(ts), m_bdd(bdd), m_netinf(netinf)
+reception::reception(Tslot * ts, bdd_tcp * bdd,Message *ourMsg, network_interface * netinf): m_ts(ts), m_bdd(bdd), m_netinf(netinf), mess(ourMsg)
 {
 }
 
@@ -69,7 +69,7 @@ void reception::traitement(string messageStr){
 
         QString message;
         QString versBdd;
-
+        int numKey;
 
         const static unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
         
@@ -84,7 +84,6 @@ void reception::traitement(string messageStr){
 
         cout << "Got somethin" << endl;
 
-        Message msg(message,'*');
         Requete req;
 
         //string * showRep = new string[2];
@@ -100,7 +99,19 @@ void reception::traitement(string messageStr){
         //QTextStream(stdout) << msg.getMsg() << endl;
 
         //string input = msg.getMsg().toStdString();
-        string input = msg.decrypt((unsigned char*) messageStr.data(), messageStr.size());
+        string input = mess.decrypt((unsigned char*) messageStr.data(), messageStr.size());
+
+        if(mess.getEChangeKey()){
+
+            clientFront cli;
+            cli.socBind();
+            cli.emission(msg.getToSend());
+
+
+
+        }else {
+
+        numKey = mess.getNumClient();
 
         input = token + "*" + input;
 
@@ -163,7 +174,6 @@ void reception::traitement(string messageStr){
             QString retour;
             retour = QString("%1").arg(req.getResultat().c_str());
 
-            Message msg2(retour,'R', '*');
             //msg2.entete();
             //msg2.chiffrement(key);
 
@@ -171,7 +181,7 @@ void reception::traitement(string messageStr){
 
             string repo = "1*R*" + req.getResultat();
 
-            string chiffrer = msg2.crypt((unsigned char*) repo.data(), repo.size());
+            string chiffrer = mess.crypt((unsigned char*) repo.data(), repo.size(), numKey);
 
             //string toto = msg2.getMsg().toStdString();
             cout << chiffrer << endl;
@@ -180,6 +190,7 @@ void reception::traitement(string messageStr){
             cli.socBind();
             cli.emission(chiffrer);//, hoteCourant, portCourant);
 
+        }
         }
 }
 

@@ -40,6 +40,7 @@ public:
     bool getDechiffre(); 
     string getAESKey(int numKey);
     string getAESIv(int numKey);
+    int getNbKey();
 
 };
 
