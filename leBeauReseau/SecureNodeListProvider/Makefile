@@ -12,13 +12,13 @@ MAKEFILE      = Makefile
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
-CFLAGS        = -m64 -pipe -O2 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
-CXXFLAGS      = -m64 -std=c++11 -pipe -O2 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
-INCPATH       = -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I. -I. -I/usr/include/qt5 -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I. -I/home/helvestrom/boost_1_59_0/
+DEFINES       = 
+CFLAGS        = -m64 -pipe -O2 -Wall -W -fPIE $(DEFINES)
+CXXFLAGS      = -m64 -pipe -std=c++11 -O2 -Wall -W -fPIE $(DEFINES)
+INCPATH       = -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I.
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1
-LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Gui -L/usr/lib/x86_64-linux-gnu -lQt5Core -lGL -lpthread /usr/local/lib/libboost_system.a /usr/local/lib/libboost_serialization.a
+LIBS          = $(SUBLIBS) -L/usr/lib -lboost_system -lboost_serialization 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
@@ -47,7 +47,7 @@ OBJECTS_DIR   = ./
 
 SOURCES       = main.cpp \
 		securenodelistprovider.cpp \
-		../Trame/trame.cpp 
+		trame.cpp 
 OBJECTS       = main.o \
 		securenodelistprovider.o \
 		trame.o
@@ -96,11 +96,6 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_post.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/gdb_dwarf_index.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_on.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/opengl.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/thread.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/testcase_targets.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
@@ -184,18 +179,11 @@ Makefile: SecureNodeListProvider.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_post.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/gdb_dwarf_index.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_on.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/opengl.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/thread.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/testcase_targets.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		SecureNodeListProvider.pro \
-		/usr/lib/x86_64-linux-gnu/libQt5Gui.prl \
-		/usr/lib/x86_64-linux-gnu/libQt5Core.prl
+		SecureNodeListProvider.pro
 	$(QMAKE) -o Makefile SecureNodeListProvider.pro
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/shell-unix.conf:
@@ -242,18 +230,11 @@ Makefile: SecureNodeListProvider.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_post.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/gdb_dwarf_index.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_on.prf:
-/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt.prf:
-/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf:
-/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf:
-/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/opengl.prf:
-/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/unix/thread.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/testcase_targets.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf:
 SecureNodeListProvider.pro:
-/usr/lib/x86_64-linux-gnu/libQt5Gui.prl:
-/usr/lib/x86_64-linux-gnu/libQt5Core.prl:
 qmake: FORCE
 	@$(QMAKE) -o Makefile SecureNodeListProvider.pro
 
@@ -261,7 +242,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/SecureNodeListProvider1.0.0 || mkdir -p .tmp/SecureNodeListProvider1.0.0
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/SecureNodeListProvider1.0.0/ && $(COPY_FILE) --parents ../Client/client.h securenodelistprovider.h ../Trame/trame.h .tmp/SecureNodeListProvider1.0.0/ && $(COPY_FILE) --parents main.cpp securenodelistprovider.cpp ../Trame/trame.cpp .tmp/SecureNodeListProvider1.0.0/ && (cd `dirname .tmp/SecureNodeListProvider1.0.0` && $(TAR) SecureNodeListProvider1.0.0.tar SecureNodeListProvider1.0.0 && $(COMPRESS) SecureNodeListProvider1.0.0.tar) && $(MOVE) `dirname .tmp/SecureNodeListProvider1.0.0`/SecureNodeListProvider1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/SecureNodeListProvider1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/SecureNodeListProvider1.0.0/ && (cd `dirname .tmp/SecureNodeListProvider1.0.0` && $(TAR) SecureNodeListProvider1.0.0.tar SecureNodeListProvider1.0.0 && $(COMPRESS) SecureNodeListProvider1.0.0.tar) && $(MOVE) `dirname .tmp/SecureNodeListProvider1.0.0`/SecureNodeListProvider1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/SecureNodeListProvider1.0.0
 
 
 clean:compiler_clean 
@@ -276,18 +257,8 @@ distclean: clean
 	-$(DEL_FILE) Makefile
 
 
-mocclean: compiler_moc_header_clean compiler_moc_source_clean
-
-mocables: compiler_moc_header_make_all compiler_moc_source_make_all
-
 check: first
 
-compiler_rcc_make_all:
-compiler_rcc_clean:
-compiler_moc_header_make_all:
-compiler_moc_header_clean:
-compiler_moc_source_make_all:
-compiler_moc_source_clean:
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
 compiler_yacc_impl_make_all:
@@ -300,18 +271,16 @@ compiler_clean:
 
 main.o: main.cpp securenodelistprovider.h \
 		../Client/client.h \
-		trame.h \
 		../Trame/trame.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 securenodelistprovider.o: securenodelistprovider.cpp securenodelistprovider.h \
 		../Client/client.h \
-		trame.h \
 		../Trame/trame.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o securenodelistprovider.o securenodelistprovider.cpp
 
-trame.o: ../Trame/trame.cpp trame.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o trame.o ../Trame/trame.cpp
+trame.o: trame.cpp ../Trame/trame.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o trame.o trame.cpp
 
 ####### Install
 

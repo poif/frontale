@@ -35,6 +35,7 @@ class NoeudThor
 		void traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource);
 		void askNeighborList();
 		void giveEarPort();
+        void giveEarPortToAll();
 		void askNombreNoeuds();
 		void askVoisins();
 		void clientLeave(Client<NoeudThor>* leaving);

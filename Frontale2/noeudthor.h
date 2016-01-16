@@ -3,8 +3,8 @@
 
 #include <boost/serialization/list.hpp>
 #include "client.h"
-#include "network_interface.h"
 #include <string>
+#include "network_interface.h"
 
 class network_interface;
 
@@ -36,6 +36,7 @@ class NoeudThor
 		void traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource);
 		void askNeighborList();
 		void giveEarPort();
+        void giveEarPortToAll();
 		void askNombreNoeuds();
 		void askVoisins();
 		void clientLeave(Client<NoeudThor>* leaving);

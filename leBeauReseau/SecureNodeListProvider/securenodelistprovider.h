@@ -21,7 +21,7 @@ class SecureNodeListProvider
 		void sendVoisins(Client<SecureNodeListProvider> *to);
 		void sendNbNoeuds(Client<SecureNodeListProvider> *to);
 		void sendNbNoeudsToAll();
-		void sendTrameToRecipient(Trame &t);
+        void sendTrameToRecipient(Trame &t);
 	public:
 		SecureNodeListProvider(boost::asio::io_service &io_service, int portecoute);
 		void traitementDeLaTrame(Trame& t, Client<SecureNodeListProvider>*noeudSource);

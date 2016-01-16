@@ -57,10 +57,6 @@ void SecureNodeListProvider::sendIpPortAllNodes(Client<SecureNodeListProvider> *
 			"TTL : " << t.getTTL() << std::endl <<
 			"Commande : " << t.getCommande() << std::endl <<
 			"*********/" << std::endl;
-//	boost::asio::streambuf buf;
-//	ostream os(&buf);
-//	boost::archive::binary_oarchive archiveBinaire(os);
-//	archiveBinaire << t;
 
 	to->send(t);
 }
@@ -69,7 +65,7 @@ void SecureNodeListProvider::traitementDeLaTrame(Trame &t, Client<SecureNodeList
 {
 	cout << "/********* Trame Recue" << std::endl <<
 			"TTL : " << t.getTTL() << std::endl <<
-			"Commande: : " << t.getCommande() << std::endl <<
+            "Commande:" << t.getCommande() << std::endl <<
 			"*********/" << std::endl;
 	const int TTL_RENSEIGNE_NO_PORT=-1;
 	const int TTL_ASK_LIST_IP_PORT=-2;
@@ -90,7 +86,7 @@ void SecureNodeListProvider::traitementDeLaTrame(Trame &t, Client<SecureNodeList
 		switch (t.getTTL()) {
 			case TTL_ASK_LIST_IP_PORT:
 				cout << "Le noeud demande la liste d'ip:portd'écoute" << std::endl;
-				sendIpPortAllNodes(noeudSource);
+                sendIpPortAllNodes(noeudSource);
 				break;
 			case TTL_ASK_NB_NOEUDS:
 				cout << "Le noeud demande le nombre de noeuds du réseau" << std::endl;
@@ -214,8 +210,7 @@ void SecureNodeListProvider::sendVoisins(Client<SecureNodeListProvider> *to){
 				"TTL : " << t2.getTTL() << std::endl <<
 				"Commande : " << t2.getCommande() << std::endl <<
 				"*********/" << std::endl;
-
-		previous->send(t2);
+        previous->send(t2);
 
 		oTextArchiveNext << ipPortOfNextNode;
 		Trame t3(-4, oStringStreamNext.str());
@@ -223,7 +218,7 @@ void SecureNodeListProvider::sendVoisins(Client<SecureNodeListProvider> *to){
 				"TTL : " << t3.getTTL() << std::endl <<
 				"Commande : " << t3.getCommande() << std::endl <<
 				"*********/" << std::endl;
-		next->send(t3);
+        next->send(t3);
 	}
 }
 
@@ -240,10 +235,6 @@ void SecureNodeListProvider::sendNbNoeuds(Client<SecureNodeListProvider> *to){
 			"TTL : " << t.getTTL() << std::endl <<
 			"Commande : " << t.getCommande() << std::endl <<
 			"*********/" << std::endl;
-//	boost::asio::streambuf buf;
-//	ostream os(&buf);
-//	boost::archive::binary_oarchive archiveBinaire(os);
-//	archiveBinaire << t;
 	to->send(t);
 }
 
@@ -253,7 +244,7 @@ void SecureNodeListProvider::sendTrameToRecipient(Trame &t)
 	for (auto n : toutlemonde){
 		Client<SecureNodeListProvider>* p = n;
 		p->send(t);
-	}
+    }
 }
 
 void SecureNodeListProvider::clientLeave(Client<SecureNodeListProvider> *leaving)

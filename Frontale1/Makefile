@@ -18,7 +18,7 @@ CXXFLAGS      = -m64 -std=c++11 -pipe -O2 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
 INCPATH       = -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I. -I. -I/usr/include/qt5 -I/usr/include/qt5/QtNetwork -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I. -I/home/helvestrom/boost_1_59_0/
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1
-LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Network -L/usr/lib/x86_64-linux-gnu -lQt5Gui -lQt5Core -lGL -lpthread -lpthread /usr/local/lib/libboost_system.a /usr/local/lib/libboost_thread.a /usr/local/lib/libboost_date_time.a /usr/local/lib/libboost_regex.a /usr/local/lib/libboost_serialization.a /usr/local/lib/libboost_timer.a /usr/local/lib/libboost_chrono.a -lssl -lcrypto -lcrypto++
+LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Network -L/usr/lib/x86_64-linux-gnu -lQt5Gui -lQt5Core -lGL -lpthread /usr/local/lib/libboost_system.a /usr/local/lib/libboost_thread.a /usr/local/lib/libboost_date_time.a /usr/local/lib/libboost_regex.a /usr/local/lib/libboost_serialization.a /usr/local/lib/libboost_timer.a /usr/local/lib/libboost_chrono.a -lssl -lcrypto -lcrypto++
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
@@ -58,7 +58,8 @@ SOURCES       = aesbdd.cpp \
 		traitement.cpp \
 		../leBeauReseau/Trame/trame.cpp \
 		Tslot.cpp \
-		utils.cpp moc_bdd_tcp.cpp \
+		utils.cpp \
+		lecture.cpp moc_bdd_tcp.cpp \
 		moc_reception.cpp
 OBJECTS       = aesbdd.o \
 		bdd_tcp.o \
@@ -74,6 +75,7 @@ OBJECTS       = aesbdd.o \
 		trame.o \
 		Tslot.o \
 		utils.o \
+		lecture.o \
 		moc_bdd_tcp.o \
 		moc_reception.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -288,7 +290,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/Frontale11.0.0 || mkdir -p .tmp/Frontale11.0.0
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/Frontale11.0.0/ && $(COPY_FILE) --parents aesbdd.h bdd_tcp.h ../leBeauReseau/Client/client.h clientFront.h engine_event.h message.h network_interface.h noeudthor.h reception.h requete.h rsacrypt.h traitement.h ../leBeauReseau/Trame/trame.h Tslot.h utils.h .tmp/Frontale11.0.0/ && $(COPY_FILE) --parents aesbdd.cpp bdd_tcp.cpp client.cpp main.cpp message.cpp network_interface.cpp noeudthor.cpp reception.cpp requete.cpp rsacrypt.cpp traitement.cpp ../leBeauReseau/Trame/trame.cpp Tslot.cpp utils.cpp .tmp/Frontale11.0.0/ && (cd `dirname .tmp/Frontale11.0.0` && $(TAR) Frontale11.0.0.tar Frontale11.0.0 && $(COMPRESS) Frontale11.0.0.tar) && $(MOVE) `dirname .tmp/Frontale11.0.0`/Frontale11.0.0.tar.gz . && $(DEL_FILE) -r .tmp/Frontale11.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/Frontale11.0.0/ && $(COPY_FILE) --parents aesbdd.h bdd_tcp.h ../leBeauReseau/Client/client.h clientFront.h engine_event.h message.h network_interface.h noeudthor.h reception.h requete.h rsacrypt.h traitement.h ../leBeauReseau/Trame/trame.h Tslot.h utils.h lecture.h .tmp/Frontale11.0.0/ && $(COPY_FILE) --parents aesbdd.cpp bdd_tcp.cpp client.cpp main.cpp message.cpp network_interface.cpp noeudthor.cpp reception.cpp requete.cpp rsacrypt.cpp traitement.cpp ../leBeauReseau/Trame/trame.cpp Tslot.cpp utils.cpp lecture.cpp .tmp/Frontale11.0.0/ && (cd `dirname .tmp/Frontale11.0.0` && $(TAR) Frontale11.0.0.tar Frontale11.0.0 && $(COMPRESS) Frontale11.0.0.tar) && $(MOVE) `dirname .tmp/Frontale11.0.0`/Frontale11.0.0.tar.gz . && $(DEL_FILE) -r .tmp/Frontale11.0.0
 
 
 clean:compiler_clean 
@@ -1312,7 +1314,8 @@ main.o: main.cpp /usr/include/qt5/QtCore/QCoreApplication \
 		reception.h \
 		clientFront.h \
 		/usr/include/qt5/QtNetwork/QUdpSocket \
-		requete.h
+		requete.h \
+		lecture.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 message.o: message.cpp message.h \
@@ -1656,7 +1659,8 @@ network_interface.o: network_interface.cpp /usr/include/qt5/QtCore/QCoreApplicat
 		requete.h \
 		message.h \
 		utils.h \
-		traitement.h
+		traitement.h \
+		lecture.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o network_interface.o network_interface.cpp
 
 noeudthor.o: noeudthor.cpp noeudthor.h \
@@ -2502,6 +2506,9 @@ Tslot.o: Tslot.cpp Tslot.h \
 
 utils.o: utils.cpp utils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o utils.o utils.cpp
+
+lecture.o: lecture.cpp lecture.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o lecture.o lecture.cpp
 
 moc_bdd_tcp.o: moc_bdd_tcp.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_bdd_tcp.o moc_bdd_tcp.cpp
