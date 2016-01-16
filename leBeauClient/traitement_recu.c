@@ -21,10 +21,10 @@ int traiter_recu (char * requete_recu)
     printf("JAI RECU -> %s\n", requete_recu);
     printf("DECRYPT -> %s\n", requete_decrypt);
 
-    char *type = malloc (sizeof (char*) * 256);
-    char *donnee = malloc (sizeof (char*) * 256);
+    char *type = malloc (sizeof (char) * 256);
+    char *donnee = malloc (sizeof (char) * 256);
     char * save_ptr;
-    char *numero_requete = malloc (sizeof (char*) * 1024);
+    char *numero_requete = malloc (sizeof (char) * 1024);
 
     char * copie = malloc(sizeof (char) * 1024);
 
@@ -51,10 +51,10 @@ int traiter_recu (char * requete_recu)
 				
 		case '1' :				
 		{
-				char *status_requete = malloc (sizeof (char*) * 1024);
+				char *status_requete = malloc (sizeof (char) * 1024);
 				
-				char *affectation_requete = malloc (sizeof (char*) * 1024);
-				//char *test = malloc (sizeof (char*) * 1024);
+				char *affectation_requete = malloc (sizeof (char) * 1024);
+				//char *test = malloc (sizeof (char) * 1024);
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
@@ -73,7 +73,7 @@ int traiter_recu (char * requete_recu)
 				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0)
 				{
 					puts("Correspond");
-					unsigned char a_envoyer[sizeof (char *) * 1024];
+					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*1*%s*%s*EOF", numero_requete, nom, recup_valeur("status"));
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					printf("a envoyer -> %s\n", a_envoyer);
@@ -83,7 +83,7 @@ int traiter_recu (char * requete_recu)
 				else
 				{
 					puts("NOP");
-					unsigned char a_envoyer[sizeof (char *) * 1024];
+					unsigned char a_envoyer[sizeof (char) * 1024];
 					strcat(a_envoyer,numero_requete);
 					strcat(a_envoyer, "chall*1*none*EOF");
 					//sprintf(a_envoyer, "1*none");
@@ -97,9 +97,9 @@ int traiter_recu (char * requete_recu)
 
 		case '2' :
 		{
-				char *status_requete = malloc (sizeof (char*) * 1024);
-				char *affectation_requete = malloc (sizeof (char*) * 1024);
-				char *test = malloc (sizeof (char*) * 1024);
+				char *status_requete = malloc (sizeof (char) * 1024);
+				char *affectation_requete = malloc (sizeof (char) * 1024);
+				char *test = malloc (sizeof (char) * 1024);
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
@@ -115,7 +115,7 @@ int traiter_recu (char * requete_recu)
 				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0)
 				{
 					puts("Correspond");
-					unsigned char a_envoyer[sizeof (char *) * 1024];
+					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*2*%s*%s*EOF",numero_requete, nom, recup_valeur("status"));
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
@@ -124,7 +124,7 @@ int traiter_recu (char * requete_recu)
 				else
 				{
 					puts("NOP");
-					unsigned char a_envoyer[sizeof (char *) * 1024];
+					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*2*none*EOF", numero_requete);
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
@@ -135,11 +135,11 @@ int traiter_recu (char * requete_recu)
 
 		case '3' :
 		{
-				char *status_requete = malloc (sizeof (char*) * 1024);//doit etre none
-				char *affectation_requete = malloc (sizeof (char*) * 1024);
-				char *groupe_requete = malloc (sizeof (char*) * 1024); //doit etre none
-				char *datatype_requete = malloc (sizeof (char*) * 1024); 
-				char *test = malloc (sizeof (char*) * 1024);
+				char *status_requete = malloc (sizeof (char) * 1024);//doit etre none
+				char *affectation_requete = malloc (sizeof (char) * 1024);
+				char *groupe_requete = malloc (sizeof (char) * 1024); //doit etre none
+				char *datatype_requete = malloc (sizeof (char) * 1024); 
+				char *test = malloc (sizeof (char) * 1024);
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
@@ -169,10 +169,9 @@ int traiter_recu (char * requete_recu)
 				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0 && partage_demande(datatype_requete, S_TYPE) == 1)
 				{
 					puts("Correspond");
-					unsigned char a_envoyer[sizeof (char *) * 1024];
+					unsigned char a_envoyer[sizeof (char) * 1024];
 					//sprintf(a_envoyer, "%s*3*%s*%s*%s*EOF",numero_requete, recup_valeur("status"), recup_valeur(datatype_requete), nom);
-					sprintf(a_envoyer, "chall*%s*3*%s;%s;%s,%s*EOF",numero_requete, recup_valeur("status"), 
-					     datatype_requete, retour_reference(datatype_requete), nom);
+					sprintf(a_envoyer, "chall*%s*3*%s;%s*EOF",numero_requete, retour_reference(datatype_requete), nom);
 					//En sortie de recup_valeur(datatype_request), on a la référence du document
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
@@ -181,7 +180,7 @@ int traiter_recu (char * requete_recu)
 				else
 				{
 					puts("NOP");
-					unsigned char a_envoyer[sizeof (char *) * 1024];
+					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*3*none*EOF", numero_requete);
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
@@ -193,9 +192,9 @@ int traiter_recu (char * requete_recu)
 
 				case '4' :
 				{
-					unsigned char a_envoyer[sizeof (char *) * 1024];
-					char *groupe_demande = malloc (sizeof (char*) * 1024);
-					char *ref = malloc (sizeof (char *) * 1024);
+					unsigned char a_envoyer[sizeof (char) * 1024];
+					char *groupe_demande = malloc (sizeof (char) * 1024);
+					char *ref = malloc (sizeof (char) * 1024);
 					
 					groupe_demande = strtok_r(NULL, "*", &save_ptr);
 					groupe_demande = strtok_r(NULL, "*", &save_ptr);
@@ -210,7 +209,7 @@ int traiter_recu (char * requete_recu)
 					}
 					else
 					{
-						unsigned char a_envoyer[sizeof (char *) * 1024];
+						unsigned char a_envoyer[sizeof (char) * 1024];
 						sprintf(a_envoyer, "chall*%s*4*none*EOF", numero_requete);
 						unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 						crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
@@ -224,8 +223,8 @@ int traiter_recu (char * requete_recu)
 
 				case '6' :
 				{
-					char *groupe_demande = malloc (sizeof (char*) * 1024);
-					unsigned char a_envoyer[sizeof (char *) * 1024];
+					char *groupe_demande = malloc (sizeof (char) * 1024);
+					unsigned char a_envoyer[sizeof (char) * 1024];
 					groupe_demande = strtok_r(NULL, "*", &save_ptr);
 					if (groupe_correspondance(groupe_demande) == 1)
 					{
@@ -245,7 +244,7 @@ int traiter_recu (char * requete_recu)
 void traitement_R(char *recu)
 {
 	char *save_ptr;
-	char *numero = malloc (sizeof (char*) * 1024);
+	char *numero = malloc (sizeof (char) * 1024);
 
 	numero = strtok_r(recu, "R*", &save_ptr);
 
@@ -274,7 +273,7 @@ void traitement_R(char *recu)
 
 		case '4':
 		{
-			char *fichier= malloc (sizeof (char*) * 1024);
+			char *fichier= malloc (sizeof (char) * 1024);
 			fichier = strtok(recu, "R*4*");
 
 			if (strcmp(fichier, "none") == 0) puts("Aucun fichier");
