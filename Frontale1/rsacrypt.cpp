@@ -21,6 +21,7 @@ rsaCrypt::rsaCrypt(int keylen)
 
 string rsaCrypt::chiffrement(string clair){
     cout << "chiffrement rsa" << endl;
+    cout << "laforeignkey" << forgeignKey << endl;
     ostringstream oss;
     unsigned char *chif = (unsigned char*)malloc(1024*sizeof(char));
     int succ;

@@ -84,7 +84,7 @@ void reception::traitement(string messageStr){
         Requete req;
 
         string input = mess->decrypt((unsigned char*) messageStr.data(), messageStr.size());
-
+        
         if(mess->getEChangeKey()){
 
             clientFront cli;

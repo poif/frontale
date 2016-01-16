@@ -20,9 +20,11 @@ Message::Message(QString msg, char type, char separateur)
 Message::Message(QString chiffre, char separateur){
     this->chiffre = chiffre;
     this->separateur = separateur;
+    this->nbKey=0;
 }
 
 Message::Message(){
+    this->nbKey=0;
  
 }
 
@@ -92,36 +94,42 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
     int i= 0;
     int newKey;
     string aesToSend;
+    
    // unsigned char iv[AES_BLOCK_SIZE];
   //  memset(iv, 0x00, AES_BLOCK_SIZE);
 //    const static unsigned char aes_key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
-    do{
+    while(chaineTest != "CHALL" && i<nbKey && !tabKeyIv[i][0].empty() && !tabKeyIv[i][0].empty()){
 
         AES_KEY dec_key;
         AES_set_decrypt_key((const unsigned char *)tabKeyIv[i][0].c_str(), sizeof(tabKeyIv[i][0].c_str())*8, &dec_key);
+
         AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key,(unsigned char *) tabKeyIv[i][1].c_str(), AES_DECRYPT);
+
         // print_data("\n Decrypted",dec_out, sizeof(dec_out));
 
-        printf("%s\n", trame);
+        cout << trame << endl;
 
         iss.str(string((const char *)trame));
-
         getline(iss,chaineTest,'*');
         i++;
-    }while(chaineTest != "CHALL" && i<nbKey);
-
+    }
 
     // echange de cle
     if(nbKey==i){
+        strncpy((char *)trame, reinterpret_cast<const char*>(dec_in), sizeof(trame));
         iss.str(string((const char *)trame));
         getline(iss,chaineTest,'*');
+        string lakey;
+        getline(iss,lakey,'*');
+        cout << chaineTest << endl;
         if(chaineTest=="init"){
             rsaCrypt rsaClient = rsaCrypt(2048);
-            rsaClient.recupKeyPub(iss.str());
-
+            rsaClient.recupKeyPub(lakey);
             newKey = this->genAESKey();
             aesToSend = tabKeyIv[newKey][0]+";"+tabKeyIv[newKey][1];
+            cout << aesToSend << endl;
             toSend = "5*"+rsaClient.chiffrement(aesToSend);
+
             eChangeKey=true;
         }else {
             dechiffre = false;
