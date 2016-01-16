@@ -133,9 +133,8 @@ void reception::traitement(string messageStr){
                 else if(option.compare("-e")==0){/* traitement est un statut */
                     m_netinf->send_exist(traitement, token);
                 }
-                if(option.compare("-p")==0){
-                    string type = "picture";
-                    m_netinf->send_lookrec(type,traitement, token);
+                if(option.compare("-r")==0){
+                    m_netinf->send_lookrec(option,traitement, token);
                 }
 
                 list<string> * listReponse = m_ts->startTimer(token, 5000);
