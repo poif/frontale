@@ -94,7 +94,7 @@ int traiter_commande(char *a_traiter)
 				affectation = strtok_r(NULL, " ", &save_ptr);
 				groupe_cible = strtok_r(NULL, " ", &save_ptr);
 
-				sprintf(a_envoyer, "chall*%s*%s*%s*%s*%s*%s*%s*none", affectation, statut, 
+				sprintf(a_envoyer, "chall*%s*%s*%s*%s*%s*%s*%s*%s*%s*%s*none", affectation, statut, 
 					action, option, cible, nom, recup_valeur("affectation"), recup_valeur("statut"), 
 					groupe_cible, recup_groupe());
 			}
