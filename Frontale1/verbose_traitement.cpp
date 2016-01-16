@@ -141,35 +141,31 @@ string traitement_req_client(	string numero,
   else if (action=="6"){             //recherche d'un groupe
       to_send += groupes_cible +"*EOF";
   }               
-
+  cout << "Formatage de la requête client : " << to_send <<"."<< endl;
   return to_send;
 }
 
- 
-/////////////////////////
-/*******REPONSES********/
-/////////////////////////
+
 
 string traitement_rep_client(list<string>& a_traiter){
 
 	vector<string> vectToSend=vector<string>();
-	/*Il vaut mieux décomposer comme ca : Si on se rend compte qu'une requete est invalide
-	par exemple un nom sans référence, on pourra simplement annuler cette réponse par error
-	On pourra également négliger les envois d'erreur si une réponse est valide*/
 	string to_send;
 	int firstRep = 0;		//c'est votre premiere bafouille?
 
-//	for (unsigned int i = 0; i < a_traiter.size(); i++) {
-  for (list<string>::iterator it = a_traiter.begin(); it != a_traiter.end(); it++) { 
+  	for (list<string>::iterator it = a_traiter.begin(); it != a_traiter.end(); it++) { 
 		//chaque réponse est dans une case du tableau
 		//on renvoie toutes les réponses concaténées
-    istringstream ss(*it);
+    	istringstream ss(*it);
 		string numero; getline(ss, numero, '*');
 
 		if (firstRep==0){
+			 cout << "Traitement des réponses des clients/BDD à la requête d'ID " + numero <<"."<< endl;
 			 to_send += numero + "*";
 			 firstRep=1;
 		}
+
+		cout << "Traitement de la réponse " << *it <<"."<< endl;
 		string action; getline(ss, action, '*');
 
 		string stringInTheVector;		//chaine qu'on va push dans le vector
@@ -191,7 +187,11 @@ string traitement_rep_client(list<string>& a_traiter){
 			if (getline(ss, nom, '*') && getline(ss, statut, '*') && getline(ss,tokenEOF,'*') &&
         nom != "none" && statut != "none" &&
         nom != "EOF"  && statut != "EOF" && tokenEOF == "EOF") {
-			  stringInTheVector += nom + "*" + hashString((char*)statut.c_str())+"*";
+				stringInTheVector += nom + "*" + hashString((char*)statut.c_str())+"*";
+				cout << "La réponse traîtée est "<< stringInTheVector <<"."<< endl;
+			}
+			else {
+				cout << "Le client interrogé ne correspondait pas à la requête ou la réponse est incorrecte."<<endl;
 			}
 		}
 
@@ -207,7 +207,10 @@ string traitement_rep_client(list<string>& a_traiter){
         string to_hash = nom + statut;
         char *hash = (char*)to_hash.c_str();
 				stringInTheVector += hashString(hash) + "*";
-      }
+				cout << "La réponse traîtée est "<< stringInTheVector <<"."<< endl;
+      		}
+      		else 
+ 				cout << "Le client interrogé ne correspondait pas à la requête ou la réponse est incorrecte."<<endl;
 		}
 
 	/****************************************/
@@ -221,6 +224,10 @@ string traitement_rep_client(list<string>& a_traiter){
           stringInTheVector += reference + "*" + hashString(hash) + "*";
         }
       }
+      if (stringInTheVector.empty())				
+      	cout << "Le client interrogé ne correspondait pas à la requête ou la réponse est incorrecte."<<endl;    
+      else 
+      	cout << "La réponse traîtée est "<< stringInTheVector <<"."<< endl;
     }
 
 	/*************************************************/
@@ -230,7 +237,10 @@ string traitement_rep_client(list<string>& a_traiter){
       if (getline(ss, document, '*') && getline(ss, tokenEOF, '*') && 
         document != "EOF" && document != "none" && tokenEOF == "EOF"){
         stringInTheVector = document + "*";
+        cout << "La réponse traîtée est "<< stringInTheVector <<"."<< endl;
       }
+      else 
+      	cout << "Le client interrogé ne correspondait pas à la requête ou la réponse est incorrecte."<<endl;    
     }
 
   /************************************************/
@@ -239,9 +249,13 @@ string traitement_rep_client(list<string>& a_traiter){
     //RECHERCHE DUN GROUPE
       string yn; 
       if (getline(ss,yn,'*') && getline(ss,tokenEOF,'*') && (yn !="0" || yn != "1")
-          && tokenEOF == "EOF")
+          && tokenEOF == "EOF"){
         stringInTheVector = yn;
+        cout << "La réponse traîtée est "<< stringInTheVector <<"."<< endl;
+      }
+      else  cout << "La réponse traîtée est invalide." << endl;
     }
+
 
 
 		/**********************************************************/
@@ -254,6 +268,10 @@ string traitement_rep_client(list<string>& a_traiter){
           stringInTheVector += reference + "*" + Hnom + "*";
         }
       }
+      if (stringInTheVector.empty())				
+      	cout << "La réponse est incorrecte ou invalide."<<endl;    
+      else 
+      	cout << "La réponse traîtée est "<< stringInTheVector <<"."<< endl;
     }
 
     /*********************************************************/
@@ -263,14 +281,17 @@ string traitement_rep_client(list<string>& a_traiter){
       if (getline(ss, document, '*') && getline(ss, tokenEOF, '*') && 
         document != "EOF" && document != "NULL" && tokenEOF == "EOF"){
         stringInTheVector = document + "*";
-      }
+      	cout << "La réponse traîtée est "<< stringInTheVector <<"."<< endl;
+      } 
+      else 
+      	cout << "La réponse est incorrecte ou invalide."<<endl;
     }
 
     //else{}
 
 		/*****************************************************/
 
-		if (!stringInTheVector.empty())   
+	if (!stringInTheVector.empty())   
       vectToSend.push_back(stringInTheVector);
 		//on ajoute une réponse traitée dans le vector
 	}
@@ -281,7 +302,7 @@ string traitement_rep_client(list<string>& a_traiter){
 	for (unsigned int i=0;i<vectToSend.size();i++){
 			to_send += vectToSend[i];
 	}
-
+	cout << "La réponse finale à la frontale émettrice est " << to_send << endl;
 	return to_send;
 }
 
@@ -369,6 +390,7 @@ string traitement_req_bdd(string numero,
     	to_send += ref + "*";
 	}
  	to_send += "EOF*";
+ 	cout << "Formatage de la requête BDD : " << to_send << "."<< endl;
  	return to_send;
 }
 
