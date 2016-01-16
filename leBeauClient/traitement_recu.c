@@ -26,12 +26,18 @@ int traiter_recu (char * requete_recu)
     char * save_ptr;
     char *numero_requete = malloc (sizeof (char*) * 1024);
 
-    numero_requete = strtok_r(requete_decrypt, "*", &save_ptr);
+    char * copie = malloc(sizeof (char) * 1024);
+
+    strncpy(copie,requete_decrypt, 1024);
+    copie[1023] = '\0';
+
+    numero_requete = strtok_r(copie, "*", &save_ptr);
+
 
     if(numero_requete[0] == 'R')
     {
     	type = 'z';
-    	traitement_R(requete_decrypt);
+    	traitement_R(copie);
     }
 
     else
