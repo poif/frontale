@@ -32,3 +32,13 @@ void clientFront::emission(string message){
     soc->writeDatagram(datagram, addr,1234);
 
 }
+
+void clientFront::emission(char * message, int size){
+
+    QHostAddress addr = QHostAddress::LocalHost;
+
+    QByteArray datagram(message, size);
+
+    soc->writeDatagram(datagram, addr,1234);
+
+}

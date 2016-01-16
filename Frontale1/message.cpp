@@ -15,16 +15,19 @@ Message::Message(QString msg, char type, char separateur)
     this->type = type;
     this->separateur = separateur;
     this->nbKey=0;
+    toSendArray = (char*)malloc(1024*sizeof(char));
 }
 
 Message::Message(QString chiffre, char separateur){
     this->chiffre = chiffre;
     this->separateur = separateur;
     this->nbKey=0;
+    toSendArray = (char*)malloc(1024*sizeof(char));
 }
 
 Message::Message(){
     this->nbKey=0;
+    toSendArray = (char*)malloc(1024*sizeof(char));
  
 }
 
@@ -128,7 +131,17 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
             newKey = this->genAESKey();
             aesToSend = tabKeyIv[newKey][0]+";"+tabKeyIv[newKey][1];
             cout << aesToSend << endl;
-            toSend = "5*"+rsaClient.chiffrement(aesToSend);
+            //toSend = "5*"+rsaClient.chiffrement(aesToSend);
+
+            
+            char *temp;
+
+            temp = rsaClient.chiffrement(aesToSend);
+
+            toSendArray[0] = '5';
+            toSendArray[1] = '*';
+
+            for(int k = 2;k<1024;k++) toSendArray[k] = temp[k];
 
             eChangeKey=true;
         }else {
@@ -211,6 +224,10 @@ int Message::getNumClient(){
 
 string Message::getToSend(){
     return toSend;
+}
+
+char* Message::getToSendArray(){
+    return toSendArray;
 }
 
 bool Message::getDechiffre(){

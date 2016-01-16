@@ -89,7 +89,7 @@ void reception::traitement(string messageStr){
 
             clientFront cli;
             cli.socBind();
-            cli.emission(mess->getToSend());
+            cli.emission(mess->getToSendArray(), sizeof(char)*258);
 
 
 

@@ -18,7 +18,7 @@ rsaCrypt::rsaCrypt(int keylen)
     cout << "fin constructeur" << endl;
 
 }
-
+/*
 string rsaCrypt::chiffrement(string clair){
     cout << "chiffrement rsa" << endl;
     cout << "laforeignkey" << forgeignKey << endl;
@@ -35,7 +35,20 @@ string rsaCrypt::chiffrement(string clair){
     return oss.str();
 
 
+}*/
 
+char* rsaCrypt::chiffrement(string clair){
+    cout << "chiffrement rsa" << endl;
+    cout << "laforeignkey" << forgeignKey << endl;
+    ostringstream oss;
+    unsigned char *chif = (unsigned char*)malloc(1024*sizeof(char));
+    int succ;
+    int kLen = RSA_size(forgeignKey) - 11;
+    succ = RSA_public_encrypt(kLen,(const unsigned char *)clair.c_str(),chif,forgeignKey,RSA_PKCS1_PADDING);
+    if(succ <= 0)
+            cout << "erreur RSA_encrypt" << endl;
+
+    return (char*) chif;
 
 
 }
@@ -63,7 +76,7 @@ void rsaCrypt::keyGen()
     BN_free(bne);
 }
 
-string rsaCrypt::dechiffrement(string chif){
+//string rsaCrypt::dechiffrement(string chif){
 
     // DECODAGE BASE64
 /*	char *buffer=(char *)malloc(1024*sizeof(char));
@@ -80,7 +93,7 @@ string rsaCrypt::dechiffrement(string chif){
     BIO_free_all(bio);
 
 */
-    cout << "dechiffrement" << endl;
+ /*   cout << "dechiffrement" << endl;
     ostringstream oss;
     unsigned char *clair=(unsigned char*)malloc(1024*sizeof(char));;
     int succ;
@@ -96,6 +109,27 @@ string rsaCrypt::dechiffrement(string chif){
     oss << clair;
     free(clair);
 //    free(buffer);
+    return oss.str();
+ 
+}*/
+
+string rsaCrypt::dechiffrement(const char * chif){
+
+    cout << "dechiffrement" << endl;
+    ostringstream oss;
+    unsigned char *clair=(unsigned char*)malloc(1024*sizeof(char));;
+    int succ;
+    int kLen = RSA_size(rsaKey);
+
+    succ = RSA_private_decrypt(kLen,(const unsigned char *)chif,clair,rsaKey,RSA_PKCS1_PADDING);
+
+    if (succ < 0)
+        cout << "erreur dechiffrement rsa" << endl;
+   
+    oss << clair;
+    free(clair);
+//    free(buffer);
+
     return oss.str();
  
 }
@@ -197,7 +231,7 @@ bool rsaCrypt::recupAesKey(string key, int id){
             istringstream issAes;
             string bddaAes;
 
-            issAes.str(this->dechiffrement(bufferchif.str()));
+            issAes.str(this->dechiffrement(bufferchif.str().c_str()));
 
             getline(issAes,bddaAes,';');
             aesKey = (char *)bddaAes.c_str();

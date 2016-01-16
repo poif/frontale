@@ -19,6 +19,7 @@ private:
     int nbKey;
     int numClient;
     string toSend;
+    char * toSendArray;
     bool eChangeKey;
     bool dechiffre;
 
@@ -37,6 +38,7 @@ public:
     int genAESKey();
     int getNumClient();
     string getToSend();
+    char* getToSendArray();
     bool getEChangeKey();
     bool getDechiffre(); 
     string getAESKey(int numKey);

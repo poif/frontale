@@ -13,6 +13,7 @@ public:
     void socBind();
     void emission(std::string message, QHostAddress hostAddr, quint16 hostPort);
     void emission(std::string message);
+    void emission(char * message, int size);
 
 private:
         QUdpSocket *soc;
