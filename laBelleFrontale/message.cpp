@@ -121,7 +121,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 
             newKey = this->genAESKey();
             aesToSend = tabKeyIv[newKey][0]+";"+tabKeyIv[newKey][1];
-            toSend = "init*"+rsaClient.chiffrement(aesToSend);
+            toSend = "5*"+rsaClient.chiffrement(aesToSend);
             eChangeKey=true;
         }else {
             dechiffre = false;
