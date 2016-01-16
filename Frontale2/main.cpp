@@ -13,6 +13,7 @@
 #include "network_interface.h"
 #include "reception.h"
 #include "message.h"
+#include "lecture.h"
 
 using namespace std;
 
@@ -24,10 +25,12 @@ int main(int argc, char *argv[])
 	Tslot ts;
 	Tslot ts_s;
 
+    lecture lec;
+
     Message mess;
 
 	bdd_tcp bdd;
-	bdd.connection_tcp("127.0.0.1",15963);
+    bdd.connection_tcp(QString(lec.getAdresse_bdd().c_str()),lec.getPort_bdd());
 
     rsaCrypt rsabdd = rsaCrypt(2048);
     rsabdd.keyGen();

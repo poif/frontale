@@ -21,7 +21,8 @@ HEADERS += aesbdd.h \
            traitement.h \
            ../leBeauReseau/Trame/trame.h \
            Tslot.h \
-           utils.h 
+           utils.h \ 
+    lecture.h
 SOURCES += aesbdd.cpp \
            bdd_tcp.cpp \
            client.cpp \
@@ -35,5 +36,6 @@ SOURCES += aesbdd.cpp \
            traitement.cpp \
            ../leBeauReseau/Trame/trame.cpp \
            Tslot.cpp \
-           utils.cpp 
+           utils.cpp \ 
+    lecture.cpp
 QT += network

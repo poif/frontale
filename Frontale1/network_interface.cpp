@@ -25,6 +25,7 @@
 #include "utils.h"
 #include "traitement.h"
 #include "message.h"
+#include "lecture.h"
 
 
 using namespace std;
@@ -85,9 +86,11 @@ void network_interface::spawn(){
 		{
 		// Création d'un NoeudThor
 
+        lecture lec;
+
 		boost::asio::io_service io_service;
 		cout << "Noeud mis en place sur le port " << port_rem << endl;
-		noeudthor = new NoeudThor(io_service, port_rem, "127.0.0.1", 8080, "127.0.0.1", 8081, this);
+        noeudthor = new NoeudThor(io_service, port_rem, lec.getServerCentrale() , 8080, lec.getServerProvider(), 8081, this);
 		io_service.run();
 
 		break;

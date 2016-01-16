@@ -13,6 +13,8 @@
 #include "network_interface.h"
 #include "reception.h"
 #include "message.h"
+#include "lecture.h"
+
 
 using namespace std;
 
@@ -20,6 +22,8 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
+
+	lecture lec;
 	
 	Tslot ts;
 	Tslot ts_s;
@@ -27,7 +31,7 @@ int main(int argc, char *argv[])
     Message mess;
 
 	bdd_tcp bdd;
-	bdd.connection_tcp("127.0.0.1",22666);
+	bdd.connection_tcp(QString(lec.getAdresse_bdd().c_str()),lec.getPort_bdd());
 
     rsaCrypt rsabdd = rsaCrypt(2048);
     rsabdd.keyGen();
