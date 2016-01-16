@@ -154,6 +154,7 @@ bool Message::dechiffrement(const unsigned char *key){
     std::cout << "ici crypt : " << chif <<  "taillt : " << chif.size() << std::endl;
 
     this->msg = QString((const char *)trame);
+    return true;
 }
 
 

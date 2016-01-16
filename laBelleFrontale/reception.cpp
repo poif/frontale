@@ -67,8 +67,6 @@ void reception::traitement(string messageStr){
         QHostAddress hoteCourant;
         quint16 portCourant;
 
-        QString message;
-        QString versBdd;
         int numKey;
 
         const static unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
@@ -80,7 +78,6 @@ void reception::traitement(string messageStr){
         string token = m_ts->GenToken(hoteCourant,portCourant);
         cout << "Token généré." << endl;
 
-        message = QString::fromStdString(messageStr);
 
         cout << "Got somethin" << endl;
 
@@ -123,7 +120,6 @@ void reception::traitement(string messageStr){
             cout << "tata" << endl;
 
             if(req.getPourBdd()){
-                versBdd = QString("%1").arg(req.getRequete().c_str());
 
                 m_bdd->emission(req.getRequete());
                 

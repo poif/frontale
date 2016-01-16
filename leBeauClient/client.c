@@ -5,7 +5,7 @@ int main (void)
 {
 	char * command = malloc (sizeof (char*) *1024);
 
-	//AES_generate_key ();
+	AES_generate_key ();
 
 	if(memcmp(recup_valeur("accueil_visible"), "true", 4) == 0)
 		accueil();
@@ -16,14 +16,14 @@ int main (void)
 		return -1;
 	}
 
-	/*generate_RSA_keys ();
+	generate_RSA_keys ();
 	RSA_envoi_key_pub ();
 
 	pthread_t attente_reponse;
 
 	pthread_create(&attente_reponse, NULL, wait_answer, NULL);
 
-	pthread_join(&attente_reponse, NULL);*/
+	pthread_join(&attente_reponse, NULL);
 
 	puts("Entrez une commande ou help !");
 

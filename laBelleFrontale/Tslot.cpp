@@ -254,7 +254,7 @@ std::list<string>* Tslot::startTimer(string token){
 
 	cout << "Lancement du timer..." << std::endl;
 	nanosecond_type const timecap(2000 * 1000000LL);
-	nanosecond_type last(0);
+	//nanosecond_type last(0);
 	cpu_timer timer;
 	bool more_transactions = true;
 	cout << "Timer lancé" << std::endl;
@@ -288,7 +288,7 @@ std::list<string>* Tslot::startTimer(string token, int ms){
 
 	cout << "Lancement du timer..." << std::endl;
 	nanosecond_type const timecap(ms * 1000000LL);
-	nanosecond_type last(0);
+	//nanosecond_type last(0);
 	cpu_timer timer;
 	bool more_transactions = true;
 	cout << "Timer lancé" << std::endl;

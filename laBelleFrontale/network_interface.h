@@ -75,8 +75,6 @@ public:
 
 	void tor_receive(std::string str_data);
 
-	inline int get_type(){return type;}
-
 	int port_udp_reception;
 
 private:
@@ -112,7 +110,6 @@ private:
 	reception * res;
     	Message * mess;
 	
-	int type;
 	bool running;
 	std::string host_rem;
     	int port_rem;
