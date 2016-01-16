@@ -1,0 +1,80 @@
+#ifndef TSLOT_H
+#define TSLOT_H
+
+#include <iostream>
+#include <boost/signals2.hpp>
+#include <boost/timer/timer.hpp>
+#include <string>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread.hpp>
+
+#include <iomanip>
+#include <sstream>
+#include <openssl/sha.h>
+#include <QtNetwork>
+#include <ctime>
+
+#include <map>
+#include <list>
+
+class IpPort {
+	public:
+	QHostAddress hostAddress;
+	quint16 port;
+};
+
+class Tslot
+{
+	private:
+	boost::thread* m_thread; // The thread runs this object
+	time_t t0;
+	 
+	// Variable that indicates to stop and the mutex to
+	// synchronise "must stop" on (mutex explained later)
+	bool m_mustStop;
+	boost::mutex m_mustStopMutex;
+	std::string m_lastToken;
+
+	std::map<std::string, IpPort> tokenToClient;
+	std::map<std::string, std::list<std::string>* > tokenToMsgList;
+	std::map<std::string, boost::mutex* > tokenToMutex;
+	std::map<std::string, bool> tokenToBool;
+
+	public:
+	// Default constructor
+	Tslot();
+	 
+	// Destructor
+	~Tslot();
+
+	std::string HexFormate(const unsigned char *hash, size_t length);
+
+	std::string GenToken(QHostAddress addr, quint16 port);
+
+	bool TriggerToken(std::string& token);
+
+	void addMessageToList(std::string token, std::string msg);
+
+	void printMessageToList(std::string token);
+
+	void timeoutCallback(std::string token);
+
+	std::string getLastToken();
+	boost::mutex * getMutex(std::string token);
+	bool getBool(std::string token);
+	 
+	// Start the threa
+	void Start();
+	 
+	// Stop the thread
+	void Stop();
+	 
+	// Thread function
+	void operator () ();
+
+	std::list<std::string>* startTimer(std::string token);
+
+	std::list<std::string>* startTimer(std::string token, int ms);
+};
+
+#endif
