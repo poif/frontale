@@ -65,6 +65,22 @@ string Tslot::GenToken(QHostAddress addr, quint16 port)
 		cerr << "Erreur : tokenToMsgList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
 		return "";
 	}
+	if (tokenToCharList.find(token) == tokenToCharList.cend()){
+		tokenToCharList.emplace(token, new list<char* >());
+	}
+	else {
+		// Ne devrait jamais s'afficher
+		cerr << "Erreur : tokenToCharList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
+	}
+	if (tokenToSizeList.find(token) == tokenToSizeList.cend()){
+		tokenToSizeList.emplace(token, new list<int>());
+	}
+	else {
+		// Ne devrait jamais s'afficher
+		cerr << "Erreur : tokenToSizeList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
+	}
 	if (tokenToBool.find(token) == tokenToBool.cend()){
 		tokenToBool.emplace(token, false);
 	}
@@ -118,6 +134,22 @@ bool Tslot::TriggerToken(string& token)
 		cerr << "Erreur : tokenToMsgList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
 		return false;
 	}
+	if (tokenToCharList.find(token) == tokenToCharList.cend()){
+		tokenToCharList.emplace(token, new list<char* >());
+	}
+	else {
+		// Ne devrait jamais s'afficher
+		cerr << "Erreur : tokenToCharList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
+	}
+	if (tokenToSizeList.find(token) == tokenToSizeList.cend()){
+		tokenToSizeList.emplace(token, new list<int>());
+	}
+	else {
+		// Ne devrait jamais s'afficher
+		cerr << "Erreur : tokenToSizeList n'est pas censé avoir une liste à cet emplacement avant d'avoir recu ce token" << endl;
+		return "";
+	}
 	if (tokenToBool.find(token) == tokenToBool.cend()){
 		tokenToBool.emplace(token, false);
 	}
@@ -150,6 +182,35 @@ void Tslot::addMessageToList(string token, string msg)
 	}
 }
 
+void Tslot::addCharToList(string token, char* buf, int size)
+{
+	if (tokenToCharList.find(token) != tokenToCharList.cend()){
+		char * tokBuf = (char*)malloc(sizeof(char)*1024);
+		int temp;
+		if(size < 1024) temp = size;
+		else temp = 1024;
+		for (int i = 0; i < temp; ++i)
+		{
+			tokBuf[i] = buf[i];
+		}
+		tokBuf[temp]='\0';
+		tokenToCharList[token]->push_back(tokBuf);
+	}
+	else {
+		cerr << "Erreur : on tente de rajoutter des char alors que le token n'existe pas. Timeout dépassé ou tentative d'attaque." << endl;
+	}
+}
+
+void Tslot::addSizeToList(string token, int size)
+{
+	if (tokenToSizeList.find(token) != tokenToSizeList.cend()){
+		tokenToSizeList[token]->push_back(size);
+	}
+	else {
+		cerr << "Erreur : on tente de rajoutter des size alors que le token n'existe pas. Timeout dépassé ou tentative d'attaque." << endl;
+	}
+}
+
 void Tslot::printMessageToList(string token)
 {
 	if (tokenToMsgList.find(token) != tokenToMsgList.cend()){
@@ -164,11 +225,15 @@ void Tslot::timeoutCallback(string token)
 {
 	cout << __FUNCTION__ << " appelée avec le token: " << token << " en argument" << std::endl;
 	std::list<string>* listeReponse = tokenToMsgList[token];
+	std::list<char* >* listeReponse_c = tokenToCharList[token];
+	std::list<int>* listeReponse_i = tokenToSizeList[token];
 	tokenToBool[token] = true;
 
 	cout << "Fin du traitement, affichage en cours..." << endl;
 
 	for (auto it : *listeReponse) cout << it << endl;
+	for (auto it : *listeReponse_c) cout << it << endl;
+	for (auto it : *listeReponse_i) cout << it << endl;
 
 	//tokenToMsgList.erase(token);
 
@@ -245,6 +310,10 @@ void Tslot::operator () ()
 	cout << endl;
 
 }
+std::list<int>* Tslot::getListSize(std::string token){
+
+	return tokenToSizeList[token];
+}
 
 std::list<string>* Tslot::startTimer(string token){
 
@@ -311,5 +380,39 @@ std::list<string>* Tslot::startTimer(string token, int ms){
 	timeoutCallback(token);
 
 	return tokenToMsgList[token];
+
+}
+
+std::list<char* >* Tslot::startTimer_c(string token, int ms){
+
+	//cout << "Armement du thread..." << endl;
+	//Start();
+	//cout << "Thread lancé" << std::endl;
+
+	cout << "Lancement du timer..." << std::endl;
+	nanosecond_type const timecap(ms * 1000000LL);
+	//nanosecond_type last(0);
+	cpu_timer timer;
+	bool more_transactions = true;
+	cout << "Timer lancé" << std::endl;
+
+	while (more_transactions)
+	{
+	  //fonction_qui_fait_un_truc();
+	  cpu_times const elapsed_times(timer.elapsed());
+	  nanosecond_type const elapsed(elapsed_times.system
+	    + elapsed_times.user);
+	  if (elapsed >= timecap)
+	  {
+	    //cout << "Arret du thread..." << endl;
+	    //Stop();
+	    //cout << "Thread arreté." << endl;
+	    more_transactions = false;
+	  }
+	}
+
+	timeoutCallback(token);
+
+	return tokenToCharList[token];
 
 }

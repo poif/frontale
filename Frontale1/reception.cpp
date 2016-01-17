@@ -36,7 +36,9 @@ void reception::procReception(){
     oss << datagram.data();
     cout << datagram.size() << endl;
 
-    boost::thread my_thread(&reception::traitement, boost::ref(*this), oss.str());
+    boost::thread my_thread(&reception::traitement, boost::ref(*this), datagram.data(), datagram.size());
+
+    usleep(50);
 
 }
 
@@ -49,21 +51,23 @@ void reception::procReception_s(){
     //TODO: verification mutex 
     //fileMsg.push_back(oss.str());
 
-    cout << "icibas" << endl;
     cout << oss.str() << endl;
+    cout << datagram.size() << endl;
 
     string token = m_ts->getLastToken();
     cout << token << endl;
     boost::mutex * mustStopMutex = m_ts->getMutex(token);
     mustStopMutex->lock();
     bool mustStop = m_ts->getBool(token);
-    if (mustStop == false)
-        m_ts->addMessageToList(token, oss.str());
+    if (mustStop == false){
+        m_ts->addCharToList(token, datagram.data(), datagram.size());
+        m_ts->addSizeToList(token, datagram.size());
+    }
     mustStopMutex->unlock();
 
 }
 
-void reception::traitement(string messageStr){
+void reception::traitement(char * messageStr, int size){
 
         QHostAddress hoteCourant;
         quint16 portCourant;
@@ -83,7 +87,7 @@ void reception::traitement(string messageStr){
 
         Requete req;
 
-        string input = mess->decrypt((unsigned char*) messageStr.data(), messageStr.size());
+        string input = mess->decrypt((unsigned char*) messageStr, size);
         
         if(mess->getEChangeKey()){
 

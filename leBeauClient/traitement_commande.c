@@ -71,11 +71,12 @@ int traiter_commande(char *a_traiter)
 		
 				int j = 0;
 
-				while (*save_ptr != '\0')	
+				/*while (*save_ptr != '\0')	
 				{
 					affectation[j] = *(save_ptr++);
 					j++;
-				}
+				}*/
+				affectation = strtok_r(NULL, " ", &save_ptr);
 
 				sprintf(a_envoyer, "chall*%s*%s*%s*%s*%s*none*none",affectation, statut, 
 					action, option, cible);
@@ -102,7 +103,8 @@ int traiter_commande(char *a_traiter)
 
 			printf("%s\n", a_envoyer);
 			printf("SIZE -> %d\n", strlen(a_envoyer));
-			unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
+			unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+			memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 			unsigned char a_decrypt[sizeof(a_envoyer)];
 			unsigned char tmp[sizeof(a_envoyer)];
 			crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));

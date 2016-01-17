@@ -23,7 +23,7 @@ void crypt(unsigned char* aes_input, unsigned char *enc_out, int size_aes_input)
     AES_KEY enc_key;
     AES_set_encrypt_key(aes_key, 256, &enc_key);
     AES_cbc_encrypt(aes_input, enc_out, size_aes_input, &enc_key, iv, AES_ENCRYPT);
-    print_data("\n Encrypted",enc_out, strlen(aes_input)+16);
+    print_data("\n Encrypted",enc_out, strlen(aes_input)+16-(strlen(aes_input)%16));
 
  }
 

@@ -16,8 +16,9 @@ extern int groupe_rep;
 int traiter_recu (char * requete_recu)
 {
     unsigned char requete_decrypt[1024];
+    memset(requete_decrypt, '\0', 1024);
     puts("YIHI");
-    decrypt(requete_recu, requete_decrypt, 1024);
+    decrypt(requete_recu, requete_decrypt, 512);
     printf("JAI RECU -> %s\n", requete_recu);
     printf("DECRYPT -> %s\n", requete_decrypt);
 
@@ -76,7 +77,8 @@ int traiter_recu (char * requete_recu)
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*1*%s*%s*EOF", numero_requete, nom, recup_valeur("statut"));
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 					printf("a envoyer -> %s\n", a_envoyer);
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);
@@ -88,7 +90,8 @@ int traiter_recu (char * requete_recu)
 					strcat(a_envoyer,numero_requete);
 					strcat(a_envoyer, "chall*1*none*EOF");
 					//sprintf(a_envoyer, "1*none");
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);	
 				}
@@ -104,7 +107,7 @@ int traiter_recu (char * requete_recu)
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
-				printf("RECUP_STATUT -> %s\n", recup_valeur("status"));
+				printf("RECUP_STATUT -> %s\n", recup_valeur("statut"));
 				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
 				status_requete = strtok_r(NULL, "*", &save_ptr);
 				affectation_requete = strtok_r(NULL, "*", &save_ptr);
@@ -117,19 +120,21 @@ int traiter_recu (char * requete_recu)
 				{
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char) * 1024];
-					sprintf(a_envoyer, "chall*%s*2*%s*%s*EOF",numero_requete, nom, recup_valeur("status"));
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
+					sprintf(a_envoyer, "chall*%s*2*%s*%s*EOF",numero_requete, nom, recup_valeur("statut"));
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);
 				}
 				else
 				{
 					puts("NOP");
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*2*none*EOF", numero_requete);
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);	
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);	
 				}
 				break;
 		}
@@ -144,7 +149,7 @@ int traiter_recu (char * requete_recu)
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
-				printf("RECUP_STATUT -> %s\n", recup_valeur("status"));
+				printf("RECUP_STATUT -> %s\n", recup_valeur("statut"));
 				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
 				status_requete = strtok_r(NULL, "*", &save_ptr);
 				affectation_requete = strtok_r(NULL, "*", &save_ptr);
@@ -272,8 +277,9 @@ void traitement_R(char *recu)
 		}
 
 		case '2':
-		{
-			if(recu[4] == 1)
+		{	
+			printf("recu : %s\n", recu);
+			if(recu[4] == '1')
 				puts("OUI");
 			else
 				puts("NON");

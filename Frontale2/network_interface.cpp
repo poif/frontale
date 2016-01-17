@@ -483,8 +483,10 @@ void network_interface::process_received_events_queue(){
 
 string network_interface::treat_resource(string& request, string& token, int action, string requetebdd){
 
-	list<string> * a_traiter;
+	list<char* > * a_traiter;
 	list<string> a_traiter_clair;
+
+	list<int > * a_traiter_size;
 
 	/* --- On interroge le client --- */
 	clientFront cli;
@@ -494,7 +496,7 @@ string network_interface::treat_resource(string& request, string& token, int act
 		char* chiffrer = mess->crypt((unsigned char*) request.data(), request.size(),i);
 
 		cli.socBind();
-		cli.emission(chiffrer, request.size()+16);
+		cli.emission(chiffrer, request.size()+16-(request.size()%16));
 	}
 
 	if(ts_s->TriggerToken(token) == false) return "";
@@ -502,18 +504,23 @@ string network_interface::treat_resource(string& request, string& token, int act
 	srand (time(NULL));
 	int ms = rand() % 200 + 2000;
 
-	a_traiter = ts_s->startTimer(token,ms);
+	a_traiter = ts_s->startTimer_c(token,ms);
+	a_traiter_size = ts_s->getListSize(token);
 
 
 	if (!a_traiter->empty())
 	{
+		list<int>::iterator it_size = a_traiter_size->begin();
 		for (auto it : *a_traiter) {
 
-			string messageStr = it;
+			char * messageStr = it;
+			int lasize = *it_size;
 
-			string rep = mess->decrypt((unsigned char*) messageStr.data(), messageStr.size());
+
+			string rep = mess->decrypt((unsigned char*) messageStr, lasize);
 
 			a_traiter_clair.push_back(rep);
+			it_size++;
 
 		}
 	}
@@ -620,6 +627,7 @@ void network_interface::process_received_events(engine_event& e){
 			engine_event r;
 			engine_event p;
 			string reqFormat;
+			
 
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
@@ -629,11 +637,18 @@ void network_interface::process_received_events(engine_event& e){
 			reqFormat = traitement_req_client(token,"2", "none", "none", affectationReq, "none", "none", "none","none","none", "none");
 
 			string repFormat = treat_resource(reqFormat, token);
+			cout << repFormat << endl;
+			istringstream iss(repFormat);
+			string temp;
+			string temp2;
+			getline(iss, temp, '*');
+			getline(iss, temp2, '*');
+			cout << "le hash : " << temp2 << endl;
 
 			if (!repFormat.empty() || repFormat != "")
 			{
 			       r.type = engine_event::ANSWER;
-			       r.s_data["HASH"] = repFormat;
+			       r.s_data["HASH"] = temp2;
 			       r.s_data["TOKEN"] = token;
 
 			       boost::archive::text_oarchive archive(archive_stream);
@@ -830,6 +845,7 @@ void network_interface::process_received_events(engine_event& e){
 					if(!r.s_data["HASH"].empty() && r.s_data["HASH"] != ""){
 						string hash = r.s_data["HASH"];
 						string token = r.s_data["TOKEN"];
+						hash = token + "*" + hash;
 						//hnom.erase(hnom.size() - 1, 1);
 						//cout << "hash : " << hash << endl;
 						//responseRec = hash;	

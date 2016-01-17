@@ -71,6 +71,8 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		string inTheVector;
 		string data;
 
+		//cout << "LE SS :: %s" << ss.str() << endl;
+
 		if (*it == numero+"*ERROR*") continue; //on passe Ã  la reponse suivante
 		else isError = 0;
 
@@ -98,9 +100,14 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 
 		/*****REQUETE 2*****/
 			else if (m_option.compare("-e") ==0) {
-				condensate = m_nom + m_statut;
+				condensate = m_parametre + m_statut;
+				cout << "lecondansate " << condensate << endl;
 				hash = hashString((char*)condensate.c_str());
 				m_resultat = "R*2*0";
+				cout << "lecondansate " << hash << endl;
+				
+				cout << "lecondansate " << hash_recu << endl;
+				//
 				//si aucune rÃ©ponse n'est "vraie", reste Ã  no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
 					//s'il y en a un, on arrÃªte

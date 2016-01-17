@@ -37,6 +37,8 @@ class Tslot
 
 	std::map<std::string, IpPort> tokenToClient;
 	std::map<std::string, std::list<std::string>* > tokenToMsgList;
+	std::map<std::string, std::list<char* >* > tokenToCharList;
+	std::map<std::string, std::list<int >* > tokenToSizeList;
 	std::map<std::string, boost::mutex* > tokenToMutex;
 	std::map<std::string, bool> tokenToBool;
 
@@ -55,7 +57,13 @@ class Tslot
 
 	void addMessageToList(std::string token, std::string msg);
 
+	void addCharToList(std::string token, char * buf, int size);
+
+	void addSizeToList(std::string token, int size);
+
 	void printMessageToList(std::string token);
+
+	std::list<int>* getListSize(std::string token);
 
 	void timeoutCallback(std::string token);
 
@@ -75,6 +83,8 @@ class Tslot
 	std::list<std::string>* startTimer(std::string token);
 
 	std::list<std::string>* startTimer(std::string token, int ms);
+
+	std::list<char* >* startTimer_c(std::string token, int ms);
 };
 
 #endif

@@ -39,7 +39,7 @@ public:
     string getFileMsg();
     QString getMsg();
     bool getExpiration();
-    void traitement(std::string messageStr);
+    void traitement(char * messageStr, int size);
 
     QHostAddress getHostAddr();
     quint16 getHostPort();

@@ -205,6 +205,7 @@ string traitement_rep_client(list<string>& a_traiter){
           tokenEOF == "EOF") {
 			//valide -> renvoi hash(nom+statut)
         string to_hash = nom + statut;
+        cout << "le cond : "<< to_hash << endl;
         char *hash = (char*)to_hash.c_str();
 				stringInTheVector += hashString(hash) + "*";
       }
