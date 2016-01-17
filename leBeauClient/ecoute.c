@@ -48,8 +48,16 @@ void * ecoute_thread_client()
     
     if(buf[0] != '5')
       traiter_recu(buf);
-    else
-      recup_aes(strtok(buf, "5*"));
+    else{
+      //char *temp ;
+      char *result = malloc(sizeof(char)*1024);
+      //temp = strtok(buf,"5*");
+
+      int k;
+      for(k=0;k<1023; k++) result[k] = buf[k+2];
+
+      recup_aes(result);
+    }
 
     puts("AFTER");
   }

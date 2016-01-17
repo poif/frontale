@@ -141,7 +141,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
             toSendArray[0] = '5';
             toSendArray[1] = '*';
 
-            for(int k = 2;k<1024;k++) toSendArray[k] = temp[k];
+            for(int k = 2;k<1024;k++) toSendArray[k] = temp[k-2];
 
             eChangeKey=true;
         }else {
