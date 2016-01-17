@@ -39,7 +39,7 @@ int bdd_parser ( char *trame )
         // On découpe la trame en morceaux repérés via un "*"
         if ( ( morceau = strtok_r ( trame, "*", &safe_trame ) ) == NULL )
         {
-            fprintf ( stderr, "Erreur_bdd_parser : information manquante " ) ;
+            fprintf ( stderr, "Erreur_bdd_parser : information manquante I " ) ;
             bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
             return ERRNO ;
         }
@@ -53,7 +53,7 @@ int bdd_parser ( char *trame )
         memset ( clair, '\0', olen ) ;
         if ( AES_chiffrement ( chiffre, clair, olen, &ilen, DECHIFFREMENT ) != TRUE )
         {
-            fprintf ( stderr, "Erreur_bdd_parser : AES_dechiffrement " ) ;
+            fprintf ( stderr, "Erreur_bdd_parser : AES_dechiffrement II " ) ;
             free ( clair ) ;
             bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
             return ERRNO ;
@@ -70,7 +70,7 @@ int bdd_parser ( char *trame )
         // On découpe la trame en morceaux repérés via un "*"
         if ( i == ZERO )
         {
-            fprintf ( stderr, "Erreur_bdd_parser : information manquante " ) ;
+            fprintf ( stderr, "Erreur_bdd_parser : information manquante III " ) ;
             if ( ( morceau = strtok_r ( clair, "*", &safe_trame ) ) == NULL )
             {
                 if ( do_free == TRUE )
@@ -83,7 +83,7 @@ int bdd_parser ( char *trame )
         {
             if ( ( morceau = strtok_r ( NULL, "*", &safe_trame ) ) == NULL )
             {
-                fprintf ( stderr, "Erreur_bdd_parser : information manquante " ) ;
+                fprintf ( stderr, "Erreur_bdd_parser : information manquante IV " ) ;
                 if ( do_free == TRUE )
                     free ( clair ) ;
                 bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
@@ -94,7 +94,7 @@ int bdd_parser ( char *trame )
         // On vérifie que l'information est présente
         if ( ( ( strcmp ( morceau, "NULL") ) == 0 ) || ( strlen ( morceau ) == 0 ) )
         {
-            fprintf ( stderr, "Erreur_bdd_parser : information manquante " ) ;
+            fprintf ( stderr, "Erreur_bdd_parser : information manquante V " ) ;
             if ( do_free == TRUE )
                 free ( clair ) ;
             bdd_send_msg ( ZERO, ERROR, "ERROR", TRUE ) ;
