@@ -1,5 +1,5 @@
 #include "crypt.h"
-
+#include "default_lib.h"
 //const static unsigned char aes_key[]={0x00,0x10,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF};
 //const static unsigned char aes_key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
 static unsigned char aes_key[AES_KEY_LENGTH+1];
@@ -18,14 +18,12 @@ RSA* client_key = NULL ;
 void crypt(unsigned char* aes_input, unsigned char *enc_out, int size_aes_input){
     
     unsigned char iv[AES_BLOCK_SIZE];
-    printf("le bloc aes : %d\n",AES_BLOCK_SIZE );
-    printf("la clea aes : %s\n", aes_key );
     memset(iv, 0x00, AES_BLOCK_SIZE);
 
     AES_KEY enc_key;
     AES_set_encrypt_key(aes_key, 256, &enc_key);
     AES_cbc_encrypt(aes_input, enc_out, size_aes_input, &enc_key, iv, AES_ENCRYPT);
-    print_data("\n Encrypted",enc_out, strlen(enc_out));
+    print_data("\n Encrypted",enc_out, strlen(aes_input)+16);
 
  }
 
@@ -43,7 +41,7 @@ void decrypt(unsigned char* dec_in, unsigned char* dec_out , int size_aes_input)
     memset(iv, 0x00, AES_BLOCK_SIZE);
     puts("Bonjour");
     AES_KEY dec_key;
-    AES_set_decrypt_key(aes_key, sizeof(aes_key)*8, &dec_key);
+    AES_set_decrypt_key(aes_key, 256, &dec_key);
     AES_cbc_encrypt(dec_in, dec_out, size_aes_input, &dec_key, iv, AES_DECRYPT);
     // print_data("\n Decrypted",dec_out, sizeof(dec_out));
     printf("%s\n", dec_out);
@@ -231,7 +229,7 @@ int RSA_envoi_key_pub ()
     reponse = (char*) malloc ( taille * sizeof ( char ) ) ;
     memset ( reponse, '\0', taille ) ;
     sprintf ( reponse, "init*%s*EOF", key ) ;
-    envoi_requete ( reponse ) ;
+    envoi_requete ( reponse , strlen(reponse), WANT) ;
 
     // Free
     free ( key ) ;

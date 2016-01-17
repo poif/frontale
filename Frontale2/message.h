@@ -34,7 +34,7 @@ public:
     void challenge(int N);
     bool dechiffrement(const unsigned char *key);
     string decrypt(unsigned char* dec_in, int size_aes_input);
-    string crypt(unsigned char* aes_input, int size_aes_input, int numkey);
+    char* crypt(unsigned char* aes_input, int size_aes_input, int numkey);
     int genAESKey();
     int getNumClient();
     string getToSend();

@@ -97,11 +97,12 @@ void reception::traitement(string messageStr){
 
         numKey = mess->getNumClient();
 
-        input = token + "*" + input;
+        
 
         cout << "input : " << input << endl;
 
         if(req.decoupage(input)){
+            //input = token + "*" + input + "*";
             cout << "tata" << endl;
             req.construction();
             cout << "tata" << endl;
@@ -122,7 +123,7 @@ void reception::traitement(string messageStr){
             else
             {
 
-                string traitement = req.getRequete();
+                string traitement = req.getAffectation();
 
                 string option = req.getOption();
 
@@ -130,7 +131,7 @@ void reception::traitement(string messageStr){
                     m_netinf->send_look(traitement, token);
                     cout << "ici envoi" << endl;
                 }
-                else if(option.compare("-e")==0){/* traitement est un statut */
+                else if(option.compare("-e")==0){
                     m_netinf->send_exist(traitement, token);
                 }
                 if(option.compare("-r")==0){
@@ -161,16 +162,17 @@ void reception::traitement(string messageStr){
 
             cout << "resultat : " << req.getResultat() << endl;
 
-            string repo = "1*R*" + req.getResultat();
+            string resultat =req.getResultat();
+            cout << numKey << endl;
 
-            string chiffrer = mess->crypt((unsigned char*) repo.data(), repo.size(), numKey);
+            char * chiffrer = mess->crypt((unsigned char*) resultat.data(), resultat.size(), numKey);
 
             //string toto = msg2.getMsg().toStdString();
             cout << chiffrer << endl;
 
             clientFront cli;
             cli.socBind();
-            cli.emission(chiffrer);//, hoteCourant, portCourant);
+            cli.emission(chiffrer, req.getResultat().size()+16);//, hoteCourant, portCourant);
 
         }
         }

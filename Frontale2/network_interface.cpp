@@ -90,7 +90,7 @@ void network_interface::spawn(){
 
 		boost::asio::io_service io_service;
 		cout << "Noeud mis en place sur le port " << port_rem << endl;
-        noeudthor = new NoeudThor(io_service, port_rem, lec.getServerCentrale(), 8080, lec.getServerProvider(), 8081, this);
+        noeudthor = new NoeudThor(io_service, port_rem, lec.getServerCentrale() , 8080, lec.getServerProvider(), 8081, this);
 		io_service.run();
 
 		break;
@@ -483,8 +483,6 @@ void network_interface::process_received_events_queue(){
 
 string network_interface::treat_resource(string& request, string& token, int action, string requetebdd){
 
-	const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
-
 	list<string> * a_traiter;
 	list<string> a_traiter_clair;
 
@@ -492,10 +490,11 @@ string network_interface::treat_resource(string& request, string& token, int act
 	clientFront cli;
 
 	for(int i=0; i < mess->getNbKey(); i++){
+		
+		char* chiffrer = mess->crypt((unsigned char*) request.data(), request.size(),i);
 
-	string chiffrer = mess->crypt((unsigned char*) request.data(), request.size(),i);
 		cli.socBind();
-		cli.emission(chiffrer);
+		cli.emission(chiffrer, request.size()+16);
 	}
 
 	if(ts_s->TriggerToken(token) == false) return "";

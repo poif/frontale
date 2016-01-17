@@ -8,12 +8,12 @@
 **      char * requete : requete à envoyer
 **======================================================================*/
 
-int envoi_requete(char *requete)
+int envoi_requete(char *requete, int size, int type)
 {
   int sockfd;
   struct sockaddr_in serveur; 
 
-  printf("Longueur du paquet -> %i\n", strlen(requete));
+  printf("Longueur du paquet -> %i\n", size);
   sockfd = socket(AF_INET,/*SOCK_STREAM*/SOCK_DGRAM,/*IPPROTO_TCP*/IPPROTO_UDP);
 
   serveur.sin_family = AF_INET;
@@ -22,9 +22,16 @@ int envoi_requete(char *requete)
 
   printf("ADRESSE -> %s\n", recup_valeur("ip_frontale"));
 
-  printf("PORT -> %i\n", recup_valeur_entier ( "port_frontale" ));
+if(type == WANT){
+      printf("PORT -> %i\n", recup_valeur_entier ( "port_frontale_want" ));
 
-  serveur.sin_port = htons(recup_valeur_entier ( "port_frontale" ));
+      serveur.sin_port = htons(recup_valeur_entier ( "port_frontale_want" ));
+  }
+  else{
+      printf("PORT -> %i\n", recup_valeur_entier ( "port_frontale_give" ));
+
+      serveur.sin_port = htons(recup_valeur_entier ( "port_frontale_give" ));
+  }
  
   if(connect(sockfd,(struct sockaddr*)&serveur,sizeof(serveur)) == -1)
   {
@@ -36,7 +43,7 @@ int envoi_requete(char *requete)
 
   printf("requete -> %s\n", requete);
 
-  if(send(sockfd,requete,strlen(requete),0) == -1)
+  if(send(sockfd,requete,size,0) == -1)
   {
     perror("Erreur lors de l'appel a send -> ");
     exit(1);
@@ -82,7 +89,7 @@ int envoi_fichier(char *fichier, char *num)
     }
 
     crypt(c, capart, strlen(c));
-    envoi_requete(capart);
+    envoi_requete(capart,strlen(c)+16,GIVE);
     }
 
 }

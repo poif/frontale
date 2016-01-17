@@ -250,7 +250,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
             noeudSource->setPort(stoi(t.getCommande(), NULL, 10));
         }
         else if(t.getTTL() == -2) {
-			noeudServeurCentral->send(t);
+        			observeur->tor_receive(t.getCommande());
         }
 		else if (t.getTTL() > 0)
 		{

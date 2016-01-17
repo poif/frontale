@@ -93,6 +93,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 				for (unsigned int i=0; i<reponseTraitees.size(); i++){
 					m_resultat += reponseTraitees[i] + "*";
 				}
+				m_resultat = "R*1*" + m_resultat;
 			}
 
 		/*****REQUETE 2*****/
@@ -147,13 +148,13 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		}
 
 
-		else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'Ã©tait une interaction bdd, il faut juste retransmettre le message au client			
+		else if(m_action.compare("insert") ==0 || !m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'Ã©tait une interaction bdd, il faut juste retransmettre le message au client			
 		{
 				m_resultat = *it;
 				pourThomas = false; // On remet le booleen à false
 		}
 
-		else if(m_action.compare("search") && m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		else if(m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
 		{
 			getline(ss, data, '*');
 			if(data != "ERROR")
@@ -239,10 +240,9 @@ void Requete::construction() //construit la requete suivant action, option et pa
 int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
-	string token;
-	getline(ss, token, '*');
 	//remplissage + test error!
-	if(m_action.compare("search") && m_option.compare("-r"))  //cas particulier de decoupage pour requete 3
+
+	if(!m_action.compare("search") && !m_option.compare("-r"))  //cas particulier de decoupage pour requete 3
 	{
 		if(!getline(ss, m_affectation_cible, '*') ||
 			!getline(ss, m_statut_cible, '*') ||
@@ -262,8 +262,10 @@ int Requete::decoupage(string chaine)
 			!getline(ss, m_statut, '*') ||
 			!getline(ss, m_action, '*') ||
 			!getline(ss, m_option, '*') ||
-			!getline(ss, m_parametre, '*')) 
+			!getline(ss, m_parametre, '*')) {
+			
 			return 0;
+			}
 		else {
 		//it's ok
 			if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) {// Si c'est une requÃªte pour la bdd on a un champ en plus : le nom de la personne
@@ -277,6 +279,7 @@ int Requete::decoupage(string chaine)
 			}
 			if (!getline(ss, m_groupe, '*') || !getline(ss, m_cle, '*')) 
 				return 0;
+
 			return 1;
 		}
 	}

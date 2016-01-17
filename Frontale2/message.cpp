@@ -62,6 +62,8 @@ void Message::chiffrement(const unsigned char *key){
     unsigned char iv[AES_BLOCK_SIZE];
     memset(iv, 0x00, AES_BLOCK_SIZE);
 
+
+
     AES_KEY enc_key;
     AES_set_encrypt_key(key,256,&enc_key);
     AES_cbc_encrypt((const unsigned char *)message,trame,strlen(message), &enc_key,iv,AES_ENCRYPT );
@@ -70,7 +72,7 @@ void Message::chiffrement(const unsigned char *key){
 
 }
 
-std::string Message::crypt(unsigned char* aes_input, int size_aes_input, int numkey ){
+char* Message::crypt(unsigned char* aes_input, int size_aes_input, int numkey ){
     
     unsigned char trame [1024];
     //unsigned char iv[AES_BLOCK_SIZE];
@@ -78,14 +80,15 @@ std::string Message::crypt(unsigned char* aes_input, int size_aes_input, int num
 
   //  const static unsigned char aes_key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
 
+    unsigned char iv[AES_BLOCK_SIZE];
+    memset(iv, 0x00, AES_BLOCK_SIZE);
 
     AES_KEY enc_key;
-    AES_set_encrypt_key((const unsigned char *)tabKeyIv[numkey][0].c_str(), sizeof(tabKeyIv[numkey][0].c_str())*8, &enc_key);
-    AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key,(unsigned char *) tabKeyIv[numkey][1].c_str(), AES_ENCRYPT);
+    AES_set_encrypt_key((const unsigned char *)tabKeyIv[numkey][0].c_str(), 256, &enc_key);
+    AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key,iv, AES_ENCRYPT);
     //print_data("\n Encrypted",enc_out, strlen(enc_out));
 
-    std::string retour = (const char *) trame;
-    return retour;
+    return (char *) trame;
 
  }
 
@@ -149,7 +152,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
             for(int k = 2;k<1024;k++) toSendArray[k] = temp[k-2];
 
             eChangeKey=true;
-            numClient=i-1;
+            numClient=i;
         }else {
             dechiffre = false;
 

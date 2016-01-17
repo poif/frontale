@@ -1,5 +1,5 @@
 #include "traitement_commande.h"
-
+#include "default_lib.h"
 int groupe_rep = 0;
 
 /*======================================================================
@@ -18,11 +18,11 @@ int traiter_commande(char *a_traiter)
 	if(*a_traiter)
 	{
 
-		char *action = malloc (sizeof (char*) * 256);
-		char *option = malloc (sizeof (char*) * 256);
-		char *cible = malloc (sizeof (char*) * 256);
-		char *statut = malloc (sizeof (char*) * 256);
-		char *affectation = malloc (sizeof (char*) * 256);
+		char *action = malloc (sizeof (char) * 256);
+		char *option = malloc (sizeof (char) * 256);
+		char *cible = malloc (sizeof (char) * 256);
+		char *statut = malloc (sizeof (char) * 256);
+		char *affectation = malloc (sizeof (char) * 256);
 
 		if (memcmp(a_traiter, "exit", 4) == 0)
 			return false;
@@ -31,7 +31,7 @@ int traiter_commande(char *a_traiter)
 		action = strtok_r(a_traiter, " ", &save_ptr);
 		option = strtok_r(NULL, " ", &save_ptr);
 
-		unsigned char a_envoyer[sizeof (char*) * 1024];
+		unsigned char a_envoyer[sizeof (char) * 1024];
 
 		if (memcmp(action, "help", 4) == 0)
 		{
@@ -53,11 +53,12 @@ int traiter_commande(char *a_traiter)
 		
 				int j = 0;
 
-				while (*save_ptr != '\0')	
+				/*while (*save_ptr != '\0')	
 				{
 					affectation[j] = *(save_ptr++);
 					j++;
-				}
+				}*/
+				affectation = strtok_r(NULL, " ", &save_ptr);
 				sprintf(a_envoyer, "chall*%s*%s*%s*%s*none*none*none", affectation, statut, 
 					action, option);
 			}
@@ -82,8 +83,8 @@ int traiter_commande(char *a_traiter)
 
 			else if(memcmp(option, "-r", 2) == 0){
 
-				char *nom = malloc (sizeof (char*) * 256);
-				char *groupe_cible = malloc (sizeof (char*) * 256);
+				char *nom = malloc (sizeof (char) * 256);
+				char *groupe_cible = malloc (sizeof (char) * 256);
 
 				printf("On recherche la reference d'un fichier !\n");
 
@@ -105,11 +106,10 @@ int traiter_commande(char *a_traiter)
 			unsigned char a_decrypt[sizeof(a_envoyer)];
 			unsigned char tmp[sizeof(a_envoyer)];
 			crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-			printf("%s\n", a_envoyer_crypt);
 			puts("AFTER");
-			envoi_requete(a_envoyer_crypt);
-			decrypt(a_envoyer_crypt, a_decrypt, sizeof(a_envoyer)+16);
-			printf("DECRYPT -> %s\n", a_decrypt);
+			envoi_requete(a_envoyer_crypt, strlen(a_envoyer)+16-(strlen(a_envoyer)%16), WANT);
+			//decrypt(a_envoyer_crypt, a_decrypt, sizeof(a_envoyer)+15);
+			//printf("DECRYPT -> %s\n", a_decrypt);
 			
 		}
 
@@ -159,7 +159,7 @@ void group_traitement(char *op, char *name)
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		unsigned char a_decrypt[sizeof(a_envoyer)];
 		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		envoi_requete(a_envoyer_crypt);
+		envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,WANT);
 		pthread_create(&attente_reponse, NULL, wait_answer);
 		pthread_join(&attente_reponse, NULL);	
 
@@ -185,7 +185,7 @@ void group_traitement(char *op, char *name)
 			unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 			unsigned char a_decrypt[sizeof(a_envoyer)];
 			crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-			envoi_requete(a_envoyer_crypt);
+			envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,WANT);
 			pthread_create(&attente_reponse, NULL, wait_answer);
 			pthread_join(&attente_reponse, NULL);
 		
@@ -226,7 +226,7 @@ void share_traitement(char *op, char *name, char *path, char *type, char *group_
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		unsigned char a_decrypt[sizeof(a_envoyer)];
 		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		envoi_requete(a_envoyer_crypt);
+		envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,WANT);
 		
 		partage_create(name, path, 1, group_name);
 	}
@@ -252,7 +252,7 @@ void delete_traitement(char *op, char *name/*, char *path*/)
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		unsigned char a_decrypt[sizeof(a_envoyer)];
 		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-		envoi_requete(a_envoyer_crypt);
+		envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,WANT);
 		partage_delete(name);
 	}
 

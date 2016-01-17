@@ -15,9 +15,9 @@ extern int groupe_rep;
 
 int traiter_recu (char * requete_recu)
 {
-	unsigned char requete_decrypt[sizeof(requete_recu)];
+    unsigned char requete_decrypt[1024];
     puts("YIHI");
-    decrypt(requete_recu, requete_decrypt, strlen(requete_recu));
+    decrypt(requete_recu, requete_decrypt, 1024);
     printf("JAI RECU -> %s\n", requete_recu);
     printf("DECRYPT -> %s\n", requete_decrypt);
 
@@ -37,7 +37,8 @@ int traiter_recu (char * requete_recu)
     if(numero_requete[0] == 'R')
     {
     	type = 'z';
-    	traitement_R(copie);
+    	traitement_R(requete_decrypt);
+    	return 0;
     }
 
     else
@@ -58,7 +59,7 @@ int traiter_recu (char * requete_recu)
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
 				//char *status = recup_valeur("status");
-				printf("RECUP_STATUT -> %s\n", recup_valeur("status"));
+				printf("RECUP_STATUT -> %s\n", recup_valeur("statut"));
 				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
 
 				status_requete = strtok_r(NULL, "*", &save_ptr);
@@ -74,11 +75,11 @@ int traiter_recu (char * requete_recu)
 				{
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char) * 1024];
-					sprintf(a_envoyer, "chall*%s*1*%s*%s*EOF", numero_requete, nom, recup_valeur("status"));
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					sprintf(a_envoyer, "chall*%s*1*%s*%s*EOF", numero_requete, nom, recup_valeur("statut"));
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					printf("a envoyer -> %s\n", a_envoyer);
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);
 				}
 				else
 				{
@@ -87,9 +88,9 @@ int traiter_recu (char * requete_recu)
 					strcat(a_envoyer,numero_requete);
 					strcat(a_envoyer, "chall*1*none*EOF");
 					//sprintf(a_envoyer, "1*none");
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);	
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);	
 				}
 
 				break;
@@ -117,18 +118,18 @@ int traiter_recu (char * requete_recu)
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*2*%s*%s*EOF",numero_requete, nom, recup_valeur("status"));
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);
 				}
 				else
 				{
 					puts("NOP");
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*2*none*EOF", numero_requete);
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);	
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);	
 				}
 				break;
 		}
@@ -173,18 +174,18 @@ int traiter_recu (char * requete_recu)
 					//sprintf(a_envoyer, "%s*3*%s*%s*%s*EOF",numero_requete, recup_valeur("status"), recup_valeur(datatype_requete), nom);
 					sprintf(a_envoyer, "chall*%s*3*%s;%s*EOF",numero_requete, retour_reference(datatype_requete), nom);
 					//En sortie de recup_valeur(datatype_request), on a la référence du document
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);
 				}
 				else
 				{
 					puts("NOP");
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*3*none*EOF", numero_requete);
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt);	
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);	
 				}
 				break;
 			
@@ -211,9 +212,9 @@ int traiter_recu (char * requete_recu)
 					{
 						unsigned char a_envoyer[sizeof (char) * 1024];
 						sprintf(a_envoyer, "chall*%s*4*none*EOF", numero_requete);
-						unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+						unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 						crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-						envoi_requete(a_envoyer_crypt);	
+						envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);	
 
 					}
 
@@ -245,8 +246,13 @@ void traitement_R(char *recu)
 {
 	char *save_ptr;
 	char *numero = malloc (sizeof (char) * 1024);
-
-	numero = strtok_r(recu, "R*", &save_ptr);
+	char *temp = malloc (sizeof (char) * 1024);
+	strncpy(temp, (const char *) recu, 1000);
+	printf("on arrive ici : %s\n", recu);
+	char * garb = strtok_r(temp, "*", &save_ptr);
+	numero = strtok_r(NULL, "*", &save_ptr);
+	printf("lala");
+	printf("%s\n", numero);
 
 	switch(numero[0])
 	{
@@ -254,6 +260,7 @@ void traitement_R(char *recu)
 		{
 			;
 			int i = 0;
+			printf("on arrive ici\n");
 			while(recu[i] != '\0')
 			{
 				if(recu[i] == 'R');
@@ -261,6 +268,7 @@ void traitement_R(char *recu)
 				else printf("%c", recu[i]);
 				i++;
 			}
+			break;
 		}
 
 		case '2':
@@ -269,6 +277,7 @@ void traitement_R(char *recu)
 				puts("OUI");
 			else
 				puts("NON");
+			break;
 		}
 
 		case '4':
@@ -278,6 +287,7 @@ void traitement_R(char *recu)
 
 			if (strcmp(fichier, "none") == 0) puts("Aucun fichier");
 			else recevoir_fichier(fichier);
+			break;
 		}
 
 		case '6':
@@ -291,8 +301,11 @@ void traitement_R(char *recu)
 			}
 
 			flag = 1;
+			break;
 		}
+
 	}
+
 }
 
 void recevoir_fichier(char *fichier)
