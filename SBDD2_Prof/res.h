@@ -18,7 +18,7 @@
 // Déclarations des constantes
 //----------------------------------------------------------
 #define PORT                15963
-#define TAILLE_MAX_TRAME    350
+#define TAILLE_MAX_TRAME    450
 #define NB_MAX_REQ          25
 
 

@@ -217,7 +217,7 @@ void res_receive ()
     while ( 1 )
     {
         // Debug
-        printf ( "Res_receive -> En ecoute..." ) ;
+        printf ( "Res_receive -> En ecoute... \n" ) ;
 
         // Ini trame
         memset ( &trame[0], '\0', TAILLE_MAX_TRAME ) ;
@@ -376,7 +376,7 @@ void res_send ( char *trame, int len )
     int nc ;
 
     // Debug
-    puts ( "Res_send -> En envoi..." ) ;
+    puts ( "Res_send -> En envoi... \n" ) ;
 
     // Initialisation errno
     errno = 0 ;
