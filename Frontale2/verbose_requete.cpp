@@ -59,10 +59,21 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 //PAS BESOIN DUN VECTOR<STRING>, on gÃ¨re les rÃ©ponses l'une aprÃ¨s l'autre
 	int isError=1;	//1 si aucune rÃ©ponse n'est valide
 	vector<string> reponseTraitees = vector<string>();	//pareil que pour les reponses clients
+	int afficherNum=0;
+	int verboseTest=0;
+
 	for (list<string>::iterator it = reponse.begin(); it != reponse.end(); it++){
 		//recup dans l'iss de la reponse
 		istringstream ss(*it);
 		string numero; getline(ss, numero, '*');	//rÃ©cupÃ©ration du numÃ©ro pour chaque rÃ©ponse
+
+		if (afficherNum==0){
+			afficherNum=1;
+			cout << "=================================================================================="<<endl;
+			cout << "Traitement des réponses à la requête " << numero <<" envoyées par les frontales."<<endl;
+			cout << "=================================================================================="<<endl;
+		}
+		cout << "Traitement de la réponse "<< *it << endl;
 		string name;
 		string hash_recu;
 		string hash;
@@ -71,21 +82,37 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		string inTheVector;
 		string data;
 
-		if (*it == numero+"*ERROR*") continue; //on passe Ã  la reponse suivante
+		if (*it == numero+"*ERROR*") {
+			cout << "La requête n'a pas eu de réponse positive de la part de cette frontale."<<endl;
+			continue;
+		}
+
 		else isError = 0;
 
 		if(m_action.compare("search") == 0) {
 		/*****REQUETE 1*****/
 			if(m_option.compare("-n") == 0){
 				m_requete = "R*1*";
+				verboseTest = 1;
+				cout << "=================================================================================="<<endl;
+				cout << "Hash du statut envoyé par le client émetteur."<<endl;
 				hash = hashString((char*)m_statut.c_str());
 				while(getline(ss, name, '*') && getline(ss, hash_recu, '*')) {
-					if(hash.compare(hash_recu) == 0)
+					cout << "**"<<endl;
+					cout << "Traitement du couple : " << name << " " << hash_recu << endl;
+					cout << "Comparaison du hash reçu avec le hash du statut intialement envoyé."<<endl;
+					if(hash.compare(hash_recu) == 0){
 						reponseTraitees.push_back(name);	//UN NOM PAR LIGNE DANS LE TABLEAU
+						cout << "Le nom " << name << " a été ajouté à la réponse finale renvoyée au client émetteur!" << endl;
+					}
+					else
+						cout << "Les hashs ne correspondent pas."<<endl;
+					cout << "**"<<endl;
 				}
 
 			/*ELIMINATION DES DOUBLONS*/
 				/*ON DOIT TRIER LE TABLEAU*/
+				cout << "Elimination d'éventuels doublons..."<<endl;
 				sort(reponseTraitees.begin(), reponseTraitees.end() );
 				reponseTraitees.erase( unique( reponseTraitees.begin(), reponseTraitees.end() ), reponseTraitees.end() );
 
@@ -99,31 +126,52 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 			else if (m_option.compare("-e") ==0) {
 				condensate = m_nom + m_statut;
 				hash = hashString((char*)condensate.c_str());
+				cout << "=================================================================================="<<endl;
+				cout << "Hash de la concaténation nom+statut, paramètres envoyés par le client émetteur."<<endl;
 				m_resultat = "R*2*0";
 				//si aucune rÃ©ponse n'est "vraie", reste Ã  no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
+					cout << "Comparaison du hash reçu " << hash_recu << " avec le hash généré."<<endl;
 					//s'il y en a un, on arrÃªte
 					if(hash.compare(hash_recu) ==0){ 
 						m_resultat = "R*2*1";
+						cout << "Les hashs correspondent."<<endl;
+						cout << "On envoie "<< m_resultat << "indiquant que la personne cherchée existe."<<endl;
+						cout << "Puisque l'on a trouvé la personne, on arrête le traitement."<<endl;
+						cout <<"=================================================================================="<<endl;
 						return 1;	//on a trouvÃ©, c'est tout ce qu'on voulait
 					}
+					else {
+						cout << "Les hashs ne correspondent pas."<<endl;
+					}
 				}
+				cout <<"=================================================================================="<<endl;
 			}
 
 		/*****REQUETE 3*****/
 			else if (m_option.compare("-r") ==0 && pourThomas == false) //Si ce booleen est à false => c'est la requête à envoyer à Thomas
 			{
-/*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
+				pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
 				condensate += m_nom;
+				cout <<"=================================================================================="<<endl;		
 				hash = hashString((char*)condensate.c_str());
-/*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
-/*REQ3->ID*3*statut*affectation*gp_cible*typedata*/
-							if(hash.compare(hash_recu) ==0) {
-								reference = m_reference;
-								m_requete = "4*" + m_statut + "*none*" + m_affectation + "*none*" + m_groupe + "*none*none*" + reference + "*none*";
-								return 1;
-							}
-						}
+				cout <<"Hash du nom envoyé par le client émetteur."<<endl;
+				while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
+					cout << "Comparaison du hash reçu "<< hash_recu << " avec le hash généré."<<endl;
+					if(hash.compare(hash_recu) ==0){
+						reference = m_reference;
+						cout << "Le hash correspond, la référence "<<reference<< " est ajoutée à la réponse!"<<endl;
+						cout << "On a obtenu la référence voulue, on arrête le traitement!"<<endl;
+						m_requete = "4*" + m_statut + "*none*" + m_affectation + "*none*" + m_groupe + "*none*none*" + reference + "*none*";
+						cout << "On renvoie la requête de récupération de données : " << m_requete<<endl;
+						cout <<"=================================================================================="<<endl;		
+						return 1;
+					}
+					else {
+						cout <<"Les hashs ne correspondent pas."<< endl;
+					}
+				}
+				cout << "Aucune référence sélectionnée pour cette frontale."<<endl;
 			}
 
 
@@ -137,19 +185,25 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		else if(m_action.compare("group") ==0)
 		{
 			string found_group;
+			cout <<"=================================================================================="<<endl;		
 			while(getline(ss, found_group, '*')){
-				if (found_group == "1"){
+				if (found_group == "1"){		
 					m_resultat= "R*6*1";
+					cout << "Le groupe cherché a été trouvé, on renvoie la message " << m_requete << "au client et on arrête le traitement."<<endl;
+					cout <<"=================================================================================="<<endl;			
 					return 1 ;
 				}
 			}
 			m_resultat = "R*6*0";
+			cout <<"Le groupe souhaité n'a pas été trouvé dans cette frontale."<<endl;
+			cout <<"=================================================================================="<<endl;		
 		}
 
 
 		else if(m_action.compare("insert") ==0 || m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'Ã©tait une interaction bdd, il faut juste retransmettre le message au client			
 		{
 				m_resultat = *it;
+				cout << "Interaction BDD : on retransmet la requête "<< *it << "à la BDD."<<endl;
 				pourThomas = false; // On remet le booleen à false
 		}
 
@@ -159,8 +213,14 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 			if(data != "ERROR")
 			{
 				m_resultat = "R*4*"+data;
+				cout << "La donnée demandée a été trouvée!"<<endl;
+				cout << "On la renvoie au client sous la forme " << m_resultat << endl;
+				cout << "On arrête le traitement."<<endl;
+				cout <<"=================================================================================="<<endl;		
 				return 1;
 			}
+			cout << "La donnée n'a pas été trouvée dans la réponse de cette frontale!"<<endl;
+			cout <<"=================================================================================="<<endl;		
 		}
 
 
@@ -171,11 +231,19 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		}
 	}
 
+	if (verboseTest==1){
+		cout << "La réponse finale renvoyée au client émetteur est pour le moment : " << m_resultat <<"."<< endl;
+		cout <<"=================================================================================="<<endl;
+	}
+
+
 	if (isError==1)	{ //Tout est erreur, ou l'option/action est invalide
 		cerr << "Erreur de traitement!" << endl;
 		m_resultat = "R*ERROR";
+		cout << "On renvoie R*ERROR au client";
 		return 0;
 	}
+
 	else
 		return 1;
 }
@@ -191,15 +259,20 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	if(m_action.compare("search") == 0) // Fonction recherche
 	{
 		pourBdd=false;
-		if(m_option.compare("-n") == 0) // Si on cherche un nom
+		if(m_option.compare("-n") == 0){ // Si on cherche un nom
 			m_requete = "1*none*none*" + m_affectation + "*none*none*none*none*none*none*" ;
+			cout << "Formatage de la requête de recherche d'une personne: " << m_requete << endl;
+		}
 
-		else if(m_option.compare("-e") == 0) // Si on cherche l'existance
+		else if(m_option.compare("-e") == 0) {// Si on cherche l'existance
 			m_requete = "2*none*none*" + m_affectation + "*none*none*none*none*none*none*" ;
+			cout << "Formatage de la requête de recherche de l'existence d'une personne: " << m_requete << endl;
+		}
 
-		else if(m_option.compare("-r") == 0) // Si on cherche une photo(donnÃ©e)
+		else if(m_option.compare("-r") == 0) {// Si on cherche une photo(donnÃ©e)
 			m_requete = "3*none*" + m_statut_cible + "*none*" + m_affectation_cible + "*none*" + m_groupe_cible + "*" + m_option + "*none*none*";
-
+			cout << "Formatage de la requête de recherche de référence: " << m_requete << endl;
+		}
 		else
 			cerr << "Option inconnue" << endl ;
 	}
@@ -208,15 +281,17 @@ void Requete::construction() //construit la requete suivant action, option et pa
         {
                 pourBdd=false;
                 m_requete = "6*none*none*none*none*none*" + m_parametre + "*none*none*none*";
+                cout << "Formatage de la requête : " << m_requete << endl;
         }
 
 	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneÃ© dans la bdd
 	{
-/*ADDED*/ string toHash = m_nom+m_statut;
+		string toHash = m_nom+m_statut;
 		hash = hashString((char*)toHash.c_str());
 	    pourBdd=true;
 	    m_requete = "302*";
 	    m_requete += m_statut + "*" + m_affectation + "*" + m_groupe + m_option + "*" + m_parametre +"*"+ hash +"*EOF";
+	    cout << "Formatage de la requête d'insertion d'une donnée dans la BDD : " << m_requete << endl;
 	}
 
 	else if(m_action.compare("delete") == 0)
@@ -225,6 +300,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	    string toHash = m_nom+m_statut;
 		hash = hashString((char*)toHash.c_str());
 	    m_requete = "303*"+m_parametre+"*"+hash+"*EOF";
+	    cout << "Formatage de la requête de supression d'une donnée dans la BDD : " << m_requete << endl;
 	}
 
 	else
@@ -239,6 +315,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
+	cout << "Découpage de la requête client." << endl;
 	//remplissage + test error!
 	if(m_action.compare("search") && m_option.compare("-r"))  //cas particulier de decoupage pour requete 3
 	{
@@ -280,5 +357,4 @@ int Requete::decoupage(string chaine)
 	}
 	return 1;
 }
-
 
