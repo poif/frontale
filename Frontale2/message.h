@@ -1,6 +1,6 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
-#define AES_KEY_LENGTH      31
+#define AES_KEY_LENGTH      32
 #include <iostream>
 #include <QCoreApplication>
 #include <string>

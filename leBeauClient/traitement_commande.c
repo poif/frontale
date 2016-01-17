@@ -101,14 +101,14 @@ int traiter_commande(char *a_traiter)
 
 			printf("%s\n", a_envoyer);
 			printf("SIZE -> %d\n", strlen(a_envoyer));
-			unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+			unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 			unsigned char a_decrypt[sizeof(a_envoyer)];
 			unsigned char tmp[sizeof(a_envoyer)];
 			crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 			printf("%s\n", a_envoyer_crypt);
 			puts("AFTER");
 			envoi_requete(a_envoyer_crypt);
-			decrypt(a_envoyer_crypt, a_decrypt, strlen(a_envoyer_crypt));
+			decrypt(a_envoyer_crypt, a_decrypt, sizeof(a_envoyer)+16);
 			printf("DECRYPT -> %s\n", a_decrypt);
 			
 		}

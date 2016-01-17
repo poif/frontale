@@ -101,12 +101,15 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
    // unsigned char iv[AES_BLOCK_SIZE];
   //  memset(iv, 0x00, AES_BLOCK_SIZE);
 //    const static unsigned char aes_key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
-    while(chaineTest != "CHALL" && i<nbKey && !tabKeyIv[i][0].empty() && !tabKeyIv[i][0].empty()){
+    while(chaineTest != "chall" && i<nbKey && !tabKeyIv[i][0].empty() && !tabKeyIv[i][0].empty()){
 
         AES_KEY dec_key;
-        AES_set_decrypt_key((const unsigned char *)tabKeyIv[i][0].c_str(), sizeof(tabKeyIv[i][0].c_str())*8, &dec_key);
+        
+        AES_set_decrypt_key((const unsigned char *)tabKeyIv[i][0].c_str(), 256, &dec_key);
 
-        AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key,(unsigned char *) tabKeyIv[i][1].c_str(), AES_DECRYPT);
+        unsigned char iv[AES_BLOCK_SIZE];
+        memset(iv, 0x00, AES_BLOCK_SIZE);
+        AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key,iv/*(unsigned char *) tabKeyIv[i][1].c_str()*/, AES_DECRYPT);
 
         // print_data("\n Decrypted",dec_out, sizeof(dec_out));
 
@@ -114,8 +117,10 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 
         iss.str(string((const char *)trame));
         getline(iss,chaineTest,'*');
-        i++;
+        if(chaineTest != "chall") i++;
     }
+    cout << nbKey << endl;
+    cout << i << endl;
 
     // echange de cle
     if(nbKey==i){
@@ -144,18 +149,24 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
             for(int k = 2;k<1024;k++) toSendArray[k] = temp[k-2];
 
             eChangeKey=true;
+            numClient=i-1;
         }else {
             dechiffre = false;
-        }
 
+        }
+        return iss.str();
 
     }else{
+        string reponse;
+        getline(iss,reponse,'\0');
+        cout << "reponse" << reponse << endl;
         dechiffre = true;
+        eChangeKey=false;
+        return reponse;
+
+
     }
 
-    numClient=i-1;
-
-    return iss.str();
  }
 
 /* fixit : probleme avec le dechiffrement depuis QT 5.5*/
@@ -182,16 +193,17 @@ bool Message::dechiffrement(const unsigned char *key){
 int Message::genAESKey(){
     int i ;
     ostringstream oss;
+    ostringstream oss2;
 
     // On alloue notre structure
-    char *key = (char *) malloc ( AES_KEY_LENGTH*sizeof(char) ) ;
-    char *iv =(char *) malloc (AES_KEY_LENGTH*sizeof(char));
+    char *key = (char *) malloc ( (AES_KEY_LENGTH+1)*sizeof(char) ) ;
+    char *iv =(char *) malloc ((AES_KEY_LENGTH+1)*sizeof(char));
     // On initialise notre structure
-    memset ( key, '\0', AES_KEY_LENGTH ) ;
-    memset ( iv, '\0', AES_KEY_LENGTH ) ;
+    memset ( key, '\0', AES_KEY_LENGTH +1) ;
+    memset ( iv, '\0', AES_KEY_LENGTH +1) ;
 
     // On génère les clés et IV avec des caractères aléatoires
-    for ( i = 0; i < AES_KEY_LENGTH - 1; i++ )
+    for ( i = 0; i < AES_KEY_LENGTH ; i++ )
     {
         key[i] = rand() % ( 122 - 97 ) + 97 ;
         iv[i] = rand() % ( 122 - 97 ) + 97 ;
@@ -200,9 +212,9 @@ int Message::genAESKey(){
 
     tabKeyIv[nbKey][0] = oss.str();
 
-    oss << iv;
+    oss2 << iv;
 
-    tabKeyIv[nbKey][1] = oss.str();
+    tabKeyIv[nbKey][1] = oss2.str();
 
     nbKey++;
 

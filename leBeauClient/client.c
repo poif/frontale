@@ -1,5 +1,6 @@
 #include "client.h"
 #include "crypt.h"
+#include "ecoute.h"
 
 int main (void)
 {
@@ -21,9 +22,11 @@ int main (void)
 
 	pthread_t attente_reponse;
 
-	pthread_create(&attente_reponse, NULL, wait_answer, NULL);
+	pthread_create(&attente_reponse, NULL, wait_my_answer, NULL);
 
-	pthread_join(&attente_reponse, NULL);
+	usleep(500);
+
+	pthread_cancel(attente_reponse);
 
 	puts("Entrez une commande ou help !");
 

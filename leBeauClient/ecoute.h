@@ -9,7 +9,7 @@
 void * ecoute_thread_client();
 int ecoute_client();
 void ecoute_kill_thread();
-
+void *wait_my_answer();
 pthread_t thread_ecoute;
 
 #endif

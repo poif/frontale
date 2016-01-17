@@ -34,6 +34,7 @@ void reception::procReception(){
     datagram.resize(soc->pendingDatagramSize());
     soc->readDatagram(datagram.data(),datagram.size(), &hostAddr, &hostPort);
     oss << datagram.data();
+    cout << datagram.size() << endl;
 
     boost::thread my_thread(&reception::traitement, boost::ref(*this), oss.str());
 
@@ -77,7 +78,6 @@ void reception::traitement(string messageStr){
         cout << "Génération du token..." << endl;
         string token = m_ts->GenToken(hoteCourant,portCourant);
         cout << "Token généré." << endl;
-
 
         cout << "Got somethin" << endl;
 

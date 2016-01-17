@@ -4,6 +4,7 @@
 **  Nom          : ecoute_thread_client
 **  Description  : Initialisation de l'écoute du client
 **======================================================================*/
+static int flag = 0;
 
 void * ecoute_thread_client()
 {
@@ -56,11 +57,19 @@ void * ecoute_thread_client()
       int k;
       for(k=0;k<1023; k++) result[k] = buf[k+2];
 
-      recup_aes(result);
+      if(recup_aes(result) == 1) flag = 1;
     }
 
     puts("AFTER");
+    flag = 1;
   }
+}
+
+void *wait_my_answer()
+{
+  while(flag ==0 );
+  
+  flag = 0;
 }
 
 /*======================================================================

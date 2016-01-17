@@ -239,6 +239,8 @@ void Requete::construction() //construit la requete suivant action, option et pa
 int Requete::decoupage(string chaine)
 {
 	istringstream ss(chaine);
+	string token;
+	getline(ss, token, '*');
 	//remplissage + test error!
 	if(m_action.compare("search") && m_option.compare("-r"))  //cas particulier de decoupage pour requete 3
 	{
