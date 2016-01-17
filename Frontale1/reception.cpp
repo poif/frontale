@@ -36,7 +36,15 @@ void reception::procReception(){
     oss << datagram.data();
     cout << datagram.size() << endl;
 
-    boost::thread my_thread(&reception::traitement, boost::ref(*this), datagram.data(), datagram.size());
+    char * passage = (char *)malloc(sizeof(char)*datagram.size()+1);
+
+    for (int i = 0; i < datagram.size(); ++i)
+    {
+       passage[i] = datagram.data()[i];
+    }
+    passage[datagram.size()]='\0';
+
+    boost::thread my_thread(&reception::traitement, boost::ref(*this), passage, datagram.size());
 
     usleep(50);
 
