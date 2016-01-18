@@ -217,7 +217,7 @@ int traiter_recu (char * requete_recu)
 					{
 						//envoi_fichier(retour_path(ref), numero_requete);
 						unsigned char a_envoyer[sizeof (char) * 1024];
-						sprintf(c, "chall*%s*4*bonjour*EOF", numero_requete);
+						sprintf(a_envoyer, "chall*%s*4*bonjour*EOF", numero_requete);
 						unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 						memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 						crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
