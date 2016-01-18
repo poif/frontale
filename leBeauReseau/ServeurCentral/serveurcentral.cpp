@@ -46,9 +46,7 @@ void ServeurCentral::traitementDeLaTrame(Trame &t, Client<ServeurCentral> *noeud
 	t.setTTL(0);
 	for(auto cl : this->toutlemonde){
 		Client<ServeurCentral> *cli = cl;
-		if (cli != noeudSource){
-			cli->send(t);
-		}
+		cli->send(t);
 	}
 }
 
