@@ -50,23 +50,17 @@ bool Requete::getPourThomas()
 void Requete::setResultat(string buffer)
 {	m_resultat = buffer;}
 
-//Methods
-
-/* =======================================================================================================================
-	FONCTION TRI : TRI ET CONSTRUIT LE RESULTAT A ENVOYER AU CLIENT
-=========================================================================================================================*/
 
 
-int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã©lÃ©ments nÃ©cessaire suivant le type de requÃªte => construit la requete Ã  envoyer sur le rÃ©seau
+int Requete::tri(list<string>& reponse) 
 {
-//CONSIDEREES DU MEME TOKEN
-//PAS BESOIN DUN VECTOR<STRING>, on gÃ¨re les rÃ©ponses l'une aprÃ¨s l'autre
-	int isError=1;	//1 si aucune rÃ©ponse n'est valide
-	vector<string> reponseTraitees = vector<string>();	//pareil que pour les reponses clients
+
+	int isError=1;	
+	vector<string> reponseTraitees = vector<string>();	
 	for (list<string>::iterator it = reponse.begin(); it != reponse.end(); it++){
-		//recup dans l'iss de la reponse
+		
 		istringstream ss(*it);
-		string numero; getline(ss, numero, '*');	//rÃ©cupÃ©ration du numÃ©ro pour chaque rÃ©ponse
+		string numero; getline(ss, numero, '*');	
 		string name;
 		string hash_recu;
 		string hash;
@@ -76,13 +70,13 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		string data;
 		string pub;
 
-		//cout << "LE SS :: %s" << ss.str() << endl;
+		
 
 		if (*it == numero+"*ERROR*") continue; //on passe Ã  la reponse suivante
 		else isError = 0;
 
 		if(m_action.compare("search") == 0) {
-		/*****REQUETE 1*****/
+		
 			if(m_option.compare("-n") == 0){
 				m_requete = "R*1*";
 				hash = hashString((char*)m_statut.c_str());
@@ -91,50 +85,48 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 						reponseTraitees.push_back(name);	//UN NOM PAR LIGNE DANS LE TABLEAU
 				}
 
-			/*ELIMINATION DES DOUBLONS*/
-				/*ON DOIT TRIER LE TABLEAU*/
+			
 				sort(reponseTraitees.begin(), reponseTraitees.end() );
 				reponseTraitees.erase( unique( reponseTraitees.begin(), reponseTraitees.end() ), reponseTraitees.end() );
 
-			/*REPONSES FINALES*/
+			
 				for (unsigned int i=0; i<reponseTraitees.size(); i++){
 					m_resultat += reponseTraitees[i] + "*";
 				}
 				m_resultat = "R*1*" + m_resultat;
 			}
 
-		/*****REQUETE 2*****/
+		
 			else if (m_option.compare("-e") ==0) {
 				condensate = m_parametre + m_statut;
 
 				hash = hashString((char*)condensate.c_str());
 				m_resultat = "R*2*0";
 
-				//
-				//si aucune rÃ©ponse n'est "vraie", reste Ã  no, sinon, dira yes
+
+			
 				while(getline(ss, hash_recu, '*')) {
-					//s'il y en a un, on arrÃªte
+				
 					if(hash.compare(hash_recu) ==0){ 
 						m_resultat = "R*2*1";
-						return 1;	//on a trouvÃ©, c'est tout ce qu'on voulait
+						return 1;	
 					}
 				}
 			}
 
-		/*****REQUETE 3*****/
-			else if (m_option.compare("-r") ==0 && pourThomas == false) //Si ce booleen est à false => c'est la requête à envoyer à Thomas
+		
+			else if (m_option.compare("-r") ==0 && pourThomas == false) 
 			{
-/*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
+				pourThomas = true; 
 				condensate = m_nom;
-				cout << "lecond " << condensate <<endl;
-				cout << "lecond " << m_nom <<endl;
+
 				hash = hashString((char*)condensate.c_str());
-/*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*') && getline(ss,pub,'*')) {
+				while (getline(ss,reference,'*') && getline(ss,hash_recu,'*') && getline(ss,pub,'*')) {
 			
-/*REQ3->ID*3*statut*affectation*gp_cible*typedata*/
+
 							if(hash.compare(hash_recu) ==0) {
 								m_reference = reference;
-								cout << "hello" << endl;
+								
 								m_pub = pub;
 								m_requete = "4*" + m_statut + "*none*" + m_affectation + "*none*" + m_groupe + "*none*none*" + reference + "*none*";
 								return 1;
@@ -143,8 +135,8 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 			}
 
 
-			else {	//1.6 GIGAWAT? (ne peut jamais arriver?)
-				cerr << "Tri : Option inconnu" << endl ;
+			else {	
+				
 				isError = 1;
 				break;
 			}
@@ -166,7 +158,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		else if(m_action.compare("insert") ==0 || !m_action.compare("seek") ==0 || m_action.compare("delete") ==0 || m_action.compare("select") ==0) // Si c'Ã©tait une interaction bdd, il faut juste retransmettre le message au client			
 		{
 				m_resultat = *it;
-				pourThomas = false; // On remet le booleen à false
+				pourThomas = false; 
 		}
 
 		else if(m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
@@ -181,14 +173,14 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 
 
 		else {
-			cerr << "Tri : Option inconnu" << endl ;
+			
 			isError = 1;
 			break;
 		}
 	}
 
-	if (isError==1)	{ //Tout est erreur, ou l'option/action est invalide
-		cerr << "Erreur de traitement!" << endl;
+	if (isError==1)	{ 
+		
 		m_resultat = "R*ERROR";
 		return 0;
 	}
@@ -197,36 +189,32 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 }
 
 
-/*=========================================================================================
-	FONCTION DE CONSTRUCTION : CONSTRUIT LA REQUETE A ENVOYER (AU RESEAU OU A LA BDD)
-=========================================================================================*/
-
-void Requete::construction() //construit la requete suivant action, option et parametre
+void Requete::construction()
 {
     	string hash; 
-	if(m_action.compare("search") == 0) // Fonction recherche
+	if(m_action.compare("search") == 0) 
 	{
 		pourBdd=false;
-		if(m_option.compare("-n") == 0) // Si on cherche un nom
+		if(m_option.compare("-n") == 0) 
 			m_requete = "1*none*none*" + m_affectation + "*none*none*none*none*none*none*" ;
 
-		else if(m_option.compare("-e") == 0) // Si on cherche l'existance
+		else if(m_option.compare("-e") == 0) 
 			m_requete = "2*none*none*" + m_affectation + "*none*none*none*none*none*none*" ;
 
-		else if(m_option.compare("-r") == 0) // Si on cherche une photo(donnÃ©e)
+		else if(m_option.compare("-r") == 0) 
 			m_requete = "3*none*" + m_statut_cible + "*none*" + m_affectation_cible + "*none*" + m_groupe_cible + "*" + m_option + "*none*none*";
 
 		else
 			cerr << "Option inconnue" << endl ;
 	}
 //requete 6
-	else if(m_action.compare("group") == 0) // Action groupe
+	else if(m_action.compare("group") == 0) 
         {
                 pourBdd=false;
                 m_requete = "6*none*none*none*none*none*" + m_parametre + "*none*none*none*";
         }
 
-	else if(m_action.compare("insert") == 0) // Cas d'ajout d'une donneÃ© dans la bdd
+	else if(m_action.compare("insert") == 0) 
 	{
 /*ADDED*/ string toHash = m_nom+m_statut;
 		hash = hashString((char*)toHash.c_str());
@@ -256,9 +244,7 @@ int Requete::decoupage(string chaine)
 {
 	string autre = chaine;
 	istringstream ss(chaine);
-	//remplissage + test error!
-	cout << "apoilapoilapoilapoilapoilpaoiploa" << endl;
-	cout << chaine << endl;
+
 
 		if (!getline(ss, m_affectation, '*') ||
 			!getline(ss, m_statut, '*') ||
@@ -285,13 +271,13 @@ int Requete::decoupage(string chaine)
 			printf("toto\n");
 		}
 		else {
-		//it's ok
-			if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) {// Si c'est une requÃªte pour la bdd on a un champ en plus : le nom de la personne
+		
+			if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) {
 				if (!getline(ss, m_nom, '*')) 
 					return 0;
 			}
 
-			if(m_action.compare("insert") == 0) {	// Et si la requete est insert => champ supplÃ©mentaire : politique de partage
+			if(m_action.compare("insert") == 0) {	
 				if (!getline(ss, m_partage, '*')) 
 					return 0;
 			}

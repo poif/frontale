@@ -31,9 +31,7 @@
 using namespace std;
 using namespace CryptoPP;
 
-/**
- * constructeur
- */
+
 network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ourts_s , reception * outres, Message *ourMsg): bdd(outbdd), ts(ourts), ts_s(ourts_s), res(outres) , mess(ourMsg) {
 	running = true;
 	host_rem = "127.0.0.1";
@@ -42,19 +40,16 @@ network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ou
     	recBool = false;
     	responseRec = "";
 
-	///////////////////////////////////////
-	// Generate Parameters
+
 	AutoSeededRandomPool rng;
 	InvertibleRSAFunction params;
 	params.GenerateRandomWithKeySize(rng, 1024);
 
-	///////////////////////////////////////
-	// Create Keys
+
 	privateKey = CryptoPP::RSA::PrivateKey(params);
 	publicKey = CryptoPP::RSA::PublicKey(params);
 
-	// With the current version of Crypto++, MessageEnd() needs to be called
-	// explicitly because Base64Encoder doesn't flush its buffer on destruction.
+
 	Base64Encoder privkeysink(new FileSink("myprivkey_net.txt"));
 	privateKey.DEREncode(privkeysink);
 	privkeysink.MessageEnd();
@@ -63,19 +58,6 @@ network_interface::network_interface(bdd_tcp * outbdd, Tslot * ourts, Tslot * ou
 	publicKey.DEREncode(pubkeysink);
 	pubkeysink.MessageEnd();
 	
-	
-	// en commentaire en attendant le module reseau
-	/*try{
-		get_config_data();
-	}catch(exception&e){
-		cerr << e.what() << endl;
-	}catch(string& e){
-		// cannot create network, will continue without networking, no listening, no connect
-		cerr << e << endl;
-		running = false;
-	}catch(...){
-		cerr << "unknown exception handled" << endl;
-	}*/
 
 }
 
@@ -84,12 +66,12 @@ void network_interface::spawn(){
 
 		try
 		{
-		// Création d'un NoeudThor
+	
 
         lecture lec;
 
 		boost::asio::io_service io_service;
-		cout << "Noeud mis en place sur le port " << port_rem << endl;
+
         noeudthor = new NoeudThor(io_service, port_rem, lec.getServerCentrale() , 8080, lec.getServerProvider(), 8081, this);
 		io_service.run();
 
@@ -111,12 +93,7 @@ void network_interface::spawn(){
 
 
 network_interface::~network_interface(){	
-	// en commentaire en attendant le module reseau	
-	//boost::mutex::scoped_lock l(state_mutex);
-	//	state = STATE_QUITTING;
-	//l.unlock();
 
-	//io.stop();
 }
 
 bool network_interface::getRecbool(){
@@ -144,8 +121,7 @@ string network_interface::encrypto_rsa(string& plain){
 	AutoSeededRandomPool rng;
 	string cipher;
 
-	////////////////////////////////////////////////
-	// Encryption
+
 	RSAES_OAEP_SHA_Encryptor e(publicKey);
 
 	StringSource ss1(plain, true,
@@ -163,8 +139,7 @@ string network_interface::encrypto_rsa(string& plain, CryptoPP::RSA::PublicKey p
 	AutoSeededRandomPool rng;
 	string cipher;
 
-	////////////////////////////////////////////////
-	// Encryption
+
 	RSAES_OAEP_SHA_Encryptor e(pubRemote);
 
 	StringSource ss1(plain, true,
@@ -184,8 +159,7 @@ string network_interface::decrypto_rsa(string& cipher){
 
 	try
 	{
-		////////////////////////////////////////////////
-		// Decryption
+
 		RSAES_OAEP_SHA_Decryptor d(privateKey);
 
 		StringSource ss2(cipher, true,
@@ -198,30 +172,17 @@ string network_interface::decrypto_rsa(string& cipher){
 	}
 	catch( const CryptoPP::Exception& e )
 	{
-		cerr << e.what() << endl;
-		cout << "Ce paquet n'est pas pour moi." << endl;
+		
 		return "";
 	}
 	
 
 }
-/*
-void network_interface::generateAESkey(){
-	AutoSeededRandomPool prng;
 
-	SecByteBlock key(AES::DEFAULT_KEYLENGTH);
-	prng.GenerateBlock( key, key.size() );
-
-	byte iv[ AES::BLOCKSIZE ];
-	prng.GenerateBlock( iv, sizeof(iv) );
-}
-*/
 string network_interface::encrypto_aes(SecByteBlock key, byte* iv, string& plain){
 
 	string cipher;
 
-	/*********************************\
-	\*********************************/
 
 	try
 	{
@@ -229,9 +190,7 @@ string network_interface::encrypto_aes(SecByteBlock key, byte* iv, string& plain
 	    CBC_Mode< AES >::Encryption e;
 	    e.SetKeyWithIV( key, key.size(), iv );
 
-	    // The StreamTransformationFilter adds padding
-	    //  as required. ECB and CBC Mode must be padded
-	    //  to the block size of the cipher.
+
 	    StringSource ss( plain, true, 
 	        new StreamTransformationFilter( e,
 	            new StringSink( cipher )
@@ -256,8 +215,6 @@ string network_interface::decrypto_aes(SecByteBlock key, byte* iv, string& ciphe
 	    CBC_Mode< AES >::Decryption d;
 	    d.SetKeyWithIV( key, key.size(), iv );
 
-	    // The StreamTransformationFilter removes
-	    //  padding as required.
 	    StringSource ss( cipher, true, 
 	        new StreamTransformationFilter( d,
 	            new StringSink( recovered )
@@ -323,61 +280,17 @@ SecByteBlock network_interface::sToSbb(string plain){
 
 	return conv;
 }
-/*
-void network_interface::get_config_data(){	
-	// non utilisé en attendant le module reseau
-	port_udp_reception = 4447;
-	
-	// starts the network and set up all the async_callbacks
-	// TODO : regarder configuration broadcast
-	boost::asio::ip::udp::endpoint udp_listening_ep(boost::asio::ip::udp::v4(), port_udp_reception);
-	s_udp_in = new boost::asio::ip::udp::socket(io, udp_listening_ep);
 
-	try{
-
-	s_udp_in->async_receive_from(	boost::asio::buffer(network_buffer, BUFFER_SIZE), 
-									udp_remote_endpoint, 
-									boost::bind(&network_interface::UDP_async_read, 
-												this, 
-												boost::asio::placeholders::error,
-												boost::asio::placeholders::bytes_transferred)
-								);
-	}catch(exception&e){
-		cerr << e.what() << endl;
-	}catch(...){
-		cerr << "unknown exception handled" << endl;
-	}
-
-	cout << "UDP listening " << s_udp_in->local_endpoint().address() << ":" << s_udp_in->local_endpoint().port()  << endl;
-
-	boost::asio::detail::thread(boost::bind(&boost::asio::io_service::run, &io));
-}*/
 
 void network_interface::frame(){
-	// events to send (maybe not needed)
-	// process_queue();
 
-	// events received
 	process_received_events_queue();
 }
 
-/**
- *  main reception function. it receives data from UDP connection
- *  we only accept messages from registered machines
- *  asynchronous function
- */
+
 void network_interface::tor_receive(string str_data){
 
-	// non utilisé en attendant le module reseau
 
-	// check if the messages comes from a registered machine	
-	/*if (!is_address_registered(udp_remote_endpoint.address().to_string()))
-		return;*/
-	
-	// let's deserialize the message
-
-
-	//string str_data(&network_buffer[0], network_buffer.size());
 
 	char buffer[26];
 	size_t length = str_data.copy(buffer,25,0);
@@ -385,7 +298,6 @@ void network_interface::tor_receive(string str_data){
 	string testHeader = string(buffer, length);
 	engine_event ne;
 
-	cout << "on a recu ca : " << str_data << endl;
 
 
 	if (testHeader.compare("22 serialization::archive") == 0){
@@ -412,49 +324,17 @@ void network_interface::tor_receive(string str_data){
 		}
 		else{
 		
-			cout << "J'ai recu un paquet qui n'était pas pour moi" << endl;
+			
 			return;
 
 		}
 
 	}
 
-	cout << "J'ai recu un paquet qui n'était pas pour moi" << endl;
 
-
-	// we add the id of the expeditor
-	//ne.i_data["FROM"] = get_machine_from_address(udp_remote_endpoint.address().to_string())->get_id();
-
-	// add the event to the received event queue
-	//push_received_event(ne);
 }
 
-/**
- *  massively used function. used to send all the UDP messages
- *  similar to send_eventTCP
- */
- /*
-void network_interface::send_eventUDP(engine_event &ne, boost::asio::ip::udp::socket *s){
-	// non utilisé  en attendant le module reseau
-	ostringstream archive_stream;
-	boost::archive::text_oarchive archive(archive_stream);
-    	archive << ne;
-	const string &outbound_data = archive_stream.str();
 
-	try{
-		s->send(boost::asio::buffer(outbound_data));
-	}catch(exception& e){
-		cerr << "sending on " 
-										   << s->remote_endpoint().address() << ":" 
-										   << s->remote_endpoint().port() << " : " 
-										   << e.what() << endl;
-	}catch(...){
-		cerr << "sending on " 
-										   << s->remote_endpoint().address() << ":" 
-										   << s->remote_endpoint().port() << " : unknown eception caught !" 
-										   << endl;
-	}
-}*/
 
 void network_interface::push_received_event(engine_event& e){
 	boost::mutex::scoped_lock l(l_receive_queue);
@@ -488,7 +368,7 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 	list<int > * a_traiter_size;
 
-	/* --- On interroge le client --- */
+	
 	clientFront cli;
 
 	for(int i=0; i < mess->getNbKey(); i++){
@@ -545,10 +425,6 @@ string network_interface::treat_resource(string& request, string& token, int act
 }
 
 void network_interface::process_received_events(engine_event& e){
-
-	// we just have received e from the network
-
-	//const unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88}; 
 
 	ostringstream archive_stream;
 	ostringstream archive_streamOut;
@@ -632,7 +508,6 @@ void network_interface::process_received_events(engine_event& e){
 			string pubStringRemote = e.s_data["PUB"];
 			string affectationReq = e.s_data["AFFECTATION"];
 			string token = e.s_data["TOKEN"];
-			/*Traitement de la requete */
 
 			reqFormat = traitement_req_client(token,"2", "none", "none", affectationReq, "none", "none", "none","none","none", "none");
 
@@ -822,17 +697,14 @@ void network_interface::process_received_events(engine_event& e){
 				case engine_event::SHOW:{
 
 					if(!r.s_data["REPONSE"].empty() && r.s_data["REPONSE"] != ""){
-	
-						//showRep[0] = r.s_data["NOM"];
-						//showRep[1] = r.s_data["HSTATUT"];
-						//responseRec = 
+	 
 						string repShow = r.s_data["REPONSE"];
 						string token = r.s_data["TOKEN"];
 
 						boost::mutex * mustStopMutex = ts->getMutex(token);
 						mustStopMutex->lock();
 						bool mustStop = ts->getBool(token);
-						cout << "repshow : " << repShow << endl;
+
 						if (mustStop == false)
 							ts->addMessageToList(token, repShow);
 						mustStopMutex->unlock();
@@ -846,10 +718,6 @@ void network_interface::process_received_events(engine_event& e){
 						string hash = r.s_data["HASH"];
 						string token = r.s_data["TOKEN"];
 						hash = token + "*" + hash;
-						//hnom.erase(hnom.size() - 1, 1);
-						//cout << "hash : " << hash << endl;
-						//responseRec = hash;	
-						//recBool = true;
 
 						boost::mutex * mustStopMutex = ts->getMutex(token);
 						mustStopMutex->lock();
@@ -881,8 +749,6 @@ void network_interface::process_received_events(engine_event& e){
 
 							repShowrec += Pub_toB64string(publicKeyRemote);
 
-							cout << "RepShowRec : " << repShowrec << endl;
-
 							boost::mutex * mustStopMutex = ts->getMutex(token);
 							mustStopMutex->lock();
 							bool mustStop = ts->getBool(token);
@@ -902,14 +768,8 @@ void network_interface::process_received_events(engine_event& e){
 						string token = r.s_data["TOKEN"];
 						string document;
 
-						/*StringSource ss(encDocument, true,
-						    new Base64Decoder(
-						        new StringSink(document)
-						    ) // Base64Decoder
-						); // StringSource
-						//hnom.erase(hnom.size() - 1, 1);*/
+
 						document = encDocument;
-						cout << "document : " << document << endl;
 
 						boost::mutex * mustStopMutex = ts->getMutex(token);
 						mustStopMutex->lock();
@@ -927,8 +787,7 @@ void network_interface::process_received_events(engine_event& e){
 
 					string aesKey = r.s_data["KEY"];
 					string aesIv = r.s_data["IV"];
-					//string reference = r.s_data["REFERENCE"];
-					//string groClient = r.s_data["GRCLIENT"];
+
 					string requete = r.s_data["REQUETE"];
 					string token = r.s_data["TOKEN"];
 
@@ -959,7 +818,7 @@ void network_interface::process_received_events(engine_event& e){
 					string reqFormat;
 					string reqFormatBdd;
 
-					/*Traitement de la requete */
+					
 					
 					reqFormat = traitement_req_client(token,"4", statutCible, "none", affectationCible, "none", groClient, "none","none",reference, "none");
 					reqFormatBdd = traitement_req_bdd(token,"301", statutCible, "none", affectationCible, "none", groClient, "none","none",reference, "none");
@@ -999,7 +858,7 @@ void network_interface::process_received_events(engine_event& e){
 			}	
 		}
 		default : 
-			// should never happen
+			
 			break;
 	}
 }
@@ -1040,19 +899,17 @@ string network_interface::Pub_toB64string(CryptoPP::RSA::PublicKey publicRemoteK
 
 void network_interface::send_look(string& affectation, string& token){
 
-	///////////////////////////////////////
-	// Generate Parameters
+
 	AutoSeededRandomPool rng;
 	InvertibleRSAFunction params;
 	params.GenerateRandomWithKeySize(rng, 1024);
 
-	///////////////////////////////////////
-	// Create Keys
+
 	privateKey = CryptoPP::RSA::PrivateKey(params);
 	publicKey = CryptoPP::RSA::PublicKey(params);
 
 	engine_event e;
-	//boost::asio::buffer network_buffer;
+	
 	ostringstream archive_stream;
 	string pubEncoded;
 
@@ -1076,19 +933,17 @@ void network_interface::send_look(string& affectation, string& token){
 void network_interface::send_exist(string& affectation, string& token){
 
 
-	///////////////////////////////////////
-	// Generate Parameters
+	
 	AutoSeededRandomPool rng;
 	InvertibleRSAFunction params;
 	params.GenerateRandomWithKeySize(rng, 1024);
 
-	///////////////////////////////////////
-	// Create Keys
+
 	privateKey = CryptoPP::RSA::PrivateKey(params);
 	publicKey = CryptoPP::RSA::PublicKey(params);
 
 	engine_event e;
-	//boost::asio::buffer network_buffer;
+	
 	e.type = engine_event::EXIST;
 	ostringstream archive_stream;
 	string pubEncoded;
@@ -1109,14 +964,13 @@ void network_interface::send_exist(string& affectation, string& token){
 
 void network_interface::send_lookrec(string& dataType, string& affectation, string& token){
 
-	///////////////////////////////////////
-	// Generate Parameters
+	
 	AutoSeededRandomPool rng;
 	InvertibleRSAFunction params;
 	params.GenerateRandomWithKeySize(rng, 1024);
 
-	///////////////////////////////////////
-	// Create Keys
+
+
 	privateKey = CryptoPP::RSA::PrivateKey(params);
 	publicKey = CryptoPP::RSA::PublicKey(params);
 
@@ -1139,13 +993,12 @@ void network_interface::send_lookrec(string& dataType, string& affectation, stri
     	archive << e;
 	const string &outbound_data = archive_stream.str();
 
-	//sendTor(outbound_data);
-	//receiveTor(network_buffer);
+
 	noeudthor->send(outbound_data);
 
 }
 
-void network_interface::send_pull(/*string& reference, string& groupeClient*/string& requete, string& encKey, string& token){
+void network_interface::send_pull(string& requete, string& encKey, string& token){
 	engine_event e;
 	engine_event p;
 
@@ -1157,7 +1010,7 @@ void network_interface::send_pull(/*string& reference, string& groupeClient*/str
 	string encDocument;
 	string pubRemote;
 
-	cout << "monPub : " << endl << encKey << endl;
+
 
 	StringSource ss(encKey, true,
 	    new Base64Decoder(
@@ -1183,8 +1036,6 @@ void network_interface::send_pull(/*string& reference, string& groupeClient*/str
 	e.s_data["KEY"] = aesKey_1[0];
 	e.s_data["IV"] = aesKey_1[1];
 
-	//e.s_data["REFERENCE"]=reference;
-	//e.s_data["GRCLIENT"]=groupeClient;
 	e.s_data["REQUETE"]=requete;
 	e.s_data["TOKEN"]=token;
 

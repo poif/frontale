@@ -11,9 +11,9 @@ class rsaCrypt
 {
 public:
     rsaCrypt(int keylen);
-    //std::string chiffrement(std::string clair);
+  
     char* chiffrement(std::string clair);
-    //std::string dechiffrement(std::string chif);
+  
     std::string dechiffrement(const char * chif);
     std::string sendKeyPub(int id);
     bool recupKeyPub(std::string key);

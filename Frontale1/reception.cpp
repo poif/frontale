@@ -34,7 +34,6 @@ void reception::procReception(){
     datagram.resize(soc->pendingDatagramSize());
     soc->readDatagram(datagram.data(),datagram.size(), &hostAddr, &hostPort);
     oss << datagram.data();
-    cout << datagram.size() << endl;
 
     char * passage = (char *)malloc(sizeof(char)*datagram.size()+1);
 
@@ -56,14 +55,9 @@ void reception::procReception_s(){
     datagram.resize(soc->pendingDatagramSize());
     soc->readDatagram(datagram.data(),datagram.size());
     oss << datagram.data();
-    //TODO: verification mutex 
-    //fileMsg.push_back(oss.str());
-
-    cout << oss.str() << endl;
-    cout << datagram.size() << endl;
 
     string token = m_ts->getLastToken();
-    cout << token << endl;
+
     boost::mutex * mustStopMutex = m_ts->getMutex(token);
     mustStopMutex->lock();
     bool mustStop = m_ts->getBool(token);
@@ -82,16 +76,12 @@ void reception::traitement(char * messageStr, int size){
 
         int numKey;
 
-        //const static unsigned char key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
         
         hoteCourant = getHostAddr();
         portCourant = getHostPort();
 
-        cout << "Génération du token..." << endl;
-        string token = m_ts->GenToken(hoteCourant,portCourant);
-        cout << "Token généré." << endl;
 
-        cout << "Got somethin" << endl;
+        string token = m_ts->GenToken(hoteCourant,portCourant);
 
         Requete req;
 
@@ -111,19 +101,11 @@ void reception::traitement(char * messageStr, int size){
 
         
 
-        cout << "input : " << input << endl;
 
         if(req.decoupage(input)){
-            //input = token + "*" + input + "*";
-            cout << "tata" << endl;
-                            cout << "lenom ici : " << req.getNom() << endl;
 
-                cout << "lenom ici : " << req.getNom() << endl;
             req.construction();
-                            cout << "lenom ici : " << req.getNom() << endl;
 
-                cout << "lenom ici : " << req.getNom() << endl;
-            cout << "tata" << endl;
 
             if(req.getPourBdd()){
 
@@ -140,9 +122,6 @@ void reception::traitement(char * messageStr, int size){
             }
             else
             {
-                cout << "lenom ici : " << req.getNom() << endl;
-
-                cout << "lenom ici : " << req.getNom() << endl;
 
                 string traitement = req.getAffectation();
 
@@ -151,7 +130,6 @@ void reception::traitement(char * messageStr, int size){
 
                 if(option.compare("-n")==0){/* traitement est une affectation */
                     m_netinf->send_look(traitement, token);
-                    cout << "ici envoi" << endl;
                 }
                 else if(option.compare("-e")==0){
                     m_netinf->send_exist(traitement, token);
@@ -161,7 +139,6 @@ void reception::traitement(char * messageStr, int size){
                 }
 
                 list<string> * listReponse = m_ts->startTimer(token, 5000);
-                cout << "lenom ici : " << req.getNom() << endl;
 
                 if(!listReponse->empty()){
 
@@ -182,7 +159,7 @@ void reception::traitement(char * messageStr, int size){
 
                 }
                 else{
-                    cout << "Temps maximum écoulé, pas de réponse" << endl;
+
                     req.setResultat("empty");
                 }
 

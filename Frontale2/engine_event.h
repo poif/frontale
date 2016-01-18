@@ -5,9 +5,7 @@
 #include <string>
 #include <map>
 
-/**
-* generic class 
-*/
+
 class engine_event{
 public:
 	int type;

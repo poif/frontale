@@ -26,11 +26,9 @@ class IpPort {
 class Tslot
 {
 	private:
-	boost::thread* m_thread; // The thread runs this object
+	boost::thread* m_thread;
 	time_t t0;
 	 
-	// Variable that indicates to stop and the mutex to
-	// synchronise "must stop" on (mutex explained later)
 	bool m_mustStop;
 	boost::mutex m_mustStopMutex;
 	std::string m_lastToken;
@@ -43,10 +41,9 @@ class Tslot
 	std::map<std::string, bool> tokenToBool;
 
 	public:
-	// Default constructor
+
 	Tslot();
 	 
-	// Destructor
 	~Tslot();
 
 	std::string HexFormate(const unsigned char *hash, size_t length);
@@ -71,13 +68,12 @@ class Tslot
 	boost::mutex * getMutex(std::string token);
 	bool getBool(std::string token);
 	 
-	// Start the threa
+
 	void Start();
 	 
-	// Stop the thread
+
 	void Stop();
 	 
-	// Thread function
 	void operator () ();
 
 	std::list<std::string>* startTimer(std::string token);

@@ -43,9 +43,7 @@ public:
 
 	void frame();
 
-	//void send_eventUDP(engine_event& ne, boost::asio::ip::udp::socket* s);
 
-	//void clean_interface();
 
 	inline bool is_running()	{return running;}
 	void push_received_event(engine_event& e);
@@ -55,11 +53,10 @@ public:
 	std::string getResp();
 	void setResp(string reResp);
 
-	// observer functions
+
 	void send_look(std::string& affectation, std::string& token);
 	void send_exist(std::string& affectation, std::string& token);
 	void send_lookrec(std::string& dataType, std::string& affectation, std::string& token);
-	//void send_pull(std::string& reference, std::string& groupeClient, std::string& encKey, std::string& token);
 	void send_pull(std::string& requete, std::string& encKey, std::string& token);
 
 	std::string encrypto_rsa(std::string& plain);
@@ -80,9 +77,7 @@ public:
 
 private:
 
-	//pthread_t t;
 
-	// mutex to protect the 'received envents' queue
 	boost::mutex l_receive_queue;
 	void process_event(engine_event&);
 	std::queue<engine_event> received_events;
@@ -91,7 +86,7 @@ private:
 	std::string treat_resource(std::string& request, std::string& token, int type=0, std::string requetebdd="");
 	void process_received_events(engine_event&);
 
-	//void get_config_data();
+
 
 	boost::asio::ip::udp::socket *s_udp_in;
 
@@ -99,7 +94,7 @@ private:
 
 	boost::asio::ip::udp::endpoint udp_remote_endpoint;
 	boost::asio::io_service io;
-	// buffer to receive data
+
 	boost::array<char, BUFFER_SIZE> network_buffer;
 
 	CryptoPP::RSA::PrivateKey privateKey;

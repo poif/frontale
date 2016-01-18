@@ -75,19 +75,14 @@ void Message::chiffrement(const unsigned char *key){
 char* Message::crypt(unsigned char* aes_input, int size_aes_input, int numkey ){
     
     unsigned char trame [1024];
-    //unsigned char iv[AES_BLOCK_SIZE];
-    //memset(iv, 0x00, AES_BLOCK_SIZE);
-
-  //  const static unsigned char aes_key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
-
+ 
     unsigned char iv[AES_BLOCK_SIZE];
     memset(iv, 0x00, AES_BLOCK_SIZE);
 
     AES_KEY enc_key;
     AES_set_encrypt_key((const unsigned char *)tabKeyIv[numkey][0].c_str(), 256, &enc_key);
     AES_cbc_encrypt(aes_input, trame, size_aes_input, &enc_key,iv, AES_ENCRYPT);
-    //print_data("\n Encrypted",enc_out, strlen(enc_out));
-
+ 
     return (char *) trame;
 
  }
@@ -101,10 +96,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
     int newKey;
     string aesToSend;
     
-   // unsigned char iv[AES_BLOCK_SIZE];
-  //  memset(iv, 0x00, AES_BLOCK_SIZE);
-//    const static unsigned char aes_key[]={0xB0,0xA1,0x73,0x37,0xA4,0x5B,0xF6,0x72,0x87,0x92,0xFA,0xEF,0x7C,0x2D,0x3D,0x4D, 0x60,0x3B,0xC5,0xBA,0x4B,0x47,0x81,0x93,0x54,0x09,0xE1,0xCB,0x7B,0x9E,0x17,0x88};
-    while(chaineTest != "chall" && i<nbKey && !tabKeyIv[i][0].empty() && !tabKeyIv[i][0].empty()){
+     while(chaineTest != "chall" && i<nbKey && !tabKeyIv[i][0].empty() && !tabKeyIv[i][0].empty()){
 
         AES_KEY dec_key;
         
@@ -112,34 +104,41 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 
         unsigned char iv[AES_BLOCK_SIZE];
         memset(iv, 0x00, AES_BLOCK_SIZE);
-        AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key,iv/*(unsigned char *) tabKeyIv[i][1].c_str()*/, AES_DECRYPT);
+        AES_cbc_encrypt(dec_in, trame, size_aes_input, &dec_key,iv, AES_DECRYPT);
 
-        // print_data("\n Decrypted",dec_out, sizeof(dec_out));
+  
 
         cout << trame << endl;
 
         iss.str(string((const char *)trame));
         getline(iss,chaineTest,'*');
+
         if(chaineTest != "chall") i++;
     }
     cout << nbKey << endl;
     cout << i << endl;
 
-    // echange de cle
+
     if(nbKey==i){
-        strncpy((char *)trame, reinterpret_cast<const char*>(dec_in), sizeof(trame));
+
+
+	
+       strncpy((char *)trame, reinterpret_cast<const char*>(dec_in), sizeof(trame));
         iss.str(string((const char *)trame));
         getline(iss,chaineTest,'*');
         string lakey;
         getline(iss,lakey,'*');
-        cout << chaineTest << endl;
+
         if(chaineTest=="init"){
+
+
+
+		
             rsaCrypt rsaClient = rsaCrypt(2048);
             rsaClient.recupKeyPub(lakey);
             newKey = this->genAESKey();
             aesToSend = tabKeyIv[newKey][0]+";"+tabKeyIv[newKey][1];
-            cout << aesToSend << endl;
-            //toSend = "5*"+rsaClient.chiffrement(aesToSend);
+
 
             
             char *temp;
@@ -162,9 +161,10 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
     }else{
         string reponse;
         getline(iss,reponse,'\0');
-        cout << "reponse" << reponse << endl;
+
         dechiffre = true;
         eChangeKey=false;
+	numClient = i;
         return reponse;
 
 
@@ -172,7 +172,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 
  }
 
-/* fixit : probleme avec le dechiffrement depuis QT 5.5*/
+
 bool Message::dechiffrement(const unsigned char *key){
     unsigned char trame [1024];
     QTextStream(stdout) << this->chiffre ;
@@ -198,14 +198,14 @@ int Message::genAESKey(){
     ostringstream oss;
     ostringstream oss2;
 
-    // On alloue notre structure
+
     char *key = (char *) malloc ( (AES_KEY_LENGTH+1)*sizeof(char) ) ;
     char *iv =(char *) malloc ((AES_KEY_LENGTH+1)*sizeof(char));
-    // On initialise notre structure
+
     memset ( key, '\0', AES_KEY_LENGTH +1) ;
     memset ( iv, '\0', AES_KEY_LENGTH +1) ;
 
-    // On génère les clés et IV avec des caractères aléatoires
+ 
     for ( i = 0; i < AES_KEY_LENGTH ; i++ )
     {
         key[i] = rand() % ( 122 - 97 ) + 97 ;

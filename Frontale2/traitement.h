@@ -5,12 +5,6 @@
 #include <vector>
 #include <list>
 
-/*TEST*/
-std::string* traitement_look(std::string& affectation);
-std::string traitement_exist(std::string& status);
-std::string* traitement_lookrec(std::string& datatype, std::string& status);
-std::string traitement_pull(std::string& reference, std::vector<std::string>& groupes_client);
-/******/
 
 std::string traitement_req_client(std::string numero,
 								  std::string action, 

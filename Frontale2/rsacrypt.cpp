@@ -15,38 +15,18 @@ rsaCrypt::rsaCrypt(int keylen)
     rsaKey = RSA_new();
     forgeignKey = RSA_new();
 
-    cout << "fin constructeur" << endl;
+   
 
 }
-/*
-string rsaCrypt::chiffrement(string clair){
-    cout << "chiffrement rsa" << endl;
-    cout << "laforeignkey" << forgeignKey << endl;
-    ostringstream oss;
-    unsigned char *chif = (unsigned char*)malloc(1024*sizeof(char));
-    int succ;
-    int kLen = RSA_size(forgeignKey) - 11;
-    succ = RSA_public_encrypt(kLen,(const unsigned char *)clair.c_str(),chif,forgeignKey,RSA_PKCS1_PADDING);
-    if(succ <= 0)
-            cout << "erreur RSA_encrypt" << endl;
 
-    oss << chif;
-
-    return oss.str();
-
-
-}*/
 
 char* rsaCrypt::chiffrement(string clair){
-    cout << "chiffrement rsa" << endl;
-    cout << "laforeignkey" << forgeignKey << endl;
+
     ostringstream oss;
     unsigned char *chif = (unsigned char*)malloc(1024*sizeof(char));
     int succ;
     int kLen = RSA_size(forgeignKey) - 11;
     succ = RSA_public_encrypt(kLen,(const unsigned char *)clair.c_str(),chif,forgeignKey,RSA_PKCS1_PADDING);
-    if(succ <= 0)
-            cout << "erreur RSA_encrypt" << endl;
 
     return (char*) chif;
 
@@ -55,7 +35,7 @@ char* rsaCrypt::chiffrement(string clair){
 
 void rsaCrypt::keyGen()
 {
-    cout << "generation de clé rsa" << endl;
+  
     BIGNUM *bne;
     bne = BN_new();
     int succ;
@@ -76,46 +56,11 @@ void rsaCrypt::keyGen()
     BN_free(bne);
 }
 
-//string rsaCrypt::dechiffrement(string chif){
 
-    // DECODAGE BASE64
-/*	char *buffer=(char *)malloc(1024*sizeof(char));
-    BIO *bio, *b64;
-
-    
-    bio = BIO_new_mem_buf((char *)chif.c_str(), -1);
-    b64 = BIO_new(BIO_f_base64());
-    bio = BIO_push(b64,bio);
-    
-    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
-    BIO_read(bio, buffer, chif.length());
-    
-    BIO_free_all(bio);
-
-*/
- /*   cout << "dechiffrement" << endl;
-    ostringstream oss;
-    unsigned char *clair=(unsigned char*)malloc(1024*sizeof(char));;
-    int succ;
-    int kLen = RSA_size(rsaKey);
-
-	cout << chif << endl;	
-
-    succ = RSA_private_decrypt(kLen,(const unsigned char *)chif.c_str(),clair,rsaKey,RSA_PKCS1_PADDING);
-
-    if (succ < 0)
-        cout << "erreur dechiffrement rsa" << endl;
-   
-    oss << clair;
-    free(clair);
-//    free(buffer);
-    return oss.str();
- 
-}*/
 
 string rsaCrypt::dechiffrement(const char * chif){
 
-    cout << "dechiffrement" << endl;
+   
     ostringstream oss;
     unsigned char *clair=(unsigned char*)malloc(1024*sizeof(char));;
     int succ;
@@ -123,12 +68,10 @@ string rsaCrypt::dechiffrement(const char * chif){
 
     succ = RSA_private_decrypt(kLen,(const unsigned char *)chif,clair,rsaKey,RSA_PKCS1_PADDING);
 
-    if (succ < 0)
-        cout << "erreur dechiffrement rsa" << endl;
    
     oss << clair;
     free(clair);
-//    free(buffer);
+
 
     return oss.str();
  
@@ -172,32 +115,19 @@ string rsaCrypt::sendKeyPub(int id){
 
 bool rsaCrypt::recupKeyPub(string key){
     istringstream iss;
-    //string bddKey;
+   
     ostringstream oss;
     BIO *keybio = NULL ;
-   /* oss << id;
-    iss << key;
-	cout << key << endl;
-    getline(iss,bddKey,'*');
+ 
 
-    if(!bddKey.compare(oss.str())){
-        getline(iss,bddKey,'*');
-
-        if(!bddKey.compare("init")){
-            getline(iss,bddKey,'*');
-            cout << bddKey << endl;*/
+	    forgeignKey = NULL;
+	    forgeignKey = RSA_new();
 
             keybio = BIO_new_mem_buf ((unsigned char *)key.c_str() , -1 );
 
             forgeignKey=PEM_read_bio_RSAPublicKey ( keybio, &forgeignKey, NULL, NULL );
 
-           /* return true;
-        }else {
-           return false;
-           }
-    }else {
-            return false;
-        }*/
+      
 
 
 }
@@ -226,7 +156,7 @@ bool rsaCrypt::recupAesKey(string key, int id){
 		bufferchif << bddKey;
 		getline(iss,bddKey,'*');
 		}
-	    cout << "debut chiffré :" + bufferchif.str() + "fin chiffré" << endl;		
+	    		
 
             istringstream issAes;
             string bddaAes;
@@ -235,12 +165,10 @@ bool rsaCrypt::recupAesKey(string key, int id){
 
             getline(issAes,bddaAes,';');
             aesKey = (char *)bddaAes.c_str();
-		cout << "cle aes :";
-		cout << aesKey << endl;
+		
             getline(issAes,bddaAes,'*');
             aesIv = (char *)bddaAes.c_str();
-		cout << "iv aes :"; 
-		cout << aesIv << endl;
+		
             return true;
         }else {
             return false;

@@ -23,7 +23,6 @@ string lecture::getAdresse_bdd(){
         fichier.close();
     }else
     {
-        cout << "erreur de lecture du fichier de config" << endl;
 
     }
 
@@ -54,7 +53,7 @@ int lecture::getPort_bdd(){
         return port;
     }else
     {
-        cout << "erreur de lecture du fichier de config" << endl;
+
         return 0;
     }
 }
@@ -77,7 +76,7 @@ string lecture::getServerCentrale(){
         return contenu;
     }else
     {
-        cout << "erreur de lecture du fichier de config" << endl;
+
         return "erreur";
     }
 }
@@ -100,7 +99,7 @@ string lecture::getServerProvider(){
         return contenu;
     }else
     {
-        cout << "erreur de lecture du fichier de config" << endl;
+  
         return "erreur";
     }
 }
