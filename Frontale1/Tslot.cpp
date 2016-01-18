@@ -175,7 +175,10 @@ bool Tslot::TriggerToken(string& token)
 void Tslot::addMessageToList(string token, string msg)
 {
 	if (tokenToMsgList.find(token) != tokenToMsgList.cend()){
-		tokenToMsgList[token]->push_back(msg);
+		auto b = std::find(tokenToMsgList[token]->begin(),tokenToMsgList[token]->end(),msg);
+		if(b == tokenToMsgList[token]->end()){
+			tokenToMsgList[token]->push_back(msg);
+		}
 	}
 	else {
 		cerr << "Erreur : on tente de rajoutter des messages alors que le token n'existe pas. Timeout dépassé ou tentative d'attaque." << endl;
@@ -185,6 +188,7 @@ void Tslot::addMessageToList(string token, string msg)
 void Tslot::addCharToList(string token, char* buf, int size)
 {
 	if (tokenToCharList.find(token) != tokenToCharList.cend()){
+
 		char * tokBuf = (char*)malloc(sizeof(char)*1024);
 		int temp;
 		if(size < 1024) temp = size;
