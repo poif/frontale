@@ -177,7 +177,6 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 				boost::archive::text_iarchive iTextArchive(iStringStream);
 				iTextArchive >> ipPortVoisins;
 
-                bool isNext=false;
                 const int SET_PREVIOUS=0;
                 const int SET_NEXT=1;
                 const int ALL_SET=2;
