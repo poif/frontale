@@ -192,9 +192,10 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		m_resultat = "R*ERROR";
 		return 0;
 	}
-	else
-		m_resultat = "N*none*none";
-		return 1;
+	
+	if(m_resultat.empty()) m_resultat = "N*none*none";
+
+	return 1;
 }
 
 
