@@ -20,15 +20,15 @@ int envoi_requete(char *requete, int size, int type)
  
   inet_aton(recup_valeur("ip_frontale"), &(serveur.sin_addr));
 
-  printf("ADRESSE -> %s\n", recup_valeur("ip_frontale"));
+  //printf("ADRESSE -> %s\n", recup_valeur("ip_frontale"));
 
 if(type == WANT){
-      printf("PORT -> %i\n", recup_valeur_entier ( "port_frontale_want" ));
+   //   printf("PORT -> %i\n", recup_valeur_entier ( "port_frontale_want" ));
 
       serveur.sin_port = htons(recup_valeur_entier ( "port_frontale_want" ));
   }
   else{
-      printf("PORT -> %i\n", recup_valeur_entier ( "port_frontale_give" ));
+   //   printf("PORT -> %i\n", recup_valeur_entier ( "port_frontale_give" ));
 
       serveur.sin_port = htons(recup_valeur_entier ( "port_frontale_give" ));
   }

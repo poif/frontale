@@ -32,7 +32,7 @@ char * recup_groupe()
 
 	close(fichier_groupe);
 
-	printf("le groupe %s\n", group);
+//	printf("le groupe %s\n", group);
 
 	return group;
 }

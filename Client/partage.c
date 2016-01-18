@@ -41,8 +41,8 @@ int partage_demande(char *compare, int recherche)
     	type = strtok_r(NULL, ";", &save_ptr);
     	type_partage = strtok_r(NULL, ";", &save_ptr);
     	groupe = strtok_r(NULL, ";", &save_ptr);
-      printf("incoming\n");
-      printf("type : %c\n", type[0]);
+//      printf("incoming\n");
+  //    printf("type : %c\n", type[0]);
 
     	switch(recherche)
 		{

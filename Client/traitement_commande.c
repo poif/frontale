@@ -47,7 +47,7 @@ int traiter_commande(char *a_traiter)
 			
 			if(memcmp(option, "-n", 2) == 0){
 
-				printf("On recherche le ou les noms d'une ou plusieurs personnes !\n");
+//				printf("On recherche le ou les noms d'une ou plusieurs personnes !\n");
 
 				statut = strtok_r(NULL, " ", &save_ptr);
 		
@@ -64,7 +64,7 @@ int traiter_commande(char *a_traiter)
 			}
 			else if(memcmp(option, "-e", 2) == 0){
 
-				printf("On recherche l'existence d'une personne !\n");
+//				printf("On recherche l'existence d'une personne !\n");
 
 				cible = strtok_r(NULL, " ", &save_ptr);
 				statut = strtok_r(NULL, " ", &save_ptr);
@@ -88,7 +88,7 @@ int traiter_commande(char *a_traiter)
 				char *groupe_cible = malloc (sizeof (char) * 256);
 				char *groupe_amoi = malloc (sizeof (char) * 256);
 
-				printf("On recherche la reference d'un fichier !\n");
+//				printf("On recherche la reference d'un fichier !\n");
 
 				cible = strtok_r(NULL, " ", &save_ptr);//type de fichier
 				nom = strtok_r(NULL, " ", &save_ptr);
@@ -104,8 +104,8 @@ int traiter_commande(char *a_traiter)
 					groupe_cible, groupe_amoi );
 			}
 
-			printf("%s\n", a_envoyer);
-			printf("SIZE -> %d\n", strlen(a_envoyer));
+//			printf("%s\n", a_envoyer);
+//			printf("SIZE -> %d\n", strlen(a_envoyer));
 			unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 			memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 			unsigned char a_decrypt[sizeof(a_envoyer)];
@@ -216,9 +216,9 @@ void share_traitement(char *op, char *name, char *path, char *type, char *group_
 {
 	unsigned char a_envoyer[sizeof (char*) * 1024];
 
-	printf("NAME -> %s\n", name);
+//	printf("NAME -> %s\n", name);
 
-	printf("GROUPE -> %s\n", group_name);
+//	printf("GROUPE -> %s\n", group_name);
 
 	if (memcmp(op, "-local", 7) == 0) 
 	{
@@ -246,7 +246,7 @@ void delete_traitement(char *op, char *name/*, char *path*/)
 	if (memcmp(op, "-local", 7) == 0)
 	{
 			printf("NAME -> %s\n", name);
-		printf("OP -> %s\n", op);
+//		printf("OP -> %s\n", op);
 		partage_delete(strtok(name, " "));
 	}
 

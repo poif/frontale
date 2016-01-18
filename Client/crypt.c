@@ -44,7 +44,7 @@ void decrypt(unsigned char* dec_in, unsigned char* dec_out , int size_aes_input)
     AES_set_decrypt_key(aes_key, 256, &dec_key);
     AES_cbc_encrypt(dec_in, dec_out, size_aes_input, &dec_key, iv, AES_DECRYPT);
     // print_data("\n Decrypted",dec_out, sizeof(dec_out));
-    printf("%s\n", dec_out);
+
  }
 
  void print_data(const char *tittle, const void* data, int len)
@@ -54,7 +54,7 @@ void decrypt(unsigned char* dec_in, unsigned char* dec_out , int size_aes_input)
     int i = 0;
     
     for (; i<len; ++i)
-        printf("%02X ", *p++);
+  
     
     printf("\n");
 }
@@ -77,8 +77,7 @@ int AES_generate_key ()
 int generate_RSA_keys ()
 {
     // DEBUG
-    printf ( "Generation cles RSA ... \n" ) ;
-
+ 
     // Déclaration variables
     BIGNUM *bne = NULL ;        // Exponent
     int bits = KEY_LENGTH ;     // Taille clé
