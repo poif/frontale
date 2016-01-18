@@ -490,7 +490,7 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 	/* --- On interroge le client --- */
 	clientFront cli;
-
+	if(ts_s->TriggerToken(token) == false) return "";
 	for(int i=0; i < mess->getNbKey(); i++){
 		
 		char* chiffrer = mess->crypt((unsigned char*) request.data(), request.size(),i);
@@ -498,8 +498,6 @@ string network_interface::treat_resource(string& request, string& token, int act
 		cli.socBind();
 		cli.emission(chiffrer, request.size()+16-(request.size()%16));
 	}
-
-	if(ts_s->TriggerToken(token) == false) return "";
 
 	srand (time(NULL));
 	int ms = rand() % 200 + 2000;
