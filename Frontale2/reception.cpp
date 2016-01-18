@@ -164,8 +164,9 @@ void reception::traitement(char * messageStr, int size){
                 cout << "lenom ici : " << req.getNom() << endl;
 
                 if(!listReponse->empty()){
+                    string option = req.getOption();
 
-                if(req.tri(*listReponse) == 1){
+                if(req.tri(*listReponse) == 1 && !option.compare("-r")){
 
                     string pubR = req.getPub();
                     string requeteP = req.getRequete();
