@@ -193,6 +193,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		return 0;
 	}
 	else
+		m_resultat = "N*none*none";
 		return 1;
 }
 
@@ -302,5 +303,6 @@ int Requete::decoupage(string chaine)
 		}
 	return 1;
 }
+
 
 
