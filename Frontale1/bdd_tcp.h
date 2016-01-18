@@ -18,7 +18,7 @@ public:
     void lecture();
     std::string getMsg();
     bool getYLecture();
-    std::string chiffrement(std::string clair);
+    char * chiffrement(std::string clair);
     std::string dechiffrement(std::string chif);
     void setKeyIv(char *key, char *iv);
 
