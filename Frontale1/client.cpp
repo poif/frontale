@@ -25,7 +25,7 @@ void clientFront::emission(string message,QHostAddress hostaddr, quint16 hostPor
 
 void clientFront::emission(string message){
 
-    QHostAddress addr = QHostAddress::LocalHost;
+    QHostAddress addr = QHostAddress::Broadcast;
 
     QByteArray datagram = message.data();
 
@@ -35,7 +35,7 @@ void clientFront::emission(string message){
 
 void clientFront::emission(char * message, int size){
 
-    QHostAddress addr = QHostAddress::LocalHost;
+    QHostAddress addr = QHostAddress::Broadcast;
 
     QByteArray datagram(message, size);
 

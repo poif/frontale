@@ -48,7 +48,7 @@ void bdd_tcp::attendLecture(int timeout, int type){
 
    yLecture=soc.waitForReadyRead(timeout);  // attend que le paquet soit pret a etre lut
 
-   QTextStream(stdout) << "it's ok" << endl;
+   QTextStream(stdout) << "reception d'un message" << endl;
 
     while(soc.canReadLine()){
 
@@ -56,7 +56,9 @@ void bdd_tcp::attendLecture(int timeout, int type){
 	}
       if(type == 0) msg = this->dechiffrement(oss.str());
       else msg = oss.str();
-	
+
+	if(msg == "")
+		yLecture = false;	
 	cout << "retour de cle" + oss.str() << endl;
 
 }
