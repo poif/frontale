@@ -34,7 +34,6 @@ void ServeurCentral::handle_accept(Client<ServeurCentral> *noeud, const boost::s
 		toutlemonde.push_back(noeud);
 		noeud->startRead();
 		startAccept();
-		//sendNbNoeudsToAll();
 	}
 }
 
@@ -43,7 +42,7 @@ void ServeurCentral::traitementDeLaTrame(Trame &t, Client<ServeurCentral> *noeud
 	cout << "/********* Trame Recue" << std::endl <<
 			"TTL : " << t.getTTL() << std::endl <<
 			"Commande : " << t.getCommande() << std::endl <<
-			"*********/" << std::endl;
+			"*********/" << std::endl << std::endl;
 	t.setTTL(0);
 	for(auto cl : this->toutlemonde){
 		Client<ServeurCentral> *cli = cl;

@@ -11,7 +11,7 @@ SecureNodeListProvider::SecureNodeListProvider(boost::asio::io_service &io_servi
 	  m_acceptor(io_service, tcp::endpoint(tcp::v4(), portecoute)),
 	  io_service(io_service)
 {
-	cout << "Construction du serveur central" << std::endl;
+	cout << "Construction du serveur de liste de noeud" << std::endl;
 	startAccept();
 }
 
@@ -30,7 +30,7 @@ void SecureNodeListProvider::handle_accept(Client<SecureNodeListProvider> *noeud
 {
 	if (!error)
 	{
-		std::cout << "Un client est accepté !" << std::endl;
+		std::cout << "Un client est accepté" << std::endl;
 		toutlemonde.push_back(noeud);
 		noeud->startRead();
 		startAccept();
@@ -56,7 +56,7 @@ void SecureNodeListProvider::sendIpPortAllNodes(Client<SecureNodeListProvider> *
 	cout << "/*********Trame réponse" << std::endl <<
 			"TTL : " << t.getTTL() << std::endl <<
 			"Commande : " << t.getCommande() << std::endl <<
-			"*********/" << std::endl;
+			"*********/" << std::endl << std::endl;
 
 	to->send(t);
 }
@@ -74,12 +74,12 @@ void SecureNodeListProvider::traitementDeLaTrame(Trame &t, Client<SecureNodeList
 	/*Si le noeud est complété*/
 	if (noeudSource->getPort() == 0){
 		if (t.getTTL() != TTL_RENSEIGNE_NO_PORT){
-			cout << "Erreur un client essaye de communiquer sans avoir de port d'écoute ouvert/renseigné" << std::endl;
+			cout << "Erreur un client essaye de communiquer sans avoir de port d'écoute ouvert/renseigné" << std::endl << std::endl;
 			return;
 		}
 		else {
 			noeudSource->setPort(stoi(t.getCommande(), NULL, 10));
-			cout << "Le noeud à renseigné son port" << std::endl;
+			cout << "Le noeud à renseigné son port" << std::endl << std::endl;
 		}
 	}
 	else {
@@ -97,7 +97,7 @@ void SecureNodeListProvider::traitementDeLaTrame(Trame &t, Client<SecureNodeList
 				sendVoisins(noeudSource);
 				break;
 			default:
-				cout << "This case should never append" << std::endl;
+				cout << "This case should never append" << std::endl << std::endl;
 				break;
 		}
 	}
@@ -134,7 +134,6 @@ void SecureNodeListProvider::sendVoisins(Client<SecureNodeListProvider> *to){
 					tmp=this->toutlemonde.begin();
 				}
 				next=*tmp;
-				cout << "Next trouvé " << next->getIpStr() << ":" << next->getPort();
 				ipPortVoisins.push_back(pair<string, int>(next->getIpStr(), next->getPort()));
 			}
 		}
@@ -148,7 +147,6 @@ void SecureNodeListProvider::sendVoisins(Client<SecureNodeListProvider> *to){
 					tmp2=this->toutlemonde.rbegin();
 				}
 				previous=*tmp2;
-				cout << "Previous trouvé " << previous->getIpStr() << ":" << previous->getPort();
 				ipPortVoisins.push_front(pair<string, int>(previous->getIpStr(), previous->getPort()));
 			}
 		}
@@ -206,7 +204,7 @@ void SecureNodeListProvider::sendVoisins(Client<SecureNodeListProvider> *to){
 	if (this->toutlemonde.size() != 1){
 		oTextArchivePrevious << ipPortOfPreviousNode;
 		Trame t2(-4, oStringStreamPrevious.str());
-		cout << "/*********Trame Précédent" << std::endl <<
+		cout << "/*********Trame vers le précédent Précédent" << std::endl <<
 				"TTL : " << t2.getTTL() << std::endl <<
 				"Commande : " << t2.getCommande() << std::endl <<
 				"*********/" << std::endl;
@@ -214,10 +212,10 @@ void SecureNodeListProvider::sendVoisins(Client<SecureNodeListProvider> *to){
 
 		oTextArchiveNext << ipPortOfNextNode;
 		Trame t3(-4, oStringStreamNext.str());
-		cout << "/*********Trame Suivant" << std::endl <<
+		cout << "/*********Trame Svers le Suivant" << std::endl <<
 				"TTL : " << t3.getTTL() << std::endl <<
 				"Commande : " << t3.getCommande() << std::endl <<
-				"*********/" << std::endl;
+				"*********/" << std::endl << std::endl;
         next->send(t3);
 	}
 }
@@ -234,7 +232,7 @@ void SecureNodeListProvider::sendNbNoeuds(Client<SecureNodeListProvider> *to){
 	cout << "/*********Trame réponse" << std::endl <<
 			"TTL : " << t.getTTL() << std::endl <<
 			"Commande : " << t.getCommande() << std::endl <<
-			"*********/" << std::endl;
+			"*********/" << std::endl << std::endl;
 	to->send(t);
 }
 
@@ -249,7 +247,7 @@ void SecureNodeListProvider::sendTrameToRecipient(Trame &t)
 
 void SecureNodeListProvider::clientLeave(Client<SecureNodeListProvider> *leaving)
 {
-	cout << "Client quitte le serveur" << std::endl;
+	cout << "Client quitte le réseau" << std::endl;
 
 	std::ostringstream oStringStream;
 	std::ostringstream oStringStreamPrevious;
@@ -298,7 +296,6 @@ void SecureNodeListProvider::clientLeave(Client<SecureNodeListProvider> *leaving
 					tmp=this->toutlemonde.begin();
 				}
 				next=*tmp;
-				cout << "Next trouvé " << next->getIpStr() << ":" << next->getPort();
 			}
 		}
 		auto it2=this->toutlemonde.rbegin();
@@ -311,7 +308,6 @@ void SecureNodeListProvider::clientLeave(Client<SecureNodeListProvider> *leaving
 					tmp2=this->toutlemonde.rbegin();
 				}
 				previous=*tmp2;
-				cout << "Previous trouvé " << previous->getIpStr() << ":" << previous->getPort();
 			}
 		}
 
@@ -368,7 +364,7 @@ void SecureNodeListProvider::clientLeave(Client<SecureNodeListProvider> *leaving
 		// envoi des information aux noeuds toujours présents :
 		oTextArchivePrevious << ipPortOfPreviousNode;
 		Trame t2(-4, oStringStreamPrevious.str());
-		cout << "/*********Trame Précédent" << std::endl <<
+		cout << "/*********Trame envoyée au noeud précédent le client déconnecté" << std::endl <<
 				"TTL : " << t2.getTTL() << std::endl <<
 				"Commande : " << t2.getCommande() << std::endl <<
 				"*********/" << std::endl;
@@ -377,7 +373,7 @@ void SecureNodeListProvider::clientLeave(Client<SecureNodeListProvider> *leaving
 
 		oTextArchiveNext << ipPortOfNextNode;
 		Trame t3(-4, oStringStreamNext.str());
-		cout << "/*********Trame Suivant" << std::endl <<
+		cout << "/*********Trame envoyée au noeud suivant le client déconnecté" << std::endl <<
 				"TTL : " << t3.getTTL() << std::endl <<
 				"Commande : " << t3.getCommande() << std::endl <<
 				"*********/" << std::endl;
