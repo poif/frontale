@@ -153,7 +153,9 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
                         cli->send(t);
                         cli->setPort(trucl.second);
 						toutlemonde.push_front(cli);
-                        cout << "Client ajouté à la liste : " << cli->getIpStr() << ":" << cli->getPort() << std::endl;
+                        
+                        cout << "Client ajouté à la liste : " << cli->getIpStr() << ":" << cli->getPort() << endl;
+                        cout << "Taille de la liste : " << toutlemonde.size() << endl;
 					}
                 }
                 cout << "Enregistrement des différents noeuds effectué" << std::endl << std::endl;
@@ -214,7 +216,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 		switch (t.getTTL()) {
 			case 0:
 			{
-				cout << "Le serveur central nous a envoyé une information dirrectement à nous, nous ignorons cette information car nous ne somme pas une frontale" << std::endl << std::endl;
+				cout << "Le serveur central nous a envoyé une information dirrectement à nous, nous ignorons cette information car nous ne somme pas une frontales" << std::endl << std::endl;
 				//observeur->tor_recieve(t.getCommande());
 				break;
 			}
@@ -231,8 +233,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
             noeudSource->setPort(stoi(t.getCommande(), NULL, 10));
         }
         else if(t.getTTL() == -2) {
-			cout << "Fin du tour de réponse à une requete, nous sommes nous ignorons cette information car nous ne somme pas une frontale" << std::endl << std::endl;
-				//noeudServeurCentral->send(t);
+			cout << "Fin du tour de réponse à une requete, suppression du paquet" << std::endl << std::endl;
         }
 		else if (t.getTTL() > 0)
 		{
