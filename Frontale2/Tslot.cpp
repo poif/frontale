@@ -176,7 +176,7 @@ void Tslot::addMessageToList(string token, string msg)
 {
 	if (tokenToMsgList.find(token) != tokenToMsgList.cend()){
 		auto b = std::find(tokenToMsgList[token]->begin(),tokenToMsgList[token]->end(), msg);
-		if(b == tokenToMsgList[token]->end()){
+		if(tokenToMsgList[token]->size() > 0 && b == tokenToMsgList[token]->end()){
 			tokenToMsgList[token]->push_back(msg);
 		}
 	}
