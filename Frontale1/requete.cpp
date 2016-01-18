@@ -142,12 +142,6 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 						}
 			}
 
-
-			else {	//1.6 GIGAWAT? (ne peut jamais arriver?)
-				cerr << "Tri : Option inconnu" << endl ;
-				isError = 1;
-				break;
-			}
 		}
 
 		else if(m_action.compare("group") ==0)
@@ -169,7 +163,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 				pourThomas = false; // On remet le booleen à false
 		}
 
-		else if(m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		else if(!m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
 		{
 			getline(ss, data, '*');
 			if(data != "ERROR")

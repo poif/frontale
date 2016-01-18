@@ -127,7 +127,6 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 /*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
 				condensate = m_nom;
 				cout << "lecond " << condensate <<endl;
-				cout << "lecond " << m_nom <<endl;
 				hash = hashString((char*)condensate.c_str());
 /*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*') && getline(ss,pub,'*')) {
 			
@@ -142,12 +141,6 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 						}
 			}
 
-
-			else {	//1.6 GIGAWAT? (ne peut jamais arriver?)
-				cerr << "Tri : Option inconnu" << endl ;
-				isError = 1;
-				break;
-			}
 		}
 
 		else if(m_action.compare("group") ==0)
@@ -169,7 +162,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 				pourThomas = false; // On remet le booleen à false
 		}
 
-		else if(m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		else if(!m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
 		{
 			getline(ss, data, '*');
 			if(data != "ERROR")
