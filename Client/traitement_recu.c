@@ -1,17 +1,8 @@
 #include "traitement_recu.h"
 
-static int flag = 0;//flag pour le wait
+static int flag = 0;
 
 extern int groupe_rep;
-
-/*======================================================================
-**  Nom          : traiter_recu
-**  Description  : Permet d'effectuer les actions en fonction de ce que
-**                 la requete reçu de la frontale
-** ---------------------------------------------------------------------
-**  Parametres   :
-**      char * requete_recu : requete reçu par la frontale
-**======================================================================*/
 
 int traiter_recu (char * requete_recu)
 {
@@ -56,19 +47,14 @@ int traiter_recu (char * requete_recu)
 				char *status_requete = malloc (sizeof (char) * 1024);
 				
 				char *affectation_requete = malloc (sizeof (char) * 1024);
-				//char *test = malloc (sizeof (char) * 1024);
+				
 				char *nom = recup_valeur("nom");
-				printf("NOM -> %s\n", nom);
-				//char *status = recup_valeur("status");
-				printf("RECUP_STATUT -> %s\n", recup_valeur("statut"));
-				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
+				
 
 				status_requete = strtok_r(NULL, "*", &save_ptr);
 				affectation_requete = strtok_r(NULL, "*", &save_ptr);
-				//test = strtok_r(NULL, "*", &save_ptr);
-				//printf("TEST -> %s\n", test);
-				printf("STATUS -> %s\n", status_requete);
-				printf("AFFECTATION -> %s\n", affectation_requete);
+				
+				
 
 				usleep(100);
 
@@ -79,7 +65,7 @@ int traiter_recu (char * requete_recu)
 					sprintf(a_envoyer, "chall*%s*1*%s*%s*EOF", numero_requete, nom, recup_valeur("statut"));
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
-					printf("a envoyer -> %s\n", a_envoyer);
+					
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);
 				}
@@ -89,7 +75,7 @@ int traiter_recu (char * requete_recu)
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					strcat(a_envoyer,numero_requete);
 					strcat(a_envoyer, "chall*1*none*EOF");
-					//sprintf(a_envoyer, "1*none");
+					
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
@@ -105,16 +91,16 @@ int traiter_recu (char * requete_recu)
 				char *affectation_requete = malloc (sizeof (char) * 1024);
 				char *test = malloc (sizeof (char) * 1024);
 				char *nom = recup_valeur("nom");
-				printf("NOM -> %s\n", nom);
-				//char *status = recup_valeur("status");
-				printf("RECUP_STATUT -> %s\n", recup_valeur("statut"));
-				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
+				
+				
+				
+				
 				status_requete = strtok_r(NULL, "*", &save_ptr);
 				affectation_requete = strtok_r(NULL, "*", &save_ptr);
-				//test = strtok_r(NULL, "*", &save_ptr);
-				//printf("TEST -> %s\n", test);
-				printf("STATUT -> %s\n", status_requete);
-				printf("AFFECTATION -> %s\n", affectation_requete);
+				
+				
+				
+				
 
 				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0)
 				{
@@ -148,43 +134,28 @@ int traiter_recu (char * requete_recu)
 				char *test = malloc (sizeof (char) * 1024);
 				char *nom = recup_valeur("nom");
 				printf("NOM -> %s\n", nom);
-				//char *status = recup_valeur("status");
-				printf("RECUP_STATUT -> %s\n", recup_valeur("statut"));
-				printf("RECUP_AFFECTATION -> %s\n", recup_valeur("affectation"));
+				
+				
+				
 				status_requete = strtok_r(NULL, "*", &save_ptr);
 				affectation_requete = strtok_r(NULL, "*", &save_ptr);
 				groupe_requete = strtok_r(NULL, "*", &save_ptr);
 				datatype_requete = strtok_r(NULL, "*", &save_ptr);
-				//test = strtok_r(NULL, "*", &save_ptr);
-				//printf("TEST -> %s\n", test);
-				//printf("STATUT -> %s\n", status_requete);
-				printf("AFFECTATION -> %s\n", affectation_requete);
-				printf("DATATYPE -> %s\n", datatype_requete);
-
-				/*
-				   Pour le test datatype, il faut juste savoir si on a une donnée 
-				   correspondant au type voulu, stocké dans datatype_requete.
-				   Je vous conseille de l'améliorer, mais le principe simple auquel je pense est qu'il faut 
-				   inscrire les différents datatypes possibles dans un fichier de configuration,
-				   puis, si un champ de type de donnée ne contient pas de référence, on met none.
-				   Exemple : le client a une image : picture = refdel'image
-				                   le client n'a pas d'image : picture = none
-				    D'où le test ci-dessous :
-				*/
-
-				//int ret = partage_demande(datatype_requete, S_TYPE);
+				
+				
+				
 				int ret = 1;
 
 				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0 &&  ret== 1)
 				{
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char) * 1024];
-					//sprintf(a_envoyer, "%s*3*%s*%s*%s*EOF",numero_requete, recup_valeur("status"), recup_valeur(datatype_requete), nom);
+					
 					char *ref_amoi = malloc (sizeof (char) * 256);
-					//ref_amoi = retour_reference(datatype_requete);
-					//printf("ref_amoi : %s\n", ref_amoi);
+					
+					
 					sprintf(a_envoyer, "chall*%s*3*fichier2.txt;%s*EOF",numero_requete/*, ref_amoi*/, nom);
-					//En sortie de recup_valeur(datatype_request), on a la référence du document
+					
 					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);
@@ -259,11 +230,11 @@ void traitement_R(char *recu)
 	char *numero = malloc (sizeof (char) * 1024);
 	char *temp = malloc (sizeof (char) * 1024);
 	strncpy(temp, (const char *) recu, 1000);
-	printf("on arrive ici : %s\n", recu);
+	
 	char * garb = strtok_r(temp, "*", &save_ptr);
 	numero = strtok_r(NULL, "*", &save_ptr);
-	printf("lala");
-	printf("%s\n", numero);
+	
+	
 
 	switch(numero[0])
 	{
@@ -271,13 +242,11 @@ void traitement_R(char *recu)
 		{
 			;
 			int i = 0;
-			printf("on arrive ici\n");
+			
 			while(recu[i] != '\0')
 			{
 				if(recu[i] == 'R');
-				else if(recu[i] == '*')printf("\n");
-				else printf("%c", recu[i]);
-				i++;
+								i++;
 			}
 			break;
 		}
