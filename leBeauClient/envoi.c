@@ -64,7 +64,6 @@ int envoi_fichier(char *fichier, char *num)
     char save[1];
     char remoteFILE[4096];
     long fichierSIZE;
-    int compt1=1,compt2=1, pourcentage;
 
     fichier_envoi = fopen (fichier,"r");
 
@@ -82,14 +81,14 @@ int envoi_fichier(char *fichier, char *num)
     
     int i = 0;
 
-    sprintf(c, "chall*%s*4*", num);
-    printf("machin -> %s\n", c);
+    sprintf(c, "chall*%s*4*bonjour*", num);
+    /*printf("machin -> %s\n", c);
     while(i<fichierSIZE && ( contenu[i] = fgetc(fichier_envoi)) !=EOF)
     {
       i++;
     }
     sprintf(c+strlen(c), "%s", contenu);
-
+    */
     crypt(c, capart, strlen(c));
     envoi_requete(capart,strlen(c)+16,GIVE);
     }
@@ -98,13 +97,11 @@ int envoi_fichier(char *fichier, char *num)
 
 char *retour_chaine_fic(char *fichier)
 {
-    char temp[1024];
     FILE * fichier_envoi;
     unsigned char c[1024];
-    char save[1];
     char remoteFILE[4096];
     long fichierSIZE;
-    int compt1=1,compt2=1, pourcentage;
+
     memset(c, '\0', 1024);
     fichier_envoi = fopen (fichier,"r");
 

@@ -79,8 +79,9 @@ char *retour_path(char *reference)
     // On lit ligne par ligne
     while ( ( lecture = getline ( &ligne, &longueur, fichier ) ) != -1 )
     {
-    	nom = strtok_r(lecture, ";", &save_ptr);
+    	nom = strtok_r(ligne, ";", &save_ptr);
     	path = strtok_r(NULL, ";", &save_ptr);
+	if (strncmp(nom, reference, sizeof(reference)) == 0) break;
     }
 
     fclose(fichier);
