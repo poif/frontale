@@ -219,7 +219,7 @@ int traiter_recu (char * requete_recu)
 						unsigned char a_envoyer[sizeof (char) * 1024];
 						sprintf(a_envoyer, "chall*%s*4*bonjour*EOF", numero_requete);
 						unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
-						memset(a_envoyer_crypt, '\0', sizeof(a_envoyer));
+						memset(a_envoyer_crypt, '\0', strlen(a_envoyer));
 						crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 						envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);
 					}

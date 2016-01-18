@@ -518,7 +518,7 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 
 			string rep = mess->decrypt((unsigned char*) messageStr, lasize);
-
+			cout << "Reponse client en clair : " << rep << endl;
 			a_traiter_clair.push_back(rep);
 			it_size++;
 
