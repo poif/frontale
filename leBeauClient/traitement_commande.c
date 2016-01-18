@@ -86,6 +86,7 @@ int traiter_commande(char *a_traiter)
 
 				char *nom = malloc (sizeof (char) * 256);
 				char *groupe_cible = malloc (sizeof (char) * 256);
+				char *groupe_amoi = malloc (sizeof (char) * 256);
 
 				printf("On recherche la reference d'un fichier !\n");
 
@@ -96,9 +97,11 @@ int traiter_commande(char *a_traiter)
 				affectation = strtok_r(NULL, " ", &save_ptr);
 				groupe_cible = strtok_r(NULL, " ", &save_ptr);
 
+				groupe_amoi = recup_groupe();
+
 				sprintf(a_envoyer, "chall*%s*%s*%s*%s*%s*%s*%s*%s*%s*%s*none", affectation, statut, 
 					action, option, cible, nom, recup_valeur("affectation"), recup_valeur("statut"), 
-					groupe_cible, recup_groupe());
+					groupe_cible, groupe_amoi );
 			}
 
 			printf("%s\n", a_envoyer);

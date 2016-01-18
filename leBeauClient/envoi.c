@@ -82,14 +82,16 @@ int envoi_fichier(char *fichier, char *num)
     int i = 0;
 
     sprintf(c, "chall*%s*4*", num);
+    int curr = strlen(c);
 
     while(i<1024 && getc(fichier_envoi)!=EOF)
     {
-      c[i+strlen(c)] = getc(fichier_envoi);
+      c[i+curr] = getc(fichier_envoi);
+      i++;
     }
 
     crypt(c, capart, strlen(c));
-    envoi_requete(capart,strlen(c)+16,GIVE);
+    envoi_requete(capart,strlen(c)+16-(strlen(c)%16),GIVE);
     }
 
 }

@@ -14,6 +14,10 @@ pourThomas = false; //Ce booleen est initialisé à false
 
 string Requete::getToken()
 {	return m_token;}
+string Requete::getNom()
+{	return m_nom;}
+string Requete::getPub()
+{	return m_pub;}
 string Requete::getAffectation()
 {	return m_affectation;}
 string Requete::getStatut()
@@ -70,6 +74,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		string reference;
 		string inTheVector;
 		string data;
+		string pub;
 
 		//cout << "LE SS :: %s" << ss.str() << endl;
 
@@ -101,12 +106,10 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		/*****REQUETE 2*****/
 			else if (m_option.compare("-e") ==0) {
 				condensate = m_parametre + m_statut;
-				cout << "lecondansate " << condensate << endl;
+
 				hash = hashString((char*)condensate.c_str());
 				m_resultat = "R*2*0";
-				cout << "lecondansate " << hash << endl;
-				
-				cout << "lecondansate " << hash_recu << endl;
+
 				//
 				//si aucune rÃ©ponse n'est "vraie", reste Ã  no, sinon, dira yes
 				while(getline(ss, hash_recu, '*')) {
@@ -122,12 +125,17 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 			else if (m_option.compare("-r") ==0 && pourThomas == false) //Si ce booleen est à false => c'est la requête à envoyer à Thomas
 			{
 /*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
-				condensate += m_nom;
+				condensate = m_nom;
+				cout << "lecond " << condensate <<endl;
+				cout << "lecond " << m_nom <<endl;
 				hash = hashString((char*)condensate.c_str());
-/*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*')) {
+/*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*') && getline(ss,pub,'*')) {
+			
 /*REQ3->ID*3*statut*affectation*gp_cible*typedata*/
 							if(hash.compare(hash_recu) ==0) {
-								reference = m_reference;
+								m_reference = reference;
+								cout << "hello" << endl;
+								m_pub = pub;
 								m_requete = "4*" + m_statut + "*none*" + m_affectation + "*none*" + m_groupe + "*none*none*" + reference + "*none*";
 								return 1;
 							}
@@ -246,25 +254,12 @@ void Requete::construction() //construit la requete suivant action, option et pa
 
 int Requete::decoupage(string chaine)
 {
+	string autre = chaine;
 	istringstream ss(chaine);
 	//remplissage + test error!
+	cout << "apoilapoilapoilapoilapoilpaoiploa" << endl;
+	cout << chaine << endl;
 
-	if(!m_action.compare("search") && !m_option.compare("-r"))  //cas particulier de decoupage pour requete 3
-	{
-		if(!getline(ss, m_affectation_cible, '*') ||
-			!getline(ss, m_statut_cible, '*') ||
-			!getline(ss, m_action, '*') ||
-			!getline(ss, m_option, '*') ||
-			!getline(ss, m_parametre, '*') ||
-			!getline(ss, m_nom, '*') ||
-			!getline(ss, m_affectation, '*') ||
-			!getline(ss, m_statut, '*') ||
-			!getline(ss, m_groupe_cible, '*') ||
-			!getline(ss, m_groupe, '*'))
-				return 0;
-	}
-	else
-	{
 		if (!getline(ss, m_affectation, '*') ||
 			!getline(ss, m_statut, '*') ||
 			!getline(ss, m_action, '*') ||
@@ -273,6 +268,22 @@ int Requete::decoupage(string chaine)
 			
 			return 0;
 			}
+		else if(!m_action.compare("search") && !m_option.compare("-r")){
+			istringstream ss2(autre);
+			if(!getline(ss2, m_affectation_cible, '*') ||
+				!getline(ss2, m_statut_cible, '*') ||
+				!getline(ss2, m_action, '*') ||
+				!getline(ss2, m_option, '*') ||
+				!getline(ss2, m_parametre, '*') ||
+				!getline(ss2, m_nom, '*') ||
+				!getline(ss2, m_affectation, '*') ||
+				!getline(ss2, m_statut, '*') ||
+				!getline(ss2, m_groupe_cible, '*')||
+				!getline(ss2, m_groupe, '*') )
+					return 0;
+
+			printf("toto\n");
+		}
 		else {
 		//it's ok
 			if(m_action.compare("insert") == 0 || m_action.compare("delete") == 0) {// Si c'est une requÃªte pour la bdd on a un champ en plus : le nom de la personne
@@ -289,7 +300,6 @@ int Requete::decoupage(string chaine)
 
 			return 1;
 		}
-	}
 	return 1;
 }
 

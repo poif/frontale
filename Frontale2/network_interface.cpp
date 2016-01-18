@@ -527,14 +527,14 @@ string network_interface::treat_resource(string& request, string& token, int act
 
 	if(action > 2){
 
-	            bdd->emission(requetebdd);
+	            /*bdd->emission(requetebdd);
 	                
 	            bdd->attendLecture(200);
 
 	            string clair = bdd->getMsg();
 
 	            if(!clair.empty())
-	            	a_traiter_clair.push_back(clair);
+	            	a_traiter_clair.push_back(clair);*/
 
 	}
 
@@ -709,8 +709,8 @@ void network_interface::process_received_events(engine_event& e){
 			string affectationReq = e.s_data["AFFECTATION"];
 			string token = e.s_data["TOKEN"];
 
-			reqFormat = traitement_req_client(token,"3", "none", "none", affectationReq, "none", "none", "none",dataType,"none", "none");
-			reqFormatBdd = traitement_req_bdd(token,"300", "none", "none", affectationReq, "none", "none", "none",dataType,"none", "none");
+			reqFormat = traitement_req_client(token,"3", "none", "none", "none", affectationReq, "none", "none",dataType,"none", "none");
+			reqFormatBdd = traitement_req_bdd(token,"300", "none", "none", "none", affectationReq, "none", "none",dataType,"none", "none");
 
 			string repFormat = treat_resource(reqFormat, token, 3, reqFormatBdd);
 
@@ -902,13 +902,13 @@ void network_interface::process_received_events(engine_event& e){
 						string token = r.s_data["TOKEN"];
 						string document;
 
-						StringSource ss(encDocument, true,
+						/*StringSource ss(encDocument, true,
 						    new Base64Decoder(
 						        new StringSink(document)
 						    ) // Base64Decoder
 						); // StringSource
-						//hnom.erase(hnom.size() - 1, 1);
-
+						//hnom.erase(hnom.size() - 1, 1);*/
+						document = encDocument;
 						cout << "document : " << document << endl;
 
 						boost::mutex * mustStopMutex = ts->getMutex(token);
@@ -927,17 +927,42 @@ void network_interface::process_received_events(engine_event& e){
 
 					string aesKey = r.s_data["KEY"];
 					string aesIv = r.s_data["IV"];
-					string reference = r.s_data["REFERENCE"];
-					string groClient = r.s_data["GRCLIENT"];
+					//string reference = r.s_data["REFERENCE"];
+					//string groClient = r.s_data["GRCLIENT"];
+					string requete = r.s_data["REQUETE"];
 					string token = r.s_data["TOKEN"];
+
+					string statutCible;
+					string affectationCible;
+					string statut;
+					string affectation;
+					string action;
+					string groClient;
+					string groCible;
+					string typeData;
+					string reference;
+					string user;
+
+					istringstream ss(requete);
+
+					getline(ss, action, '*');
+					getline(ss, statutCible, '*');
+					getline(ss, statut, '*');
+					getline(ss, affectationCible, '*');
+					getline(ss, affectation, '*');
+					getline(ss, groClient, '*');
+					getline(ss, groCible, '*');
+					getline(ss, typeData, '*');
+					getline(ss, reference, '*');
+					getline(ss, user, '*');
 
 					string reqFormat;
 					string reqFormatBdd;
 
 					/*Traitement de la requete */
 					
-					reqFormat = traitement_req_client(token,"4", "none", "none", "none", "none", groClient, "none","none",reference, "none");
-					reqFormatBdd = traitement_req_bdd(token,"301", "none", "none", "none", "none", groClient, "none","none",reference, "none");
+					reqFormat = traitement_req_client(token,"4", statutCible, "none", affectationCible, "none", groClient, "none","none",reference, "none");
+					reqFormatBdd = traitement_req_bdd(token,"301", statutCible, "none", affectationCible, "none", groClient, "none","none",reference, "none");
 
 					string document = treat_resource(reqFormat, token, 4, reqFormatBdd);			
 
@@ -945,7 +970,7 @@ void network_interface::process_received_events(engine_event& e){
 					{
 						p.type = engine_event::PUSH;
 						p.s_data["DOCUMENT"] = document;
-						r.s_data["TOKEN"] = token;
+						p.s_data["TOKEN"] = token;
 
 						boost::archive::text_oarchive archive(archive_stream);
 						archive << p;
@@ -1120,7 +1145,7 @@ void network_interface::send_lookrec(string& dataType, string& affectation, stri
 
 }
 
-void network_interface::send_pull(string& reference, string& groupeClient, string& encKey, string& token){
+void network_interface::send_pull(/*string& reference, string& groupeClient*/string& requete, string& encKey, string& token){
 	engine_event e;
 	engine_event p;
 
@@ -1131,6 +1156,8 @@ void network_interface::send_pull(string& reference, string& groupeClient, strin
 	string document;
 	string encDocument;
 	string pubRemote;
+
+	cout << "monPub : " << endl << encKey << endl;
 
 	StringSource ss(encKey, true,
 	    new Base64Decoder(
@@ -1156,8 +1183,9 @@ void network_interface::send_pull(string& reference, string& groupeClient, strin
 	e.s_data["KEY"] = aesKey_1[0];
 	e.s_data["IV"] = aesKey_1[1];
 
-	e.s_data["REFERENCE"]=reference;
-	e.s_data["GRCLIENT"]=groupeClient;
+	//e.s_data["REFERENCE"]=reference;
+	//e.s_data["GRCLIENT"]=groupeClient;
+	e.s_data["REQUETE"]=requete;
 	e.s_data["TOKEN"]=token;
 
 	aesKeyTampon = aesKey_1[0];

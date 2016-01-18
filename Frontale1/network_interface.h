@@ -59,7 +59,8 @@ public:
 	void send_look(std::string& affectation, std::string& token);
 	void send_exist(std::string& affectation, std::string& token);
 	void send_lookrec(std::string& dataType, std::string& affectation, std::string& token);
-	void send_pull(std::string& reference, std::string& groupeClient, std::string& encKey, std::string& token);
+	//void send_pull(std::string& reference, std::string& groupeClient, std::string& encKey, std::string& token);
+	void send_pull(std::string& requete, std::string& encKey, std::string& token);
 
 	std::string encrypto_rsa(std::string& plain);
 	std::string encrypto_rsa(std::string& plain, CryptoPP::RSA::PublicKey pubRemote);

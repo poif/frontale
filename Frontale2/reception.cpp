@@ -116,7 +116,13 @@ void reception::traitement(char * messageStr, int size){
         if(req.decoupage(input)){
             //input = token + "*" + input + "*";
             cout << "tata" << endl;
+                            cout << "lenom ici : " << req.getNom() << endl;
+
+                cout << "lenom ici : " << req.getNom() << endl;
             req.construction();
+                            cout << "lenom ici : " << req.getNom() << endl;
+
+                cout << "lenom ici : " << req.getNom() << endl;
             cout << "tata" << endl;
 
             if(req.getPourBdd()){
@@ -134,10 +140,14 @@ void reception::traitement(char * messageStr, int size){
             }
             else
             {
+                cout << "lenom ici : " << req.getNom() << endl;
+
+                cout << "lenom ici : " << req.getNom() << endl;
 
                 string traitement = req.getAffectation();
 
                 string option = req.getOption();
+                string parametre = req.getParametre();
 
                 if(option.compare("-n")==0){/* traitement est une affectation */
                     m_netinf->send_look(traitement, token);
@@ -147,16 +157,28 @@ void reception::traitement(char * messageStr, int size){
                     m_netinf->send_exist(traitement, token);
                 }
                 if(option.compare("-r")==0){
-                    m_netinf->send_lookrec(option,traitement, token);
+                    m_netinf->send_lookrec(parametre,traitement, token);
                 }
 
                 list<string> * listReponse = m_ts->startTimer(token, 5000);
+                cout << "lenom ici : " << req.getNom() << endl;
 
                 if(!listReponse->empty()){
 
-                req.tri(*listReponse);
+                if(req.tri(*listReponse) == 1){
 
-                //TODO : methode qui delete les liés au token
+                    string pubR = req.getPub();
+                    string requeteP = req.getRequete();
+
+                    token = m_ts->GenToken(hoteCourant,portCourant);
+
+                    m_netinf->send_pull(requeteP, pubR, token);
+
+                    list<string> * listReponsePull = m_ts->startTimer(token, 5000);
+                    req.tri(*listReponsePull);
+
+
+                }
 
                 }
                 else{
@@ -184,7 +206,7 @@ void reception::traitement(char * messageStr, int size){
 
             clientFront cli;
             cli.socBind();
-            cli.emission(chiffrer, req.getResultat().size()+16);//, hoteCourant, portCourant);
+            cli.emission(chiffrer, req.getResultat().size()+16-(req.getResultat().size()%16));//, hoteCourant, portCourant);
 
         }
         }

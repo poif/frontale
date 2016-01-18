@@ -6,13 +6,14 @@ void partage_create(char *nom, char *path, char *type, int bdd, char *group_name
 
 	fichier_partage = fopen ("partage.ini", "w");
 
-	fprintf(fichier_partage, "%s\t%s\t%s\t%i\t%s\n", nom, path, type, bdd, group_name);
+	fprintf(fichier_partage, "%s;%s;%s;%i;%s\n", nom, path, type, bdd, group_name);
 
 	fclose (fichier_partage);
 }
 
 int partage_demande(char *compare, int recherche)
 {
+
 	 // Déclaration variables
     FILE *fichier ;
     char *ligne = NULL ;
@@ -35,29 +36,33 @@ int partage_demande(char *compare, int recherche)
     // On lit ligne par ligne
     while ( ( lecture = getline ( &ligne, &longueur, fichier ) ) != -1 )
     {
-    	nom = strtok_r(lecture, "\t", &save_ptr);
-    	path = strtok_r(NULL, "\t", &save_ptr);
-    	type = strtok_r(NULL, "\t", &save_ptr);
-    	type_partage = strtok_r(NULL, "\t", &save_ptr);
-    	groupe = strtok_r(NULL, "\t", &save_ptr);
+    	nom = strtok_r(ligne, ";", &save_ptr);
+    	path = strtok_r(NULL, ";", &save_ptr);
+    	type = strtok_r(NULL, ";", &save_ptr);
+    	type_partage = strtok_r(NULL, ";", &save_ptr);
+    	groupe = strtok_r(NULL, ";", &save_ptr);
+      printf("incoming\n");
+      printf("type : %c\n", type[0]);
 
     	switch(recherche)
 		{
 			case S_TYPE:
 			{
-				if (strcmp (compare, type) == 0) return 1;
+				if (strncmp (compare, type, strlen(compare)) == 0) 
+					{ fclose(fichier); return 1; }
 				break;
 			}
 
 			case S_GROUPE:
 			{
-				if (strcmp (compare, groupe) == 0) return 1;
+				if (strcmp (compare, groupe) == 0) 
+					{ fclose(fichier); return 1; }
 				break;
 			}
 		}
         
     }
-
+    fclose(fichier);
     // Retour de la focntion
     return 0 ;
 }
@@ -83,8 +88,8 @@ char *retour_path(char *reference)
     // On lit ligne par ligne
     while ( ( lecture = getline ( &ligne, &longueur, fichier ) ) != -1 )
     {
-    	nom = strtok_r(lecture, "\t", &save_ptr);
-    	path = strtok_r(NULL, "\t", &save_ptr);
+    	nom = strtok_r(ligne, ";", &save_ptr);
+    	path = strtok_r(NULL, ";", &save_ptr);
     }
 
     fclose(fichier);
@@ -116,9 +121,9 @@ char *retour_reference(char * extension)
     // On lit ligne par ligne
     while ( ( lecture = getline ( &ligne, &longueur, fichier ) ) != -1 )
     {
-    	nom = strtok_r(lecture, "\t", &save_ptr);
-    	path = strtok_r(NULL, "\t", &save_ptr);
-    	extension_file = strtok_r(NULL, "\t", &save_ptr);
+    	nom = strtok_r(ligne, ";", &save_ptr);
+    	path = strtok_r(NULL, ";", &save_ptr);
+    	extension_file = strtok_r(NULL, ";", &save_ptr);
     	if(strcmp(extension, extension_file) == 0) 
     	{
     		    fclose(fichier);

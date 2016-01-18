@@ -3,7 +3,7 @@
 char * recup_groupe()
 {
 	FILE *fichier_groupe ;
-	char *group = malloc (sizeof (char*) *2048);
+	char *group = malloc (sizeof (char) *2048);
 	char *ligne = NULL;
 	ssize_t lecture;
 	ssize_t longueur;
@@ -13,20 +13,26 @@ char * recup_groupe()
 	if(fichier_groupe == NULL) puts("Erreur ouverture fichier");
 
 	int group_compt = 0;
+	puts("vivant");
 
 	while ( ( lecture = getline (&ligne, &longueur, fichier_groupe) ) != -1 )
 	{
+
 		int i;
 
 		for(i = 0; ligne[i] != '\n' && ligne[i] != EOF; i++)
 		{
+			
 			group[group_compt] = ligne[i];
 			group_compt++;
 		}
 		group[group_compt++] = ';';
+
 	}
 
 	close(fichier_groupe);
+
+	printf("le groupe %s\n", group);
 
 	return group;
 }
