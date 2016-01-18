@@ -11,12 +11,13 @@ ServeurCentral::ServeurCentral(boost::asio::io_service &io_service, int portecou
 	  m_acceptor(io_service, tcp::endpoint(tcp::v4(), portecoute)),
 	  io_service(io_service)
 {
-	
+	cout << "Construction du serveur central" << std::endl;
 	startAccept();
 }
 
 void ServeurCentral::startAccept()
-{	
+{
+	cout << "Serveur accepte des clients" << std::endl;
 	Client<ServeurCentral>* newNoeud = new Client<ServeurCentral>(this, io_service);
 	m_acceptor.async_accept(newNoeud->getSocket(),
 		boost::bind(&ServeurCentral::handle_accept,
@@ -29,17 +30,20 @@ void ServeurCentral::handle_accept(Client<ServeurCentral> *noeud, const boost::s
 {
 	if (!error)
 	{
-		
+		std::cout << "Un client est accepté !" << std::endl;
 		toutlemonde.push_back(noeud);
 		noeud->startRead();
 		startAccept();
-		
+		//sendNbNoeudsToAll();
 	}
 }
 
 void ServeurCentral::traitementDeLaTrame(Trame &t, Client<ServeurCentral> *noeudSource)
 {
-	
+	cout << "/********* Trame Recue" << std::endl <<
+			"TTL : " << t.getTTL() << std::endl <<
+			"Commande : " << t.getCommande() << std::endl <<
+			"*********/" << std::endl;
 	t.setTTL(0);
 	for(auto cl : this->toutlemonde){
 		Client<ServeurCentral> *cli = cl;
@@ -51,7 +55,7 @@ void ServeurCentral::traitementDeLaTrame(Trame &t, Client<ServeurCentral> *noeud
 
 void ServeurCentral::clientLeave(Client<ServeurCentral> *leaving)
 {
-	
+	cout << "Client quitte le serveur" << std::endl;
 	auto i = std::begin(this->toutlemonde);
 
 	while (i != std::end(this->toutlemonde)) {
