@@ -187,6 +187,9 @@ bool rsaCrypt::recupKeyPub(string key){
             getline(iss,bddKey,'*');
             cout << bddKey << endl;*/
 
+	    forgeignKey = NULL;
+	    forgeignKey = RSA_new();
+
             keybio = BIO_new_mem_buf ((unsigned char *)key.c_str() , -1 );
 
             forgeignKey=PEM_read_bio_RSAPublicKey ( keybio, &forgeignKey, NULL, NULL );

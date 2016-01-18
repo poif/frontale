@@ -120,6 +120,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 
         iss.str(string((const char *)trame));
         getline(iss,chaineTest,'*');
+	cout << "chaine test :" <<  chaineTest << endl;
         if(chaineTest != "chall") i++;
     }
     cout << nbKey << endl;
@@ -127,13 +128,20 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
 
     // echange de cle
     if(nbKey==i){
-        strncpy((char *)trame, reinterpret_cast<const char*>(dec_in), sizeof(trame));
+
+	cout << "non dechiffré" << endl;
+	
+       strncpy((char *)trame, reinterpret_cast<const char*>(dec_in), sizeof(trame));
         iss.str(string((const char *)trame));
         getline(iss,chaineTest,'*');
         string lakey;
         getline(iss,lakey,'*');
         cout << chaineTest << endl;
         if(chaineTest=="init"){
+
+	    cout << "nouveau client" << endl;
+
+		
             rsaCrypt rsaClient = rsaCrypt(2048);
             rsaClient.recupKeyPub(lakey);
             newKey = this->genAESKey();
@@ -165,6 +173,7 @@ std::string Message::decrypt(unsigned char* dec_in, int size_aes_input){
         cout << "reponse" << reponse << endl;
         dechiffre = true;
         eChangeKey=false;
+	numClient = i;
         return reponse;
 
 
