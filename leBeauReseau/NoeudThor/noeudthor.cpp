@@ -20,9 +20,6 @@ NoeudThor::NoeudThor(boost::asio::io_service &io_service, int portecoute, std::s
 	startAccept();
     giveEarPort();
     askNeighborList();
-    //sleep(5);
-    //giveEarPortToAll();
-    //askNombreNoeuds();
 }
 
 
@@ -55,22 +52,8 @@ void NoeudThor::giveEarPort(){
     noeudSecureNodeListProvider->send(t);
 }
 
-//void NoeudThor::giveEarPortToAll(){
-//    cout << "Le NoeudThor donne son port d'écoute à tout ses clients connectés." << std::endl;
-//    Trame t(-1, std::to_string(portecoute));
-//    cout << "/*********" << std::endl <<
-//            "TTL : " << t.getTTL() << std::endl <<
-//            "Commande : " << t.getCommande() << std::endl <<
-//            "*********/" << std::endl;
-
-//    for (auto i : this->toutlemonde){
-//        cout << "1 client informé de mon port d'écoute" << endl;
-//        i->send(t);
-//    }
-//}
-
 void NoeudThor::askNeighborList(){
-	cout << "Le NoeudThor demande la liste d'ip:portd'ecoute des autres noeudsThors / frontales" << std::endl;
+	cout << "Le NoeudThor demande la liste d'ip:portd'ecoute des autres noeuds du Réseau" << std::endl;
 	Trame t(-2, "");
 	cout << "/*********" << std::endl <<
 			"TTL : " << t.getTTL() << std::endl <<
@@ -93,7 +76,7 @@ void NoeudThor::askNombreNoeuds(){
 }
 
 void NoeudThor::askVoisins(){
-	cout << "Le NoeudThor demande ses voisins" << std::endl;
+	cout << "Le NoeudThor demande qui sont ses voisins (droit et gauche" << std::endl;
 	Trame t(-4, "");
 	cout << "/*********" << std::endl <<
 			"TTL : " << t.getTTL() << std::endl <<
@@ -159,7 +142,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 						}
 					}
 					if (found == false){
-						cout << "On était pas connecté donc on se connecte" << std::endl;
+						cout << "Nous ne sommes pas connectés à un client, (" << trucl.first << ":" << trucl.second << ") on s'y connecte" << std::endl;
 						auto cli = new Client<NoeudThor>(this, io_service);
 						tcp::endpoint endpoint(boost::asio::ip::address::from_string(trucl.first), trucl.second);
 						cli->getSocket().connect(endpoint);
@@ -170,13 +153,10 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
                         cli->send(t);
                         cli->setPort(trucl.second);
 						toutlemonde.push_front(cli);
-                        cout << "Client ajouté à la liste : " << cli->getIpStr() << ":" << cli->getPort() << endl;
-                        cout << "Taille de la liste : " << toutlemonde.size() << endl;
+                        cout << "Client ajouté à la liste : " << cli->getIpStr() << ":" << cli->getPort() << std::endl;
 					}
-					cout << "IP : " << trucl.first << std::endl;
-					cout << "Port : " << trucl.second << std::endl;
                 }
-                cout << "Enregistrement des différents noeuds effectué" << std::endl;
+                cout << "Enregistrement des différents noeuds effectué" << std::endl << std::endl;
                 askVoisins();
 				break;
             }
@@ -190,7 +170,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 			}
 			case -4:
 			{
-				cout << "On a recu nos voisins" << std::endl;
+				cout << "On a recu nos voisins (droite et gauche)" << std::endl;
 				list<pair <string, int> > ipPortVoisins;
 
 				std::istringstream iStringStream(t.getCommande());
@@ -222,7 +202,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
                     this->previous=NULL;
                     this->next=NULL;
                 }
-				cout << "Enregistrement des voisins effectué" << std::endl;
+				cout << "Enregistrement des voisins effectué" << std::endl << std::endl;
 				break;
 			}
 			default:
@@ -235,6 +215,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 		switch (t.getTTL()) {
 			case 0:
 			{
+				cout << "Le serveur central nous a envoyé une information dirrectement à nous, nous ignorons cette information car nous ne somme pas une frontale" << std::endl << std::endl;
 				//observeur->tor_recieve(t.getCommande());
 				break;
 			}
@@ -242,18 +223,21 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 	}
 	else{
 		if(t.getTTL() == 0) {
+			cout << "Envoi de la donnée au serveur central (On est le dernier rebond)" << std::endl << std::endl;
 			noeudServeurCentral->send(t);
         }
         else if (t.getTTL() == -1)
         {
-            cout << "ON A RECU LE PORT d'écoute d'un noeud déjà connecté" << std::endl;
+            cout << "Un noeud, qui vient de se connecter à nous, nous donne son port d'écoute" << std::endl << std::endl;
             noeudSource->setPort(stoi(t.getCommande(), NULL, 10));
         }
         else if(t.getTTL() == -2) {
-			noeudServeurCentral->send(t);
+			cout << "Fin du tour de réponse à une requete, nous sommes nous ignorons cette information car nous ne somme pas une frontale" << std::endl << std::endl;
+				//noeudServeurCentral->send(t);
         }
 		else if (t.getTTL() > 0)
 		{
+			cout << "Rebond d'un paquet sur nous, envoi à un autre noeud choisi aléatoirement" << std::endl << std::endl;
 			t.setTTL(t.getTTL()-1);
 			int number = rand()%toutlemonde.size();
 			auto i = toutlemonde.begin();
@@ -262,6 +246,7 @@ void NoeudThor::traitementDeLaTrame(Trame &t, Client<NoeudThor> *noeudSource)
 		}
         else if (t.getTTL() < -2)
 		{
+			cout << "Transfert de paquet sur la boucle de retour" << std::endl << std::endl;
 			t.setTTL(t.getTTL()+1);
             if (this->next != NULL)
                 this->next->send(t);
@@ -273,7 +258,7 @@ void NoeudThor::handle_accept(Client<NoeudThor> *noeud, const boost::system::err
 {
 	if (!error)
 	{
-		std::cout << "Nouveau Client se connecte !" << std::endl;
+		std::cout << "Nouveau Client se connecte !" << std::endl << std::endl;
         toutlemonde.push_back(noeud);
 		noeud->startRead();
         startAccept();
@@ -282,7 +267,7 @@ void NoeudThor::handle_accept(Client<NoeudThor> *noeud, const boost::system::err
 
 void NoeudThor::send(string toSend)
 {
-	std::cout << "Envoi d'une string depuis la frontale" << std::endl;
+	std::cout << "Envoi d'une string depuis la frontale" << std::endl << std::endl;
 	Trame t;
 	t.setCommande(toSend);
 	t.setTTL(rand()%toutlemonde.size());
@@ -293,7 +278,7 @@ void NoeudThor::send(string toSend)
 
 void NoeudThor::sendRep(string toSend)
 {
-	std::cout << "Envoi d'une réponse depuis la frontale" << std::endl;
+	std::cout << "Envoi d'une réponse depuis la frontale" << std::endl << std::endl;
 	Trame t;
 	t.setCommande(toSend);
     t.setTTL(-1*(toutlemonde.size()+(rand()%toutlemonde.size())+2));
