@@ -86,7 +86,6 @@ int traiter_commande(char *a_traiter)
 
 				char *nom = malloc (sizeof (char) * 256);
 				char *groupe_cible = malloc (sizeof (char) * 256);
-				char *groupe_amoi = malloc (sizeof (char) * 256);
 
 				printf("On recherche la reference d'un fichier !\n");
 
@@ -97,11 +96,9 @@ int traiter_commande(char *a_traiter)
 				affectation = strtok_r(NULL, " ", &save_ptr);
 				groupe_cible = strtok_r(NULL, " ", &save_ptr);
 
-				groupe_amoi = recup_groupe();
-
 				sprintf(a_envoyer, "chall*%s*%s*%s*%s*%s*%s*%s*%s*%s*%s*none", affectation, statut, 
 					action, option, cible, nom, recup_valeur("affectation"), recup_valeur("statut"), 
-					groupe_cible, groupe_amoi );
+					groupe_cible, recup_groupe());
 			}
 
 			printf("%s\n", a_envoyer);
@@ -226,14 +223,24 @@ void share_traitement(char *op, char *name, char *path, char *type, char *group_
 	}
 	else if (memcmp(op, "-bdd", 4) == 0)
 	{
-		sprintf(a_envoyer, "chall*%s*%s*insert*%s*%s*%s*$+;$+;*%s*none", recup_valeur("affectation"), 
+		/*char *yolo = malloc(1024*sizeof(char));
+		retour_chaine_fic(path, yolo);
+		puts("nia");
+		printf("taille -> %i\n", strlen(yolo));
+		printf("yolo -> %s\n", yolo);
+		puts("YOLO");*/
+		printf("ce qu'on veut -> %s\n", retour_chaine_fic(path));
+		sprintf(a_envoyer, "chall*%s*%s*insert*%s*%s*%s*+$;+$;*%s*none", recup_valeur("affectation"), 
 			recup_valeur("statut"), type, retour_chaine_fic(path), name, group_name);
+		printf("j'envois -> %s\n\n", a_envoyer);
+		puts("HEY");
 		unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
 		unsigned char a_decrypt[sizeof(a_envoyer)];
 		crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
 		envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,WANT);
-		
-		partage_create(name, path, 1, group_name);
+		puts("hum");
+		partage_create(name, path, type, 1, group_name);
+		puts("partage");
 	}
 	else puts("Mauvais argument");
 

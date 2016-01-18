@@ -48,7 +48,7 @@ if(type == WANT){
     perror("Erreur lors de l'appel a send -> ");
     exit(1);
   }
-
+  puts("AFTER SEND");
   close(sockfd);
 
   return 0;             
@@ -59,6 +59,7 @@ int envoi_fichier(char *fichier, char *num)
     char temp[1024];
     FILE * fichier_envoi;
     unsigned char c[sizeof (char *) * 1024];
+    unsigned char contenu[sizeof (char *) * 1024];
     unsigned char capart[sizeof (char *) * 2048];
     char save[1];
     char remoteFILE[4096];
@@ -82,16 +83,15 @@ int envoi_fichier(char *fichier, char *num)
     int i = 0;
 
     sprintf(c, "chall*%s*4*", num);
-    int curr = strlen(c);
-
-    while(i<1024 && getc(fichier_envoi)!=EOF)
+    printf("machin -> %s\n", c);
+    while(i<fichierSIZE && ( contenu[i] = fgetc(fichier_envoi)) !=EOF)
     {
-      c[i+curr] = getc(fichier_envoi);
       i++;
     }
+    sprintf(c+strlen(c), "%s", contenu);
 
     crypt(c, capart, strlen(c));
-    envoi_requete(capart,strlen(c)+16-(strlen(c)%16),GIVE);
+    envoi_requete(capart,strlen(c)+16,GIVE);
     }
 
 }
@@ -100,14 +100,15 @@ char *retour_chaine_fic(char *fichier)
 {
     char temp[1024];
     FILE * fichier_envoi;
-    unsigned char c[sizeof (char *) * 1024];
-    unsigned char capart[sizeof (char *) * 2048];
+    unsigned char c[1024];
     char save[1];
     char remoteFILE[4096];
     long fichierSIZE;
     int compt1=1,compt2=1, pourcentage;
-
+    memset(c, '\0', 1024);
     fichier_envoi = fopen (fichier,"r");
+
+	puts("retour chaine");
 
     if(!fichier_envoi)
     {
@@ -118,17 +119,18 @@ char *retour_chaine_fic(char *fichier)
     {
 
     fseek (fichier_envoi, 0, SEEK_END);
-    fichierSIZE = ftell (fichier_envoi);
+    fichierSIZE = ftell(fichier_envoi);
+   
     rewind(fichier_envoi);//retour debut fichier
-    
+
     int i = 0;
 
-    while(i<1024 && getc(fichier_envoi)!=EOF)
+    while( ( i < fichierSIZE ) && (( c[i] = fgetc(fichier_envoi) ) != EOF))
     {
-      c[i+strlen(c)] = getc(fichier_envoi);
+	i++;
     }
-
     return c;
     }
 
+return "haha";
 }

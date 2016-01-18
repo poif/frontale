@@ -50,11 +50,11 @@ int traiter_recu (char * requete_recu)
 
 	switch(type[0])
 	{
-				
-		case '1' :				
+
+		case '1' :
 		{
 				char *status_requete = malloc (sizeof (char) * 1024);
-				
+
 				char *affectation_requete = malloc (sizeof (char) * 1024);
 				//char *test = malloc (sizeof (char) * 1024);
 				char *nom = recup_valeur("nom");
@@ -171,32 +171,27 @@ int traiter_recu (char * requete_recu)
 				                   le client n'a pas d'image : picture = none
 				    D'où le test ci-dessous :
 				*/
+				int ret = partage_demande(datatype_requete, S_TYPE);
 
-				//int ret = partage_demande(datatype_requete, S_TYPE);
-				int ret = 1;
-
-				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0 &&  ret== 1)
+				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0 && ret == 1)
 				{
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					//sprintf(a_envoyer, "%s*3*%s*%s*%s*EOF",numero_requete, recup_valeur("status"), recup_valeur(datatype_requete), nom);
-					char *ref_amoi = malloc (sizeof (char) * 256);
-					//ref_amoi = retour_reference(datatype_requete);
-					//printf("ref_amoi : %s\n", ref_amoi);
-					sprintf(a_envoyer, "chall*%s*3*fichier2.txt;%s*EOF",numero_requete/*, ref_amoi*/, nom);
+					sprintf(a_envoyer, "chall*%s*3*%s;%s*EOF",numero_requete, "fichier2.txt", nom);
 					//En sortie de recup_valeur(datatype_request), on a la référence du document
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);
 				}
 				else
 				{
 					puts("NOP");
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					sprintf(a_envoyer, "chall*%s*3*none*EOF", numero_requete);
-					unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+					unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 					crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);	
+					envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);	
 				}
 				break;
 			
@@ -215,7 +210,7 @@ int traiter_recu (char * requete_recu)
 					ref = strtok_r(NULL, "*", &save_ptr);
 
 
-					if (1==1/* || groupe_correspondance(groupe_demande)*/)
+					if (groupe_correspondance(groupe_demande))
 					{
 						envoi_fichier(retour_path(ref), numero_requete);
 					}
@@ -223,9 +218,9 @@ int traiter_recu (char * requete_recu)
 					{
 						unsigned char a_envoyer[sizeof (char) * 1024];
 						sprintf(a_envoyer, "chall*%s*4*none*EOF", numero_requete);
-						unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
+						unsigned char a_envoyer_crypt[sizeof(a_envoyer)+16];
 						crypt(a_envoyer, a_envoyer_crypt, strlen(a_envoyer));
-						envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16-(strlen(a_envoyer)%16),GIVE);	
+						envoi_requete(a_envoyer_crypt,strlen(a_envoyer)+16,GIVE);	
 
 					}
 
