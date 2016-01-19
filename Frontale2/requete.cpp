@@ -122,6 +122,15 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 			}
 
 		/*****REQUETE 3*****/
+			else if(m_option.compare("-r") == 0 && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+			{
+				getline(ss, data, '*');
+				if(data != "ERROR")
+				{
+					m_resultat = "R*4*"+data;
+					return 1;
+				}
+			}
 			else if (m_option.compare("-r") ==0 && pourThomas == false) //Si ce booleen est à false => c'est la requête à envoyer à Thomas
 			{
 /*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
@@ -162,15 +171,6 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 				pourThomas = false; // On remet le booleen à false
 		}
 
-		else if(!m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
-		{
-			getline(ss, data, '*');
-			if(data != "ERROR")
-			{
-				m_resultat = "R*4*"+data;
-				return 1;
-			}
-		}
 
 
 		else {
