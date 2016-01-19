@@ -173,7 +173,7 @@ int traiter_recu (char * requete_recu)
 				*/
 				//int ret = partage_demande(datatype_requete, S_TYPE);
 
-				if( strcmp(recup_valeur("affectation"), affectation_requete) == 0 && 1 == 1)
+				if( strcmp(groupe_requete, "insa") == 0 && strcmp(recup_valeur("affectation"), affectation_requete) == 0 && 1 == 1)
 				{
 					puts("Correspond");
 					unsigned char a_envoyer[sizeof (char) * 1024];
@@ -202,6 +202,7 @@ int traiter_recu (char * requete_recu)
 
 				case '4' :
 				{
+
 					unsigned char a_envoyer[sizeof (char) * 1024];
 					char *groupe_demande = malloc (sizeof (char) * 1024);
 					char *ref = malloc (sizeof (char) * 1024);
@@ -213,8 +214,9 @@ int traiter_recu (char * requete_recu)
 					ref = strtok_r(NULL, "*", &save_ptr);
 
 
-					if (1==1/*groupe_correspondance(groupe_demande)*/)
+					if (strcmp(groupe_demande, "insa") == 0 && 1==1/*groupe_correspondance(groupe_demande)*/)
 					{
+						puts("Correspond");
 						//envoi_fichier(retour_path(ref), numero_requete);
 						unsigned char a_envoyer[sizeof (char) * 1024];
 						sprintf(a_envoyer, "chall*%s*4*bonjour*EOF", numero_requete);
@@ -225,6 +227,7 @@ int traiter_recu (char * requete_recu)
 					}
 					else
 					{
+						puts("No rights");
 						unsigned char a_envoyer[sizeof (char) * 1024];
 						sprintf(a_envoyer, "chall*%s*4*none*EOF", numero_requete);
 						unsigned char a_envoyer_crypt[sizeof(a_envoyer)];
