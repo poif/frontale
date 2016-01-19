@@ -151,6 +151,11 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 							}
 						}
 			}
+			else {
+				cerr << "Tri : Option inconnu" << endl ;
+				isError = 1;
+				break;
+			}
 
 		}
 
@@ -190,7 +195,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 
 	if(m_resultat.empty())m_resultat = "N*none*none";
 
-	return 1;
+	return 0;
 }
 
 
