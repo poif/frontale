@@ -23,13 +23,16 @@ void bdd_tcp::connection_tcp(QString IP, int port){
 
 void bdd_tcp::emission(string texte, int type){
         ostringstream oss;
-    if(type == 0){
         texte +="*";
-        char * temp = chiffrement(texte);
+        int len;
+
+    if(type == 0){
+
+        char * temp = chiffrement(texte, &len);
         
-	QByteArray datagram(temp,strlen(temp)+16-(strlen(temp)%16));
+    QByteArray datagram(temp,len );
 	
-	oss << datagram.size() <<'*'<< datagram.data();
+    oss << len <<'*'<< datagram.data();
 
      }else {
         oss << texte ;
@@ -82,10 +85,10 @@ bool bdd_tcp::getYLecture(){
     return yLecture;
 }
 
-char * bdd_tcp::chiffrement(std::string clair){
+char * bdd_tcp::chiffrement(std::string clair, int *len){
     EVP_CIPHER_CTX ctx;
     int succ;
-    int outlen, tmplen;
+    int outlen;
     ostringstream oss;
   
     
@@ -103,7 +106,7 @@ char * bdd_tcp::chiffrement(std::string clair){
     if(!succ)
         std::cout << "erreur aes cipher update" << std::endl;
 
-    succ = EVP_CipherFinal_ex(&ctx,(unsigned char *) out + outlen,&tmplen);
+    succ = EVP_CipherFinal_ex(&ctx,(unsigned char *) out + outlen,len);
 
     if(!succ)
         std::cout << "erreur aes cipher final" << std::endl;

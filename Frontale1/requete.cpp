@@ -153,14 +153,12 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 								return 1;
 							}
 						}
-			}
-			else {
-				cerr << "Tri : Option inconnu" << endl ;
-				isError = 1;
+			}else {
+				cerr << "Tri : Option inconnu" << endl;
+				isError =1;
 				break;
+
 			}
-
-
 		}
 
 		else if(m_action.compare("group") ==0)
@@ -236,8 +234,8 @@ void Requete::construction() //construit la requete suivant action, option et pa
 /*ADDED*/ string toHash = m_nom+m_statut;
 		hash = hashString((char*)toHash.c_str());
 	    pourBdd=true;
-	    m_requete = "302*";
-	    m_requete += m_statut + "*" + m_affectation + "*" + m_groupe + m_option + "*" + m_parametre +"*"+ hash +"*EOF";
+        m_requete = "1*302*";
+        m_requete += m_statut + "*" + m_affectation + "*" + m_groupe + "*" + m_option + "*" + m_parametre +"*"+ hash + "*" + m_partage + "*EOF";
 	}
 
 	else if(m_action.compare("delete") == 0)
@@ -245,7 +243,7 @@ void Requete::construction() //construit la requete suivant action, option et pa
 	    pourBdd=true;
 	    string toHash = m_nom+m_statut;
 		hash = hashString((char*)toHash.c_str());
-	    m_requete = "303*"+m_parametre+"*"+hash+"*EOF";
+        m_requete = "2*303*"+m_parametre+"*"+hash+"*EOF";
 	}
 
 	else
@@ -262,6 +260,7 @@ int Requete::decoupage(string chaine)
 	string autre = chaine;
 	istringstream ss(chaine);
 	//remplissage + test error!
+	cout << "apoilapoilapoilapoilapoilpaoiploa" << endl;
 	cout << chaine << endl;
 
 		if (!getline(ss, m_affectation, '*') ||
