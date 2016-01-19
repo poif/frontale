@@ -25,14 +25,12 @@ void bdd_tcp::emission(string texte, int type){
         ostringstream oss;
     if(type == 0){
         texte +="*";
-        char * temp = chiffrement(texte);
-        
-	QByteArray datagram(temp,strlen(temp)+16-(strlen(temp)%16));
-	
-	oss << datagram.size() <<'*'<< datagram.data();
-
+        texte = this->chiffrement(texte);
+        oss << texte.size() ;
+        oss << '*';
+        oss << texte;
      }else {
-        oss << texte ;
+        oss << texte;
     }
 
 
@@ -50,7 +48,7 @@ void bdd_tcp::attendLecture(int timeout, int type){
 
    yLecture=soc.waitForReadyRead(timeout);  // attend que le paquet soit pret a etre lut
 
-   QTextStream(stdout) << "reception d'un message" << endl;
+   QTextStream(stdout) << "it's ok" << endl;
 
     while(soc.canReadLine()){
 
@@ -58,9 +56,7 @@ void bdd_tcp::attendLecture(int timeout, int type){
 	}
       if(type == 0) msg = this->dechiffrement(oss.str());
       else msg = oss.str();
-
-	if(msg == "")
-		yLecture = false;	
+	
 	cout << "retour de cle" + oss.str() << endl;
 
 }
@@ -82,12 +78,11 @@ bool bdd_tcp::getYLecture(){
     return yLecture;
 }
 
-char * bdd_tcp::chiffrement(std::string clair){
+string bdd_tcp::chiffrement(std::string clair){
     EVP_CIPHER_CTX ctx;
     int succ;
     int outlen, tmplen;
     ostringstream oss;
-  
     
     char* out = (char*) malloc ( 2048 * sizeof ( char ) ) ;
 
@@ -115,8 +110,9 @@ char * bdd_tcp::chiffrement(std::string clair){
 
     oss << out;
 
+    free(out);
 
-    return out;
+    return oss.str();
 
 
 

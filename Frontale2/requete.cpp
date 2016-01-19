@@ -122,20 +122,22 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 			}
 
 		/*****REQUETE 3*****/
-			else if(m_option.compare("-r") == 0 && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		else if(!m_action.compare("search") && !m_option.compare("-r") && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		{
+			getline(ss, data, '*');
+			if(data != "ERROR")
 			{
-				getline(ss, data, '*');
-				if(data != "ERROR")
-				{
-					m_resultat = "R*4*"+data;
-					return 1;
-				}
+				m_resultat = "R*4*"+data;
+				return 1;
 			}
+		}
+
 			else if (m_option.compare("-r") ==0 && pourThomas == false) //Si ce booleen est à false => c'est la requête à envoyer à Thomas
 			{
 /*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
 				condensate = m_nom;
 				cout << "lecond " << condensate <<endl;
+				cout << "lecond " << m_nom <<endl;
 				hash = hashString((char*)condensate.c_str());
 /*A CHANGER*/			while (getline(ss,reference,'*') && getline(ss,hash_recu,'*') && getline(ss,pub,'*')) {
 			
@@ -185,8 +187,8 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		m_resultat = "R*ERROR";
 		return 0;
 	}
-	
-	if(m_resultat.empty()) m_resultat = "N*none*none";
+
+	if(m_resultat.empty())m_resultat = "N*none*none";
 
 	return 1;
 }

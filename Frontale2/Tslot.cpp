@@ -179,7 +179,7 @@ void Tslot::addMessageToList(string token, string msg)
 		if(tokenToMsgList[token]->size() > 0 && b == tokenToMsgList[token]->end()){
 			tokenToMsgList[token]->push_back(msg);
 		}
-		else if(tokenToMsgList[token]->size() == 0) tokenToMsgList[token]->push_back(msg);
+		else if(tokenToMsgList[token]->size() == 0)tokenToMsgList[token]->push_back(msg);
 	}
 	else {
 		cerr << "Erreur : on tente de rajoutter des messages alors que le token n'existe pas. Timeout dépassé ou tentative d'attaque." << endl;

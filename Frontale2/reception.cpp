@@ -184,7 +184,7 @@ void reception::traitement(char * messageStr, int size){
                 }
                 else{
                     cout << "Temps maximum écoulé, pas de réponse" << endl;
-                    req.setResultat("N*empty*");
+                    req.setResultat("R*empty*");
                 }
 
             }

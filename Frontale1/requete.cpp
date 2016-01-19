@@ -76,7 +76,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 		string data;
 		string pub;
 
-		//cout << "LE SS :: %s" << ss.str() << endl;
+		cout << "LE SS :: " << ss.str() <<"   "<<m_action << m_option << pourThomas <<  endl;
 
 		if (*it == numero+"*ERROR*") continue; //on passe Ã  la reponse suivante
 		else isError = 0;
@@ -123,15 +123,18 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 
 		/*****REQUETE 3*****/
 
-			else if(m_option.compare("-r") == 0 && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		else if(m_option.compare("-r") == 0 && pourThomas == true) // Si c'est la requête 4 (sachant que la requête pour Thomas a déjà était envoyé car pourThomas = true), cette fois ci c'est pour le client
+		{
+			cout << "ici" << endl;
+			getline(ss, data, '*');
+			cout << data << endl;
+			if(data != "ERROR")
 			{
-				getline(ss, data, '*');
-				if(data != "ERROR")
-				{
-					m_resultat = "R*4*"+data;
-					return 1;
-				}
+				m_resultat = "R*4*"+data;
+				return 1;
 			}
+		}
+
 			else if (m_option.compare("-r") ==0 && pourThomas == false) //Si ce booleen est à false => c'est la requête à envoyer à Thomas
 			{
 /*ADDED*/			pourThomas = true; //Ce message est pour Thomas (comme ça la frontale sait qu'il faut lui envoyer à lui et non pas au client)
@@ -151,6 +154,7 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 							}
 						}
 			}
+
 
 		}
 
@@ -172,7 +176,6 @@ int Requete::tri(list<string>& reponse) //tri les resultats recu et garde les Ã
 				m_resultat = *it;
 				pourThomas = false; // On remet le booleen à false
 		}
-
 
 
 		else {
@@ -254,7 +257,6 @@ int Requete::decoupage(string chaine)
 	string autre = chaine;
 	istringstream ss(chaine);
 	//remplissage + test error!
-	cout << "apoilapoilapoilapoilapoilpaoiploa" << endl;
 	cout << chaine << endl;
 
 		if (!getline(ss, m_affectation, '*') ||
